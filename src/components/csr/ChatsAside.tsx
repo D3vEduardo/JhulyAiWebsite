@@ -1,0 +1,119 @@
+'use client'
+import { useState } from "react";
+import Button from "@components/csr/Button";
+import { Icon } from "@iconify-icon/react";
+
+export default function ChatsAside() {
+    const [chats] = useState([
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.',
+        'Como criar um projeto em nextjs?',
+        'Detalhes sobre a documentação do nextjs.',
+        'Quero aprender go lang.'
+    ]);
+
+    return (
+        <div className="h-[96vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-lg p-2
+        border-2 border-input-border absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-5 top-1/2 -translate-y-1/2">
+            {/* Botão de novo chat */}
+            <Button
+                className="py-2 gap-0.5 flex items-center
+                justify-center text-center"
+                variant={{
+                    color: "secondary",
+                    size: "sm",
+                    hoverAnimationSize: 0.98,
+                    tapAnimationSize: 0.9
+                }}
+            >
+                Novo chat <Icon icon="charm:plus" width="20" height="20" />
+            </Button>
+
+            {/* Título da seção de chats */}
+            <div className="relative flex items-center justify-center
+            text-center my-2">
+                <span
+                    className="w-full rounded-2xl bg-input-border h-0.5"
+                />
+                <p className="text-input-border text-center w-full">Chats</p>
+                <span
+                    className="w-full rounded-2xl bg-input-border h-0.5"
+                />
+            </div>
+
+            {/* Lista de chats */}
+            <section
+                className="flex flex-col justify-between h-full"
+            >
+                <div className="flex flex-col gap-2 w-full h-[70vh] overflow-y-auto">
+                    {chats.map((chat, index) => (
+                        <Button
+                            className="py-2 justify-start text-start items-start w-full min-h-11"
+                            key={index}
+                            variant={{
+                                size: "sm",
+                                color: index == 1 ? "quarternary" : "tertiary",
+                                hoverAnimationSize: 0.98,
+                                tapAnimationSize: 0.9
+                            }}
+                        >
+                            <p className="truncate w-full">{chat}</p>
+                        </Button>
+                    ))}
+                </div>
+                <div
+                    className="flex flex-col gap-2 mt-4"
+                >
+                    <Button
+                        className="py-2 text-white gap-0.5 flex items-center
+                        justify-center text-center"
+                        variant={{
+                            size: "sm",
+                            color: "danger",
+                            hoverAnimationSize: 0.98,
+                            tapAnimationSize: 0.9
+                        }}
+                    >
+                        <Icon icon="iconamoon:close-bold" width="24" height="24" />Fechar menu
+                    </Button>
+                    <Button
+                        className="py-2 text-white gap-1.5 flex items-center
+                        justify-center text-center"
+                        variant={{
+                            size: "sm",
+                            hoverAnimationSize: 0.98,
+                            tapAnimationSize: 0.9
+                        }}
+                    >
+                        Configurações<Icon icon="octicon:gear-16" width="20" height="20" />
+                    </Button>
+                </div>
+            </section>
+        </div>
+    );
+}

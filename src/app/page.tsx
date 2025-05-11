@@ -40,9 +40,13 @@ export default function Home() {
               className="text-2xl w-full md:text-4xl lg:text-6xl text-text-primary
               overflow-hidden pb-4 md:pb-2 flex items-center justify-center max-h-15 gap-2.5"
             >
-              Descubra algo
+              <span
+                className="overflow-hidden pb-2"
+              >
+                Descubra algo
+              </span>
               <ZoopText
-                className="bg-button-secondary rounded-2xl px-2 mt-2"
+                className="bg-button-secondary rounded-2xl px-2 mt-2 h-full"
                 texts={[
                   "novo.", "incrível.", "fantástico.", "inspirador.", "mágico.", "especial."
                 ]}

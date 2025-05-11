@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "../globals.css";
+import AsideProvider from "@/contexts/aside/AsideProvider";
 
 export const metadata: Metadata = {
     title: "Jhuly AI - Chats",
@@ -12,8 +13,8 @@ export default function ChatLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <>
+        <AsideProvider>
             {children}
-        </>
+        </AsideProvider>
     );
 }

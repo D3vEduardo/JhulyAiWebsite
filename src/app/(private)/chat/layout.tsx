@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import "../globals.css";
-import AsideProvider from "@/contexts/aside/AsideProvider";
+import "../../globals.css";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
     title: "Jhuly AI - Chats",
     description: "Crie um chat e converse com a Jhuly. Sua agente ia favorita (e mais fofinha)!",
 };
+
 
 export default function ChatLayout({
     children,
@@ -13,8 +14,10 @@ export default function ChatLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <AsideProvider>
+        <SessionProvider>
             {children}
-        </AsideProvider>
+        </SessionProvider>
+
     );
 }
+

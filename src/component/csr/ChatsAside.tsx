@@ -1,13 +1,12 @@
 'use client'
-import Button from "@components/csr/Button";
+import Button from "@/component/csr/Button";
 import { Icon } from "@iconify-icon/react";
 import { motion } from "motion/react";
-import useAside from "@/contexts/aside/useAside";
+import { useAside } from "@store/asideMenu";
 
 export default function ChatsAside() {
 
-    const { setAsideIsOpen, asideIsOpen } = useAside();
-    if (setAsideIsOpen === undefined) return null;
+    const { toggleAside, asideIsOpen } = useAside();
 
     const chats = [
         'Como criar um projeto em nextjs?',
@@ -48,7 +47,7 @@ export default function ChatsAside() {
                 x: asideIsOpen ? 0 : "-100%",
                 opacity: asideIsOpen ? 1 : 0
             }}
-            className="h-[96vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-lg p-2
+            className="h-[96vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-lg p-2 z-50
         border-2 border-input-border absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-5 top-1/2 -translate-y-1/2">
             {/* Botão de novo chat */}
             <Button
@@ -61,7 +60,7 @@ export default function ChatsAside() {
                     tapAnimationSize: 0.9
                 }}
             >
-                Novo chat <Icon icon="charm:plus" width="20" height="20" />
+                Novo chat
             </Button>
 
             {/* Título da seção de chats */}
@@ -115,9 +114,9 @@ export default function ChatsAside() {
                             hoverAnimationSize: 0.98,
                             tapAnimationSize: 0.9
                         }}
-                        onClick={() => setAsideIsOpen(false)}
+                        onClick={() => toggleAside()}
                     >
-                        <Icon icon="iconamoon:close-bold" width="24" height="24" />Fechar menu
+                        Fechar menu
                     </Button>
                     <Button
                         className="py-2 text-white gap-1.5 flex items-center

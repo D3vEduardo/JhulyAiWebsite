@@ -50,7 +50,7 @@ export default function ZoopText({ texts, speed = 2000, className }: PropsType) 
                         }}
                         className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-full
                         flex items-center justify-center text-center overflow-hidden
-                        m-0 pb-2.5 leading-5 opacity-0"
+                        m-0 pb-1 md:pb-2.5 leading-5 opacity-0"
                     >
                         {text}
                     </motion.p>

@@ -7,7 +7,8 @@ const {
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET
+  GITHUB_CLIENT_SECRET,
+  OPENROUTER_API_KEY
 } = process.env;
 
 const envSchema = z.object({
@@ -17,7 +18,8 @@ const envSchema = z.object({
   DISCORD_CLIENT_ID: z.string().min(1, "DISCORD_CLIENT_ID é obrigatório"),
   DISCORD_CLIENT_SECRET: z.string().min(1, "DISCORD_CLIENT_SECRET é obrigatório"),
   GITHUB_CLIENT_ID: z.string().min(1, "GITHUB_CLIENT_ID é obrigatório"),
-  GITHUB_CLIENT_SECRET: z.string().min(1, "DGITHUB_CLIENT_SECRET é obrigatório")
+  GITHUB_CLIENT_SECRET: z.string().min(1, "DGITHUB_CLIENT_SECRET é obrigatório"),
+  OPENROUTER_API_KEY: z.string().min(1, "OPENROUTER_API_KEY é obrigatório")
 });
 
 const parsed = envSchema.safeParse({
@@ -27,7 +29,8 @@ const parsed = envSchema.safeParse({
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
-  GITHUB_CLIENT_SECRET
+  GITHUB_CLIENT_SECRET,
+  OPENROUTER_API_KEY
 });
 
 if (!parsed.success) {

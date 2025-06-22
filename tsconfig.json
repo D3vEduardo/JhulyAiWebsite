@@ -41,7 +41,10 @@
       ],
       "@store/*": [
         "./src/store/*"
-      ]
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
     }
   },
   "include": [

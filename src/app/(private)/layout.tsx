@@ -11,8 +11,8 @@ const ItimFont = Itim({
 })
 
 export const metadata: Metadata = {
-  title: "Jhuly AI",
-  description: "Agente IA que te ajuda com código.",
+    title: "Jhuly AI - Chats",
+    description: "Crie um chat e converse com a Jhuly. Sua agente ia favorita (e mais fofinha)!",
 };
 
 export default function RootLayout({

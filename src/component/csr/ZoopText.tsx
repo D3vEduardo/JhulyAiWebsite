@@ -8,6 +8,7 @@ type PropsType = ComponentProps<"span"> & {
 }
 
 export default function ZoopText({ texts, speed = 2000, className }: PropsType) {
+console.log("Renderizei ZoopText");
 
     const [currentTextIndex, setCurrentTextIndex] = useState<number>(0);
 

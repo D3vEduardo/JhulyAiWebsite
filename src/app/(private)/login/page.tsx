@@ -5,13 +5,14 @@ import { Icon } from "@iconify-icon/react";
 import { signIn } from "next-auth/react";
 
 export default function LoginPage() {
+
     return (
         <main
             className="flex flex-col items-center justify-center h-svh w-screen bg-login-bg"
         >
             <div
                 className="px-2 py-4 flex flex-col items-center justify-center gap-4 text-center
-                bg-navbar rounded-2xl max-w-[300px]"
+                bg-peach border-almond border-2 rounded-2xl max-w-[300px]"
             >
                 <h1 className="text-4xl overflow-hidden pb-1">
                     Faça LogIn com sua conta

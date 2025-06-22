@@ -1,4 +1,5 @@
 export default function CheckboxPromptInput() {
+console.log("Renderizei CheckboxPromptInput");
     return (
         <>
             <label

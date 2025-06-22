@@ -5,6 +5,7 @@ import Avatar from "@public/avatars/avatar_3.png";
 import Image from "next/image";
 
 export default function UserAvatar() {
+console.log("Renderizei UserAvatar");
     const { data } = useSession();
 
     return (

@@ -4,6 +4,7 @@ import UserAvatar from "./UserAvatar";
 import { useAside } from "@store/asideMenu";
 
 export default function ChatNavBar() {
+console.log("Renderizei ChatNavbar");
   const { toggleAside } = useAside();
 
   return (

@@ -6,12 +6,14 @@ import { useSession } from "@/lib/nextAuth/auth-client";
 import { redirect } from "next/navigation";
 
 export default function HomeNavbar() {
+console.log("Renderizei HomeNavbar");
   const { status } = useSession();
   return (
     <nav
       className="absolute top-6 md:top-10 left-1/2 -translate-x-1/2
             bg-navbar px-4 py-1.5 h-14 w-9/10 md:w-7/10 rounded-xl
-            border-navbar-border border-2 flex items-center justify-between"
+            border-almond border-2 flex items-center justify-between
+            bg-peach"
     >
       <Image
         className="h-9/10 w-auto custom-cursor-hover"
@@ -29,7 +31,7 @@ export default function HomeNavbar() {
           redirect("/chat")
         }}
         className="flex items-center justify-center text-center
-                gap-0.5 h-full text-lg text-text-primary custom-cursor-hover"
+                gap-0.5 h-full text-lg text-cocoa custom-cursor-hover"
       >
         {
           (status === "loading" || status === "unauthenticated") ? (

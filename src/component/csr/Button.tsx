@@ -18,6 +18,7 @@ interface PropsType extends MotionButtonProps {
 }
 
 export default function Button({ children, className, variant, ...props }: PropsType) {
+console.log("Renderizei Button");
 
     const button = tv({
         base: `font-medium flex items-center overflow-hidden
@@ -29,11 +30,11 @@ export default function Button({ children, className, variant, ...props }: Props
                 lg: "px-6 py-3 text-3xl"
             },
             color: {
-                danger: "bg-red-400 text-background",
-                primary: "bg-button-primary text-background",
-                secondary: "bg-button-secondary text-text-primary",
-                tertiary: "bg-button-tertiary text-text-primary",
-                quarternary: "bg-button-quarternary text-text-primary",
+                danger: "bg-red-400 text-vanilla",
+                primary: "bg-papaya text-vanilla",
+                secondary: "bg-strawberry text-cocoa",
+                tertiary: "bg-watermelon text-cocoa",
+                quarternary: "bg-apricot text-cocoa",
             }
         }
     });

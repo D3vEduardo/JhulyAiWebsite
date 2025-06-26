@@ -2,12 +2,13 @@
 import Button from "@/component/csr/Button";
 import { motion } from "motion/react";
 import { useAside } from "@store/asideMenu";
-import { redirect } from "next/navigation";
 import AsideMenuChats from "./AsideMenuChats";
 import AsideMenuFooter from "./AsideMenuFooter";
+import { useRouter } from "next/navigation";
 export default function AsideMenu() {
-console.log("Renderizei AsideMenu");
+  console.log("Renderizei AsideMenu");
   const { asideIsOpen } = useAside();
+  const router = useRouter();
 
   return (
     <motion.div
@@ -28,7 +29,7 @@ console.log("Renderizei AsideMenu");
           hoverAnimationSize: 0.98,
           tapAnimationSize: 0.9,
         }}
-        onClick={() => redirect("/")}
+        onClick={() => router.replace("/chat/new")}
       >
         Novo chat
       </Button>
@@ -51,7 +52,7 @@ console.log("Renderizei AsideMenu");
           />
           <span
             className="w-full h-6 bg-gradient-to-t
-                        to-transparent from-peach fixed bottom-29"
+                        to-transparent from-peach fixed bottom-26"
           />
         </div>
         <AsideMenuFooter />

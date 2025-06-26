@@ -1,12 +1,17 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Button from "../Button";
 import { getUserChats } from "./getUserChats";
-import { redirect } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { getChatMessages } from "../MessagesContainer/getChatMessages";
 
 export default function AsideMenuChats() {
-console.log("Renderizei AsideMenuChats");
+  console.log("Renderizei AsideMenuChats");
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { chatId } = useParams();
+  console.log("DEBUG - Current chatId in Aside:", chatId);
   const { data: chats, isPending: getChatsIsPending } = useQuery<
     {
       id: string;
@@ -22,26 +27,42 @@ console.log("Renderizei AsideMenuChats");
     staleTime: 60 * 1000,
   });
 
+  // Prefetch chat messages on hover
+  const prefetchMessages = (chatId: string) => {
+    queryClient.prefetchQuery({
+      queryKey: ["chat", `chat_${chatId}`],
+      queryFn: async () => await getChatMessages(chatId),
+    });
+  };
+
   return (
-    <div className="mt-4 overflow-y-auto">
+    <div className="mb-4 overflow-y-auto gap-y-2 flex flex-col">
       {!getChatsIsPending ? (
-        chats?.map((chat, index) => (
-          <Button
-            className="py-2 justify-start text-start items-start w-full min-h-11 !overflow-hidden"
-            key={index}
-            onClick={() => redirect(`/?chatId=${chat.id}`)}
-            variant={{
-              size: "sm",
-              color: index == 1 ? "quarternary" : "tertiary",
-              hoverAnimationSize: 0.98,
-              tapAnimationSize: 0.9,
-            }}
-          >
-            <p className="truncate w-full !overflow-hidden">{chat.name}</p>
-          </Button>
-        ))
+        <>
+          {chats?.map((chat, index) => {
+            console.log(`DEBUG - Rendering chat: ${chat.id} (${chat.name})`);
+            return (
+              <Button
+                className="py-2 justify-start text-start items-start w-full min-h-11 !overflow-hidden"
+                key={index}
+                onMouseEnter={() => prefetchMessages(chat.id)}
+                onClick={() =>
+                  router.replace(`/chat/${chat.id}`, { scroll: false })
+                }
+                variant={{
+                  size: "sm",
+                  color: chatId == chat.id ? "quarternary" : "tertiary",
+                  hoverAnimationSize: 0.98,
+                  tapAnimationSize: 0.9,
+                }}
+              >
+                <p className="truncate w-full !overflow-hidden">{chat.name}</p>
+              </Button>
+            );
+          })}
+        </>
       ) : (
-        <span>loading...</span>
+        <p>loading...</p>
       )}
     </div>
   );

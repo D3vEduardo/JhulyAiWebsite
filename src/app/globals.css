@@ -1,17 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-vanilla: #FFF8F6;
-  --color-cocoa: #662E1F;
-  --color-cinnamon: #926F66;
-  --color-papaya: #F07D5F;
-  --color-strawberry: #FFB3A0;
-  --color-peach: #F9E4DD;
-  --color-almond: #CFB4AD;
-  --color-watermelon: #FFD4C9;
-  --color-apricot: #F0C2B7;
+  --color-vanilla: #fff8f6;
+  --color-cocoa: #662e1f;
+  --color-cinnamon: #926f66;
+  --color-papaya: #f07d5f;
+  --color-strawberry: #ffb3a0;
+  --color-peach: #f9e4dd;
+  --color-almond: #cfb4ad;
+  --color-watermelon: #ffd4c9;
+  --color-apricot: #f0c2b7;
   --color-surface-input: var(--color-peach);
   --color-border-input: var(--color-almond);
+  --color-brick-brown: #86331e;
 }
 
 :root {
@@ -20,7 +21,6 @@
 }
 
 @layer base {
-
   *,
   :after,
   ::before,
@@ -33,7 +33,7 @@
 
 body {
   background-color: var(--color-vanilla);
-  color: var(--color-cocoa);
+  color: var(--color-brick-brown);
   cursor: var(--cursor-normal), auto;
   width: 100vw;
   height: 100dvh;

@@ -1,12 +1,9 @@
 "use client";
 
-import { Icon } from "@iconify-icon/react";
-import Button from "../Button";
 import PromptInput from "./PromptInput";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { UseChatHelpers } from "@ai-sdk/react";
-import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
@@ -33,7 +30,6 @@ export default function PromptForm({ chat }: PromptFormProps) {
   const { chatId } = useParams();
   const chatIsReady = chat.status === "ready" || chat.status === "error";
   const [reasoning, setReasoning] = useState<boolean>(false);
-  const queryClient = useQueryClient();
 
   return (
     <motion.form

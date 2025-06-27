@@ -59,13 +59,13 @@ export default function MessageContainer() {
         scroll: false,
       });
     }
-  }, [isNewChat, chat.status]);
+  }, [isNewChat, chat.status, router]);
 
   useEffect(() => {
     if (isNewChat && chat.status !== "streaming") {
       chat.setMessages([]);
     }
-  }, [isNewChat, chat.setMessages, chat.status]);
+  }, [isNewChat, chat]);
 
   // Calcular layout responsivo
   const shouldShowSidebar = asideIsOpen && innerWidth > 768;

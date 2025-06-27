@@ -1,6 +1,7 @@
 import React, { ComponentProps, useMemo, memo } from "react";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
+import remarkGfm from "remark-gfm";
 import { tv } from "tailwind-variants";
 import "./highlight.css";
 
@@ -51,7 +52,10 @@ const ChatBalloon = memo(
     return (
       <figure className={variants(selectedVariant)} {...props}>
         {containsCode ? (
-          <Markdown rehypePlugins={[rehypeHighlight]}>
+          <Markdown
+            rehypePlugins={[rehypeHighlight]}
+            remarkPlugins={[remarkGfm]}
+          >
             {message.content}
           </Markdown>
         ) : (

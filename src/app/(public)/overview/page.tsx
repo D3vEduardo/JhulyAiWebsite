@@ -1,8 +1,8 @@
 "use client";
 
-import ZoopText from "@component/csr/ZoopText";
-import Button from "@component/csr/Button";
-import HomeNavbar from "@component/csr/HomeNavbar";
+import ZoopText from "@components/csr/ZoopText";
+import Button from "@components/csr/Button";
+import HomeNavbar from "@components/csr/HomeNavbar";
 import { Icon } from "@iconify-icon/react";
 import { useRouter } from "next/navigation";
 

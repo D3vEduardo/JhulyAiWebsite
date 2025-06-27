@@ -1,5 +1,5 @@
 "use client";
-import Button from "@/component/csr/Button";
+import Button from "@components/csr/Button";
 import { motion } from "motion/react";
 import { useAside } from "@store/asideMenu";
 import AsideMenuChats from "./AsideMenuChats";

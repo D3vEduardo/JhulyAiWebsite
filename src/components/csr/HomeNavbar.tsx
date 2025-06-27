@@ -6,7 +6,7 @@ import { useSession } from "@/lib/nextAuth/auth-client";
 import { redirect } from "next/navigation";
 
 export default function HomeNavbar() {
-console.log("Renderizei HomeNavbar");
+  console.log("Renderizei HomeNavbar");
   const { status } = useSession();
   return (
     <nav
@@ -28,18 +28,22 @@ console.log("Renderizei HomeNavbar");
         onClick={() => {
           if (status === "loading") return;
           if (status === "unauthenticated") return redirect("/login");
-          redirect("/chat")
+          redirect("/chat");
         }}
         className="flex items-center justify-center text-center
                 gap-0.5 h-full text-lg text-cocoa custom-cursor-hover"
       >
-        {
-          (status === "loading" || status === "unauthenticated") ? (
-            <><Icon icon="solar:login-2-bold-duotone" width="24" height="24" /> Login</>
-          ) : (
-            <><Icon icon="solar:login-2-bold-duotone" width="24" height="24" /> Conversar com Jhuly</>
-          )
-        }
+        {status === "loading" || status === "unauthenticated" ? (
+          <>
+            <Icon icon="solar:login-2-bold-duotone" width="24" height="24" />{" "}
+            Login
+          </>
+        ) : (
+          <>
+            <Icon icon="solar:login-2-bold-duotone" width="24" height="24" />{" "}
+            Conversar com Jhuly
+          </>
+        )}
       </p>
     </nav>
   );

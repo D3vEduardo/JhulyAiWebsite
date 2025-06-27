@@ -1,7 +1,7 @@
 "use client";
 
-import AsideMenu from "@component/csr/AsideMenu/AsideMenu";
-import MessagesContainer from "@/component/csr/MessagesContainer/MessagesContainer";
+import AsideMenu from "@components/csr/AsideMenu/AsideMenu";
+import MessagesContainer from "@components/csr/MessagesContainer/MessagesContainer";
 import { Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -21,7 +21,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function Chat() {
+export default function ClientChat() {
   return (
     <QueryClientProvider client={queryClient}>
       <main className="flex flex-col w-screen h-dvh relative overflow-hidden">

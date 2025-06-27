@@ -10,21 +10,22 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { prompt, chatId } = body;
-    console.log("Prompt received:", prompt);
 
     if (!prompt?.trim()) {
       return NextResponse.json(
-        { error: "Prompt is required" },
+        { error: "Prompt is required!" },
         { status: 400 }
       );
     }
 
     const session = await auth();
     if (!session?.user?.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized! (User not authenticated)" },
+        { status: 401 }
+      );
     }
 
-    // Garantir que o usuário existe
     const { id: databaseUserId } = await prisma.user.upsert({
       where: { id: session.user.id },
       update: {},
@@ -37,8 +38,16 @@ export async function POST(req: NextRequest) {
 
     let chat;
 
-    if (chatId && chatId != "new") {
-      // Buscar chat existente e verificar ownership
+    const isExistingChat =
+      chatId &&
+      typeof chatId === "string" &&
+      chatId !== "new" &&
+      chatId !== "null" &&
+      chatId !== "undefined";
+
+    if (isExistingChat) {
+      console.log("Processing existing chat with ID:", chatId);
+
       const existingChat = await prisma.chat.findFirst({
         where: {
           id: chatId,
@@ -53,12 +62,11 @@ export async function POST(req: NextRequest) {
 
       if (!existingChat) {
         return NextResponse.json(
-          { error: "Chat not found or access denied" },
+          { error: "Chat not found or access denied!" },
           { status: 404 }
         );
       }
 
-      // Adicionar mensagem do usuário ao chat existente
       await prisma.message.create({
         data: {
           content: prompt.trim(),
@@ -68,7 +76,6 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Buscar chat atualizado com todas as mensagens
       chat = await prisma.chat.findUnique({
         where: { id: existingChat.id },
         include: {
@@ -82,6 +89,8 @@ export async function POST(req: NextRequest) {
         throw new Error("Chat not found after update");
       }
     } else {
+      console.log(`Creating new chat (chatId:"${chatId}")`);
+
       // Criar novo chat
       chat = await prisma.chat.create({
         data: {
@@ -101,11 +110,12 @@ export async function POST(req: NextRequest) {
           },
         },
       });
+
+      console.log("New chat created with ID:", chat.id);
     }
 
     const aiMessages = ConvertMessageOfDatabaseToAiModel(chat.messages);
 
-    // 3. Call the selected agent's model
     const result = streamText({
       model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
       messages: aiMessages,
@@ -135,7 +145,6 @@ Se o que eu pedi for estrourar o seu limite de output tokens, então faça uma v
 - Sempre usar markdown na qual o discord suporte.
       `,
       onFinish: async (completion) => {
-        // Salvar resposta da AI após completar
         try {
           await prisma.message.create({
             data: {
@@ -144,6 +153,7 @@ Se o que eu pedi for estrourar o seu limite de output tokens, então faça uma v
               chatId: chat.id,
             },
           });
+          console.log("AI response saved successfully for chat:", chat.id);
         } catch (error) {
           console.error("Error saving AI response:", error);
         }

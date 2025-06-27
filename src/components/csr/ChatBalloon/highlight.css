@@ -1,0 +1,133 @@
+pre code.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+}
+
+code.hljs {
+  padding: 3px 5px;
+}
+
+.hljs {
+  margin-block: 10px;
+  border-radius: 20px;
+  background: #fce8e2;
+  color: #5c2b1a;
+  /*font-family: 'Fira Code', monospace; */
+}
+
+/* Palavras-chave, funções como `useState` */
+.hljs-keyword,
+.hljs-title,
+.hljs-built_in,
+.hljs-function {
+  color: #ef5a3c;
+  font-weight: bold;
+}
+
+/* Strings */
+.hljs-string {
+  color: #c14f2d;
+}
+
+/* Números, booleanos, null */
+.hljs-literal,
+.hljs-number {
+  color: #b7410e;
+}
+
+/* Comentários */
+.hljs-comment {
+  color: #a87c6b;
+  font-style: italic;
+}
+
+/* Variáveis, parâmetros */
+.hljs-variable,
+.hljs-params {
+  color: #5c2b1a;
+}
+
+/* Operadores, sinais */
+.hljs-operator,
+.hljs-punctuation {
+  color: #84492c;
+}
+
+/* ...existing code... */
+
+.hljs-keyword,
+.hljs-title,
+.hljs-built_in,
+.hljs-function {
+  color: #ef5a3c;
+  font-weight: bold;
+}
+
+/* Adicionando destaque para classes e tipos */
+.hljs-class,
+.hljs-type {
+  color: #b7410e;
+  font-weight: bold;
+  text-decoration: underline dotted #ef5a3c;
+}
+
+/* Strings */
+.hljs-string {
+  color: #c14f2d;
+  font-style: italic;
+}
+
+/* Números, booleanos, null */
+.hljs-literal,
+.hljs-number {
+  color: #b7410e;
+  font-weight: 600;
+}
+
+/* Comentários */
+.hljs-comment {
+  color: #a87c6b;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* Variáveis, parâmetros */
+.hljs-variable,
+.hljs-params {
+  color: #5c2b1a;
+  font-weight: 500;
+}
+
+/* Operadores, sinais */
+.hljs-operator,
+.hljs-punctuation {
+  color: #84492c;
+}
+
+/* Adicionando destaque para atributos */
+.hljs-attr {
+  color: #ef8a3c;
+  font-weight: bold;
+}
+
+/* Adicionando destaque para tags HTML/XML */
+.hljs-tag,
+.hljs-name {
+  color: #c14f2d;
+  font-weight: bold;
+}
+
+/* Adicionando destaque para valores booleanos */
+.hljs-boolean {
+  color: #b7410e;
+  background: #fce8e2;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+/* Adicionando destaque para propriedades CSS */
+.hljs-attribute {
+  color: #ef5a3c;
+  font-style: italic;
+}

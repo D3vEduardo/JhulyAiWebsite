@@ -47,6 +47,9 @@ export default function ChatMessages({
               />
             </div>
           )}
+          components={{
+            Footer: () => <div className="h-[160px]" />,
+          }}
           style={{ height: "100%" }}
         />
       ) : (

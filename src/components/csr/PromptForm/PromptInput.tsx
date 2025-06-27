@@ -1,10 +1,12 @@
-import { ChangeEvent } from "react"
+import { ChangeEvent } from "react";
 
 export default function PromptInput({
   handleInputChange,
   inputValue,
 }: {
-  handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
+  handleInputChange: (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>,
+  ) => void;
   inputValue: string;
 }) {
   console.log("Renderizei PromptInput");

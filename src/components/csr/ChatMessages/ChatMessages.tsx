@@ -1,26 +1,12 @@
 "use client";
 
-import { UseChatHelpers } from "@ai-sdk/react";
+import { useChatContext } from "@/contexts/ChatContext";
 import ChatBalloon from "../ChatBalloon/ChatBalloon";
 import { Virtuoso } from "react-virtuoso";
 
-interface ChatMessagesProps {
-  chat: UseChatHelpers & {
-    addToolResult: ({
-      toolCallId,
-      result,
-    }: {
-      toolCallId: string;
-      result: unknown;
-    }) => void;
-  };
-  getMessagesIsPending: boolean;
-}
-
-export default function ChatMessages({
-  chat,
-  getMessagesIsPending,
-}: ChatMessagesProps) {
+export default function ChatMessages() {
+  const chat = useChatContext();
+  const getMessagesIsPending = chat.isLoadingMessages;
   console.log("Renderizei ChatMessages");
   return (
     <main

@@ -7,8 +7,8 @@ const ItimFont = Itim({
   variable: "--font-itim",
   weight: ["400"],
   preload: true,
-  subsets: ["latin"]
-})
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Jhuly AI",
@@ -22,12 +22,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body
-        className={`${ItimFont.variable} antialiased w-screen h-dvh`}
-      >
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+      <body className={`${ItimFont.variable} antialiased w-screen h-dvh`}>
+        <SessionProvider>{children}</SessionProvider>
       </body>
     </html>
   );

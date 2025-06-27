@@ -3,14 +3,12 @@
 ## Problemas Identificados
 
 1. **Backend (API Route)**:
-
    - Operações de I/O excessivas no banco de dados (Prisma)
    - Geração de nome do chat via IA bloqueia o fluxo principal
    - Conversão serial de mensagens custosa
    - Salvamento de mensagens da IA durante streaming causa atrasos
 
 2. **Frontend**:
-
    - Re-renders desnecessários em cascata (`MessagesContainer` → `ChatMessages` → `ChatBalloon`)
    - Ausência de virtualização na lista de mensagens
    - Processamento pesado de Markdown/Syntax Highlighting
@@ -46,13 +44,11 @@ graph TD
 ### Backend (src/app/api/chat/route.ts)
 
 1. **Otimizar Operações DB**:
-
    - Agrupar operações com transações do Prisma
    - Remover chamadas redundantes ao banco
    - Adicionar índices para consultas frequentes
 
 2. **Processamento Assíncrono**:
-
    - Mover `generateChatNameWithAi` para fila (ex: BullMQ)
    - Usar nome temporário até geração completa
 
@@ -75,7 +71,6 @@ graph TD
 ### Frontend
 
 1. **Virtualização de Lista** (src/component/csr/ChatMessages/ChatMessages.tsx):
-
    - Implementar `react-virtuoso`
    - Renderizar apenas itens visíveis
 
@@ -85,7 +80,6 @@ graph TD
    ```
 
 2. **Memoização de Componentes**:
-
    - Adicionar `React.memo` em `ChatBalloon`
    - Usar `useCallback` para handlers
 
@@ -103,7 +97,6 @@ graph TD
 ### Melhorias Gerais
 
 1. **Gerenciamento de Estado**:
-
    - Migrar para Zustand com seletores granulares
 
    ```ts
@@ -114,7 +107,6 @@ graph TD
    ```
 
 2. **Caching**:
-
    - Implementar `stale-while-revalidate` com React Query
    - Cache agressivo para mensagens
 

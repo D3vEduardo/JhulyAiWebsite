@@ -36,8 +36,8 @@ const ChatBalloon = memo(
     const color: VariantsType = error
       ? "error"
       : roles.includes(message.role as VariantsType)
-      ? (message.role as "user" | "assistant")
-      : "assistant";
+        ? (message.role as "user" | "assistant")
+        : "assistant";
 
     const selectedVariant = {
       color,
@@ -46,7 +46,7 @@ const ChatBalloon = memo(
     // Verificar se a mensagem contém blocos de código
     const containsCode = useMemo(
       () => /```[\s\S]*?```|`[^`]+`/.test(message.content),
-      [message.content]
+      [message.content],
     );
 
     return (
@@ -71,7 +71,7 @@ const ChatBalloon = memo(
       prevProps.message.role === nextProps.message.role &&
       prevProps.error === nextProps.error
     );
-  }
+  },
 );
 
 export default ChatBalloon;

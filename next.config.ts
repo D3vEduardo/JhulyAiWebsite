@@ -6,15 +6,15 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cdn.discordapp.com",
-        pathname: "/avatars/**"
+        pathname: "/avatars/**",
       },
       {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
-        pathname: "/u/**"
-      }
-    ]
-  }
+        pathname: "/u/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

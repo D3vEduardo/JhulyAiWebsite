@@ -7,26 +7,16 @@ import { UseChatHelpers } from "@ai-sdk/react";
 import { useParams } from "next/navigation";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
+import { useChatContext } from "@/contexts/ChatContext";
 
 // interface SubmitBody {
 //   prompt: string;
 //   chatId: string | null;
 // }
 
-interface PromptFormProps {
-  chat: UseChatHelpers & {
-    addToolResult: ({
-      toolCallId,
-      result,
-    }: {
-      toolCallId: string;
-      result: unknown;
-    }) => void;
-  };
-}
-
-export default function PromptForm({ chat }: PromptFormProps) {
+export default function PromptForm() {
   console.log("Renderizei PromptForm");
+  const chat = useChatContext();
   const { chatId } = useParams();
   const chatIsReady = chat.status === "ready" || chat.status === "error";
   const [reasoning, setReasoning] = useState<boolean>(false);

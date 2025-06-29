@@ -3,7 +3,6 @@
 import PromptInput from "./PromptInput";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { UseChatHelpers } from "@ai-sdk/react";
 import { useParams } from "next/navigation";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 
 export function useWindowResize() {
   const [innerWidth, setInnerWidth] = useState<number>(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const handleResize = () => setInnerWidth(window.innerWidth);
 
     // Inicializar o valor

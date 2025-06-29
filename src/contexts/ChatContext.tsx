@@ -7,7 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { useChat, type UseChatOptions } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useChatMessages } from "@/hooks/useChatMessages";
@@ -68,7 +68,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (chatMessagesQuery.data) {
       chat.setMessages(chatMessagesQuery.data);
     }
-  }, [isNewChat, chatId, chatMessagesQuery.data]);
+  }, [isNewChat, chatId, chatMessagesQuery.data, chat]);
 
   const value = {
     ...chat,

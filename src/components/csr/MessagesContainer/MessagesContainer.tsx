@@ -6,7 +6,6 @@ import ChatMessages from "../ChatMessages/ChatMessages";
 import PromptForm from "../PromptForm/PromptForm";
 import ChatNavBar from "../ChatNavbar";
 import { useWindowResize } from "@hooks/useWindowSize";
-import { useChatContext } from "@/contexts/ChatContext";
 
 export default function MessageContainer() {
   const { asideIsOpen } = useAside();

@@ -56,7 +56,9 @@ export default function AsideMenuChats() {
                   tapAnimationSize: 0.9,
                 }}
               >
-                <p className="truncate w-full !overflow-hidden">{decodeURIComponent(chat.name)}</p>
+                <p className="truncate w-full !overflow-hidden">
+                  {decodeURIComponent(chat.name)}
+                </p>
               </Button>
             );
           })}

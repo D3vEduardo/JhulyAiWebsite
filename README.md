@@ -6,6 +6,10 @@ Bem-vindo ao repositório oficial do Jhuly AI Website, uma aplicação web compl
 
 O projeto foi desenvolvido para ser uma plataforma de chat com IA robusta e escalável. Ele utiliza as tecnologias mais recentes do ecossistema React e Next.js, incluindo o App Router para uma arquitetura de renderização híbrida, e o Vercel AI SDK para uma integração perfeita com modelos de linguagem.
 
+### Otimizações
+
+- **Performance Otimizada:** O `ChatContext` foi refatorado para separar o estado das ações, e os componentes do formulário foram memoizados para evitar re-renderizações desnecessárias.
+
 ## Stack de Tecnologia
 
 - **Framework:** [Next.js](https://nextjs.org/) (com App Router)

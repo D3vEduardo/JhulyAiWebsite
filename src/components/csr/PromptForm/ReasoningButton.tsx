@@ -1,17 +1,13 @@
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 import Button from "../Button";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, memo } from "react";
 
 type PropsType = {
   reasoning: boolean;
   setReasoning: Dispatch<SetStateAction<boolean>>;
   chatIsReady: boolean;
 };
-export default function ReasoningButton({
-  reasoning,
-  setReasoning,
-  chatIsReady,
-}: PropsType) {
+function ReasoningButton({ reasoning, setReasoning, chatIsReady }: PropsType) {
   return (
     <Button
       type="button"
@@ -24,3 +20,5 @@ export default function ReasoningButton({
     </Button>
   );
 }
+
+export default memo(ReasoningButton);

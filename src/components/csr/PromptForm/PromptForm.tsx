@@ -6,26 +6,25 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
-import { useChatContext } from "@/contexts/ChatContext";
-
-// interface SubmitBody {
-//   prompt: string;
-//   chatId: string | null;
-// }
+import {
+  useChatStateContext,
+  useChatActionsContext,
+} from "@/contexts/ChatContext";
 
 export default function PromptForm() {
   console.log("Renderizei PromptForm");
-  const chat = useChatContext();
+  const { input, status, messages } = useChatStateContext();
+  const { handleSubmit, stop } = useChatActionsContext();
   const { chatId } = useParams();
-  const chatIsReady = chat.status === "ready" || chat.status === "error";
+  const chatIsReady = status === "ready" || status === "error";
   const [reasoning, setReasoning] = useState<boolean>(false);
 
   return (
     <motion.form
       onSubmit={async (e) => {
-        chat.handleSubmit(e, {
+        handleSubmit(e, {
           body: {
-            prompt: chat.input,
+            prompt: input,
             reasoning: reasoning,
             chatId,
           },
@@ -35,17 +34,18 @@ export default function PromptForm() {
                 py-4 px-2 rounded-lg border-2 border-almond z-10 flex flex-col gap-2 items-center
                 max-w-[900px]`}
     >
-      <PromptInput
-        handleInputChange={chat.handleInputChange}
-        inputValue={chat.input}
-      />
+      <PromptInput />
       <section className="flex w-full justify-end gap-x-2 py-1 px-2">
         <ReasoningButton
           reasoning={reasoning}
           setReasoning={setReasoning}
           chatIsReady={chatIsReady}
         />
-        <PromptSubmitButton chat={chat} chatIsReady={chatIsReady} />
+        <PromptSubmitButton
+          chatIsReady={chatIsReady}
+          stop={stop}
+          messagesLength={messages.length}
+        />
       </section>
     </motion.form>
   );

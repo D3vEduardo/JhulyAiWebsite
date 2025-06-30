@@ -1,11 +1,11 @@
 "use client";
 
-import { useChatContext } from "@/contexts/ChatContext";
+import { useChatStateContext } from "@/contexts/ChatContext";
 import ChatBalloon from "../ChatBalloon/ChatBalloon";
 import { Virtuoso } from "react-virtuoso";
 
 export default function ChatMessages() {
-  const chat = useChatContext();
+  const chat = useChatStateContext();
   const getMessagesIsPending = chat.isLoadingMessages;
   console.log("Renderizei ChatMessages");
   return (

@@ -1,21 +1,14 @@
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 import Button from "../Button";
-import { UseChatHelpers } from "@ai-sdk/react";
+import { memo } from "react";
 
 type PropsType = {
-  chat: UseChatHelpers & {
-    addToolResult: ({
-      toolCallId,
-      result,
-    }: {
-      toolCallId: string;
-      result: unknown;
-    }) => void;
-  };
   chatIsReady: boolean;
+  stop: () => void;
+  messagesLength: number;
 };
 
-export default function PromptSubmitButton({ chatIsReady, chat }: PropsType) {
+function PromptSubmitButton({ chatIsReady, stop, messagesLength }: PropsType) {
   return (
     <Button
       type={chatIsReady ? "submit" : "button"}
@@ -25,7 +18,7 @@ export default function PromptSubmitButton({ chatIsReady, chat }: PropsType) {
         size: "sm",
       }}
       onClick={() => {
-        if (!chatIsReady) chat.stop();
+        if (!chatIsReady) stop();
       }}
     >
       {chatIsReady ? (
@@ -35,7 +28,7 @@ export default function PromptSubmitButton({ chatIsReady, chat }: PropsType) {
           height="24"
           className="-rotate-45"
         />
-      ) : chat.messages.length > 0 ? (
+      ) : messagesLength > 0 ? (
         <Icon
           icon="material-symbols:stop-circle-outline-rounded"
           width="24"
@@ -56,5 +49,4 @@ export default function PromptSubmitButton({ chatIsReady, chat }: PropsType) {
   );
 }
 
-//
-//
+export default memo(PromptSubmitButton);

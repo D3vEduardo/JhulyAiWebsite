@@ -102,6 +102,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [chatMessagesQuery.data, chat]);
 
   useEffect(() => {
+    if (pathname === "/chat/new") {
+      setNewChatId(null);
+    }
+  }, [pathname]);
+
+  useEffect(() => {
     if (isNewChat && newChatId) {
       router.push(`/chat/${newChatId}`, { scroll: false });
     }

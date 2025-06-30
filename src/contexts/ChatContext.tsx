@@ -31,6 +31,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   const isNewChat = chatId === "new";
 
   const [newChatId, setNewChatId] = useState<string | null>(null);
+  const [newChatName, setNewChatName] = useState<string | null>(null);
 
   const chatMessagesQuery = useChatMessages(isNewChat ? null : chatId);
 
@@ -38,8 +39,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     api: "/api/chat",
     onResponse(response) {
       const newChatIdFromHeader = response.headers.get("X-Chat-Id");
+      const newChatNameFromHeader = response.headers.get("X-Chat-Name");
+
       if (isNewChat && newChatIdFromHeader) {
         setNewChatId(newChatIdFromHeader);
+        if (newChatNameFromHeader) {
+          setNewChatName(decodeURIComponent(newChatNameFromHeader));
+        }
         queryClient.invalidateQueries({ queryKey: ["chats"] });
       }
     },

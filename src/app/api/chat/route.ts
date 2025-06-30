@@ -163,7 +163,7 @@ Se o que eu pedi for estrourar o seu limite de output tokens, então faça uma v
     return result.toDataStreamResponse({
       headers: {
         "X-Chat-Id": chat.id,
-        "X-Chat-Name": chat.name,
+        "X-Chat-Name": encodeURIComponent(chat.name),
       },
     });
   } catch (error) {

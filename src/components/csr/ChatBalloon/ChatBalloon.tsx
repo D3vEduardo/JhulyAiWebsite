@@ -17,7 +17,7 @@ type PropsType = ComponentProps<"figure"> & {
 };
 
 const ChatBalloon = memo(
-  ({ message, error, ...props }: PropsType) => {
+  ({ message, error }: PropsType) => {
     console.log("Renderizei ChatBalloon");
     const variants = tv({
       base: "text-cocoa",
@@ -25,7 +25,7 @@ const ChatBalloon = memo(
         color: {
           user: "bg-apricot px-4 py-6 rounded-2xl",
           assistant: "",
-          error: "bg-danger px-4 py-6 rounded-2xl",
+          error: "bg-red-300 px-4 py-6 rounded-2xl text-red-900",
         },
       },
     });
@@ -43,35 +43,21 @@ const ChatBalloon = memo(
       color,
     };
 
-    // Verificar se a mensagem contém blocos de código
-    const containsCode = useMemo(
-      () => /```[\s\S]*?```|`[^`]+`/.test(message.content),
-      [message.content],
-    );
-
     return (
-      <figure className={variants(selectedVariant)} {...props}>
-        {containsCode ? (
-          <Markdown
-            rehypePlugins={[rehypeHighlight]}
-            remarkPlugins={[remarkGfm]}
-          >
-            {message.content}
-          </Markdown>
-        ) : (
-          <div>{message.content}</div>
-        )}
+      <figure className={variants(selectedVariant)}>
+        <Markdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>
+          {message.content}
+        </Markdown>
       </figure>
     );
   },
   (prevProps, nextProps) => {
-    // Evita re-render se conteúdo e tipo não mudaram
     return (
       prevProps.message.content === nextProps.message.content &&
       prevProps.message.role === nextProps.message.role &&
       prevProps.error === nextProps.error
     );
-  },
+  }
 );
 
 export default ChatBalloon;

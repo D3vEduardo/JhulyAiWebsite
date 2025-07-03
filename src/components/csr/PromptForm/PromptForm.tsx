@@ -9,12 +9,13 @@ import ReasoningButton from "./ReasoningButton";
 import {
   useChatStateContext,
   useChatActionsContext,
+  useChatInputContext,
 } from "@/contexts/ChatContext";
 
 export default function PromptForm() {
-  console.log("Renderizei PromptForm");
-  const { input, status, messages } = useChatStateContext();
-  const { handleSubmit, stop } = useChatActionsContext();
+  const { value: input } = useChatInputContext();
+  const { status, messages } = useChatStateContext();
+  const { handleSubmit, stop, setMessages } = useChatActionsContext();
   const { chatId } = useParams();
   const chatIsReady = status === "ready" || status === "error";
   const [reasoning, setReasoning] = useState<boolean>(false);
@@ -22,6 +23,7 @@ export default function PromptForm() {
   return (
     <motion.form
       onSubmit={async (e) => {
+        e.preventDefault();
         handleSubmit(e, {
           body: {
             prompt: input,
@@ -31,11 +33,11 @@ export default function PromptForm() {
         });
       }}
       className={`absolute bg-peach left-1/2 bottom-6 -translate-x-1/2 w-95/100 overflow-hidden
-                py-4 px-2 rounded-lg border-2 border-almond z-10 flex flex-col gap-2 items-center
+                py-2 px-2 rounded-lg border-2 border-almond z-10 flex justify-between gap-x-2
                 max-w-[900px]`}
     >
       <PromptInput />
-      <section className="flex w-full justify-end gap-x-2 py-1 px-2">
+      <section className="flex flex-col md:flex-initial justify-end gap-2 py-1 px-2">
         <ReasoningButton
           reasoning={reasoning}
           setReasoning={setReasoning}

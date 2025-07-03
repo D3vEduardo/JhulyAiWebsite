@@ -2,11 +2,13 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
+  useRef,
   useState,
   ReactNode,
-  useMemo,
 } from "react";
 import { Message, useChat } from "@ai-sdk/react";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,10 +20,18 @@ interface ChatState {
   chatId: string | null;
   isNewChat: boolean;
   isLoadingMessages: boolean;
-  input: string;
   messages: Message[];
   status: "idle" | "loading" | "streaming" | "error" | "ready";
   error: Error | undefined;
+}
+
+interface ChatInput {
+  value: string;
+  onChange: (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLTextAreaElement>
+  ) => void;
 }
 
 interface ChatActions {
@@ -31,12 +41,7 @@ interface ChatActions {
           preventDefault?: (() => void) | undefined;
         }
       | undefined,
-    chatRequestOptions?: ChatRequestOptions | undefined,
-  ) => void;
-  handleInputChange: (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>,
+    chatRequestOptions?: ChatRequestOptions | undefined
   ) => void;
   stop: () => void;
   addToolResult: ({
@@ -46,10 +51,14 @@ interface ChatActions {
     toolCallId: string;
     result: unknown;
   }) => void;
+  setMessages: (
+    messages: Message[] | ((messages: Message[]) => Message[])
+  ) => void;
 }
 
 const ChatStateContext = createContext<ChatState | undefined>(undefined);
 const ChatActionsContext = createContext<ChatActions | undefined>(undefined);
+const ChatInputContext = createContext<ChatInput | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -60,65 +69,96 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     ? (pathname.split("/").pop() ?? null)
     : null;
   const isNewChat = chatId === "new";
-
-  const [newChatId, setNewChatId] = useState<string | null>(null);
+  const newChatIdRef = useRef<string | null>(null);
+  const [navigateToChatId, setNavigateToChatId] = useState<string | null>(null);
 
   const chatMessagesQuery = useChatMessages(isNewChat ? null : chatId);
 
-  const chat = useChat({
-    onResponse(response) {
+  const onResponse = useCallback(
+    async (response: Response) => {
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Ocorreu um erro desconhecido.");
+      }
+
       const newChatIdFromHeader = response.headers.get("X-Chat-Id");
       if (isNewChat && newChatIdFromHeader) {
-        setNewChatId(newChatIdFromHeader);
-        queryClient.invalidateQueries({ queryKey: ["chats"] });
+        newChatIdRef.current = newChatIdFromHeader;
+        await queryClient.invalidateQueries({ queryKey: ["chats"] });
       }
     },
-    onFinish() {
-      const finalChatId = newChatId || chatId;
-      if (finalChatId && finalChatId !== "new") {
-        // setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["chat", `chat_${finalChatId}`],
-        });
-        // }, 200);
+    [isNewChat, queryClient]
+  );
+
+  const onFinish = useCallback(
+    (message: Message) => {
+      const finalChatId = isNewChat ? newChatIdRef.current : chatId;
+      console.log("Final chatId onFinish:", finalChatId);
+      if (!finalChatId) {
+        alert("Final chat não existe!");
+        return;
       }
+
+      queryClient.setQueryData(
+        ["chat", `chat_${finalChatId}`],
+        (oldData: Message[] | undefined) => {
+          if (oldData) {
+            const messageIndex = oldData.findIndex((m) => m.id === message.id);
+            if (messageIndex !== -1) {
+              const newData = [...oldData];
+              newData[messageIndex] = message;
+              return newData;
+            }
+            return [...oldData, message];
+          }
+          return [message];
+        }
+      );
+
+      setNavigateToChatId(finalChatId);
     },
+    [isNewChat, chatId]
+  );
+
+  const chat = useChat({
+    onResponse,
+    onFinish,
     body: {
       chatId,
     },
   });
 
   useEffect(() => {
-    if (isNewChat && !newChatId) {
+    if (navigateToChatId) {
+      router.push(`/chat/${navigateToChatId}`, { scroll: false });
+      setNavigateToChatId(null);
+    }
+  }, [navigateToChatId, router]);
+
+  useEffect(() => {
+    if (isNewChat && !newChatIdRef.current && pathname !== "/chat/new") {
       router.push("/chat/new", { scroll: false });
     }
-  }, [isNewChat, newChatId, router]);
+  }, [isNewChat, newChatIdRef.current, router, pathname]);
 
   useEffect(() => {
     if (chatMessagesQuery.data && chat.status !== "streaming") {
-      console.log("Setando as mensagens com os dados da query...");
       chat.setMessages(chatMessagesQuery.data);
     }
-  }, [chatMessagesQuery.data, chat]);
+  }, [chatMessagesQuery.data, chat.status, chat.setMessages]);
 
   useEffect(() => {
-    if (pathname === "/chat/new") {
-      setNewChatId(null);
+    if (pathname === "/chat/new" && chat.status !== "streaming") {
+      newChatIdRef.current = null;
+      chat.setMessages([]);
     }
-  }, [pathname]);
-
-  useEffect(() => {
-    if (isNewChat && newChatId) {
-      router.push(`/chat/${newChatId}`, { scroll: false });
-    }
-  }, [isNewChat, newChatId, router]);
+  }, [isNewChat, chat.status, chat.setMessages, pathname]);
 
   const chatState = useMemo(
     () => ({
       chatId,
       isNewChat,
       isLoadingMessages: chatMessagesQuery.isLoading,
-      input: chat.input,
       messages: chat.messages,
       status: chat.status as ChatState["status"],
       error: chat.error,
@@ -127,27 +167,33 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       chatId,
       isNewChat,
       chatMessagesQuery.isLoading,
-      chat.input,
       chat.messages,
       chat.status,
       chat.error,
-    ],
+    ]
   );
 
   const chatActions = useMemo(
     () => ({
       handleSubmit: chat.handleSubmit,
-      handleInputChange: chat.handleInputChange,
       stop: chat.stop,
       addToolResult: chat.addToolResult,
+      setMessages: chat.setMessages,
     }),
-    [chat.handleSubmit, chat.handleInputChange, chat.stop, chat.addToolResult],
+    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
   );
+
+  const chatInput = {
+    value: chat.input,
+    onChange: chat.handleInputChange,
+  };
 
   return (
     <ChatStateContext.Provider value={chatState}>
       <ChatActionsContext.Provider value={chatActions}>
-        {children}
+        <ChatInputContext.Provider value={chatInput}>
+          {children}
+        </ChatInputContext.Provider>
       </ChatActionsContext.Provider>
     </ChatStateContext.Provider>
   );
@@ -165,6 +211,14 @@ export function useChatActionsContext() {
   const context = useContext(ChatActionsContext);
   if (context === undefined) {
     throw new Error("useChatActionsContext must be used within a ChatProvider");
+  }
+  return context;
+}
+
+export function useChatInputContext() {
+  const context = useContext(ChatInputContext);
+  if (context === undefined) {
+    throw new Error("useChatInputContext must be used within a ChatProvider");
   }
   return context;
 }

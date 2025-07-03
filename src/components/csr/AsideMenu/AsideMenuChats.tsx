@@ -31,12 +31,18 @@ export default function AsideMenuChats() {
   const prefetchMessages = (chatId: string) => {
     queryClient.prefetchQuery({
       queryKey: ["chat", `chat_${chatId}`],
-      queryFn: async () => await getChatMessages(chatId),
+      queryFn: async () => {
+        console.log(`Fazendo prefetch de mensagens do chat '${chatId}'...`);
+        const data = await getChatMessages(chatId);
+        console.log(`Prefetch do chat '${chatId}' concluído!`);
+        return data;
+      },
+      staleTime: 1000 * 60 * 1.5,
     });
   };
 
   return (
-    <div className="mb-4 overflow-y-auto gap-y-2 flex flex-col">
+    <div className="mb-4 mt-2 overflow-y-auto gap-y-2 flex flex-col">
       {!getChatsIsPending ? (
         <>
           {chats?.map((chat, index) => {

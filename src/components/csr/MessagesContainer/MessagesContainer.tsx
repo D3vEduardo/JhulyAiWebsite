@@ -24,7 +24,7 @@ export default function MessageContainer() {
         duration: 0.5,
         type: "spring",
       }}
-      className="w-screen h-screen relative max-h-dvh overflow-hidden px-[2%] pt-2"
+      className="w-screen h-screen relative max-h-dvh !overflow-hidden px-[2%] pt-2"
     >
       <ChatNavBar />
       <ChatMessages />

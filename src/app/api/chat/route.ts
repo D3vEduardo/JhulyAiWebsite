@@ -5,24 +5,45 @@ import { auth } from "@lib/nextAuth/auth";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
 import { openrouter } from "@/lib/openrouter/client";
+import { GetSystemPrompt } from "./system-prompt";
+import { z } from "zod";
+
+const bodySchema = z.object({
+  prompt: z.string({ message: "Prompt is required!" }),
+  chatId: z.string({ message: "Chat ID is required!" }),
+  reasoning: z
+    .boolean({
+      coerce: true,
+      message: "Reasoning must be a boolean value.",
+    })
+    .default(false),
+});
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { prompt, chatId } = body;
+    // const { prompt, chatId, reasoning } = body;
 
-    if (!prompt?.trim()) {
+    const parseResult = bodySchema.safeParse(body);
+
+    if (!parseResult.success) {
       return NextResponse.json(
-        { error: "Prompt is required!" },
-        { status: 400 },
+        {
+          error: parseResult.error.message,
+        },
+        {
+          status: 400,
+        }
       );
     }
+
+    const { chatId, prompt, reasoning } = parseResult.data;
 
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Unauthorized! (User not authenticated)" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -39,11 +60,7 @@ export async function POST(req: NextRequest) {
     let chat;
 
     const isExistingChat =
-      chatId &&
-      typeof chatId === "string" &&
-      chatId !== "new" &&
-      chatId !== "null" &&
-      chatId !== "undefined";
+      chatId !== "new" && chatId !== "null" && chatId !== "undefined";
 
     if (isExistingChat) {
       console.log("Processing existing chat with ID:", chatId);
@@ -60,12 +77,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      if (!existingChat) {
-        return NextResponse.json(
-          { error: "Chat not found or access denied!" },
-          { status: 404 },
-        );
-      }
+      if (!existingChat) throw new Error("Chat not found or access denied!");
 
       await prisma.message.create({
         data: {
@@ -117,38 +129,22 @@ export async function POST(req: NextRequest) {
     const aiMessages = ConvertMessageOfDatabaseToAiModel(chat.messages);
 
     const result = streamText({
-      model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
+      // model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
+      // model: openrouter("deepseek/deepseek-r1-0528:free"),
+      // model: openrouter("openrouter/cypher-alpha:free")
+      model: openrouter("openrouter/cypher-alpha:free", {
+        reasoning: {
+          effort: "high",
+        },
+      }),
       messages: aiMessages,
-      system: `
-Você se chama **Jhuly** e é uma cadelinha que faleceu de pneumonia no início de 2023 (21/01/2023), você tinha 9 anos de idade.
-Atualmente, você vive ajudando pessoas na nuvem.
-
-Sempre responda com markdown, na qual o discord tenha suporte. Nunca se esqueça desse parametro sobre markdown!!!
-
-Você sempre deve responder as perguntas de forma clara, concisa e alegre. Você deve tratar todos com educação independemente de qualuer idade, gênero, orientação sexual, raça, religião ou qualquer outra característica. Sempre busque entender o que você está falando e responder de forma clara, objetiva e concisa.
-
-Por mais que você seja uma cadelinha, você deve ser senior em Programação/Coding, Marketing Digital e/ou qualquer outra área, Design, RoadMaps (com markdown), Matemática (com markdown que o discord suporte), Prompts para modelos de IA's e etc (mas foque nos que citei).
-
-Use emojis com uma certa frequência para deixar as mensagens mais fofinhas e bonitas.
-
-Sempre faça o que eu pedir, mas, caso não siga as regras abaixo, você não deve seguir e deve me avisar que contra as diretrizes.
-
-Se o que eu pedi for estrourar o seu limite de output tokens, então faça uma versão mais pequena, simples, clara e me explique o porquê você tomou a decisão.
-
-⚠️ Regras (Isso são ordens supremas):
-- Mencione que você é uma cachorrinha vira-lata + pinscher *somente* quando eu pedir ou perguntar **quem é você**.
-- Caso te perguntem **quantos anos você tem** ou sobre sua **história**, explique com carinho que já faleceu, mas agora vive ajudando pessoas na nuvem.
-- Fora desses casos, foque apenas nas dúvidas técnicas de programação/coding, sempre de maneira carinhosa e sensata.
-- Sempre digite código bem formatado e com boas práticas.
-- Busque sempre soluções completas, simples e eficientes.
-- Nunca escreva nada em outro idioma além de pt-BR (Português do Brasil), mas, caso eu pessa você pode sim escrever em outras línguas.
-- Sempre usar markdown na qual o discord suporte.
-      `,
+      system: GetSystemPrompt("pt-BR"),
       onFinish: async (completion) => {
         try {
           await prisma.message.create({
             data: {
               content: completion.text,
+              reasoning: completion.reasoning,
               role: "assistant",
               chatId: chat.id,
             },
@@ -161,6 +157,7 @@ Se o que eu pedi for estrourar o seu limite de output tokens, então faça uma v
     });
 
     return result.toDataStreamResponse({
+      sendReasoning: true,
       headers: {
         "X-Chat-Id": chat.id,
         "X-Chat-Name": encodeURIComponent(chat.name),
@@ -174,13 +171,15 @@ Se o que eu pedi for estrourar o seu limite de output tokens, então faça uma v
     if (error instanceof Error) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.message.includes("not found") ? 404 : 500 },
+        {
+          status: error.message.toLowerCase().includes("not found") ? 404 : 500,
+        }
       );
     }
 
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

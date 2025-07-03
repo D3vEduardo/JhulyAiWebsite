@@ -6,7 +6,7 @@ import { Suspense } from "react";
 
 export default function ClientChat() {
   return (
-    <main className="flex flex-col w-screen h-dvh relative overflow-hidden">
+    <main className="flex flex-col w-screen h-dvh relative !overflow-hidden">
       <AsideMenu />
       <Suspense fallback={<div>Loading...</div>}>
         <MessagesContainer />

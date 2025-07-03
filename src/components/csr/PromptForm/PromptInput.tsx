@@ -1,19 +1,16 @@
 import { memo } from "react";
-import {
-  useChatStateContext,
-  useChatActionsContext,
-} from "@/contexts/ChatContext";
+import { useChatInputContext } from "@/contexts/ChatContext";
 
 function PromptInput() {
-  const { input } = useChatStateContext();
-  const { handleInputChange } = useChatActionsContext();
+  const { value: input, onChange: handleInputChange } = useChatInputContext();
+  // const { value:  } = useChatInputContext();
   console.log("Renderizei PromptInput");
   return (
     <textarea
       onChange={handleInputChange}
       value={input}
       placeholder="Digite sua mensagem aqui..."
-      className="w-full h-10 p-2 focus:outline-none resize-none"
+      className="w-full min-h-full p-2 focus:outline-none resize-none py-1 px-2"
     ></textarea>
   );
 }

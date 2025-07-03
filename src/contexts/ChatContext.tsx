@@ -30,7 +30,7 @@ interface ChatInput {
   onChange: (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLTextAreaElement>,
   ) => void;
 }
 
@@ -41,7 +41,7 @@ interface ChatActions {
           preventDefault?: (() => void) | undefined;
         }
       | undefined,
-    chatRequestOptions?: ChatRequestOptions | undefined
+    chatRequestOptions?: ChatRequestOptions | undefined,
   ) => void;
   stop: () => void;
   addToolResult: ({
@@ -52,7 +52,7 @@ interface ChatActions {
     result: unknown;
   }) => void;
   setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[])
+    messages: Message[] | ((messages: Message[]) => Message[]),
   ) => void;
 }
 
@@ -87,7 +87,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         await queryClient.invalidateQueries({ queryKey: ["chats"] });
       }
     },
-    [isNewChat, queryClient]
+    [isNewChat, queryClient],
   );
 
   const onFinish = useCallback(
@@ -112,12 +112,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             return [...oldData, message];
           }
           return [message];
-        }
+        },
       );
 
       setNavigateToChatId(finalChatId);
     },
-    [isNewChat, chatId]
+    [isNewChat, chatId, queryClient],
   );
 
   const chat = useChat({
@@ -139,20 +139,20 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (isNewChat && !newChatIdRef.current && pathname !== "/chat/new") {
       router.push("/chat/new", { scroll: false });
     }
-  }, [isNewChat, newChatIdRef.current, router, pathname]);
+  }, [isNewChat, router, pathname]);
 
   useEffect(() => {
     if (chatMessagesQuery.data && chat.status !== "streaming") {
       chat.setMessages(chatMessagesQuery.data);
     }
-  }, [chatMessagesQuery.data, chat.status, chat.setMessages]);
+  }, [chatMessagesQuery.data, chat]);
 
   useEffect(() => {
     if (pathname === "/chat/new" && chat.status !== "streaming") {
       newChatIdRef.current = null;
       chat.setMessages([]);
     }
-  }, [isNewChat, chat.status, chat.setMessages, pathname]);
+  }, [isNewChat, chat, pathname]);
 
   const chatState = useMemo(
     () => ({
@@ -170,7 +170,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       chat.messages,
       chat.status,
       chat.error,
-    ]
+    ],
   );
 
   const chatActions = useMemo(
@@ -180,7 +180,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       addToolResult: chat.addToolResult,
       setMessages: chat.setMessages,
     }),
-    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
+    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages],
   );
 
   const chatInput = {

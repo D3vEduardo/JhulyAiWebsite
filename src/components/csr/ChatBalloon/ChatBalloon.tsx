@@ -1,4 +1,4 @@
-import React, { ComponentProps, useMemo, memo } from "react";
+import React, { ComponentProps, memo } from "react";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
@@ -57,7 +57,7 @@ const ChatBalloon = memo(
       prevProps.message.role === nextProps.message.role &&
       prevProps.error === nextProps.error
     );
-  }
+  },
 );
 
 export default ChatBalloon;

@@ -1,5 +1,5 @@
 import { openrouter } from "@lib/openrouter/client";
-import { generateObject, generateText } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 
 export async function generateChatNameWithAi(userPrompt: string) {

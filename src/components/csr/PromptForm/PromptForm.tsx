@@ -15,7 +15,7 @@ import {
 export default function PromptForm() {
   const { value: input } = useChatInputContext();
   const { status, messages } = useChatStateContext();
-  const { handleSubmit, stop, setMessages } = useChatActionsContext();
+  const { handleSubmit, stop } = useChatActionsContext();
   const { chatId } = useParams();
   const chatIsReady = status === "ready" || status === "error";
   const [reasoning, setReasoning] = useState<boolean>(false);

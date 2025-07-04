@@ -4,10 +4,10 @@ import { prisma } from "@lib/prisma/client";
 import { auth } from "@lib/nextAuth/auth";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
-// import { openrouter } from "@/lib/openrouter/client";
+import { openrouter } from "@/lib/openrouter/client";
 import { GetSystemPrompt } from "./system-prompt";
 import { z } from "zod";
-import { google } from "@lib/google/client";
+// import { google } from "@lib/google/client";
 
 const bodySchema = z.object({
   prompt: z.string({ message: "Prompt is required!" }),
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 400,
-        },
+        }
       );
     }
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     if (!session?.user?.id) {
       return NextResponse.json(
         { error: "Unauthorized! (User not authenticated)" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -132,8 +132,8 @@ export async function POST(req: NextRequest) {
     const result = streamText({
       // model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
       // model: openrouter("deepseek/deepseek-r1-0528:free"),
-      // model: openrouter("openrouter/cypher-alpha:free")
-      model: google("gemini-2.0-flash"),
+      model: openrouter("openrouter/cypher-alpha:free"),
+      // model: google("gemini-2.0-flash"),
       messages: aiMessages,
       system: GetSystemPrompt("pt-BR"),
       onFinish: async (completion) => {
@@ -170,13 +170,13 @@ export async function POST(req: NextRequest) {
         { error: error.message },
         {
           status: error.message.toLowerCase().includes("not found") ? 404 : 500,
-        },
+        }
       );
     }
 
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

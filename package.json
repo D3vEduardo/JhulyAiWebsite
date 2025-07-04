@@ -11,6 +11,7 @@
     "prisma:push": "dotenv -- pnpm prisma db push"
   },
   "dependencies": {
+    "@ai-sdk/google": "^1.2.22",
     "@ai-sdk/react": "^1.2.12",
     "@hookform/resolvers": "^5.1.1",
     "@openrouter/ai-sdk-provider": "^0.7.1",

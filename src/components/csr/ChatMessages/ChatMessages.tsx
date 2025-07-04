@@ -7,7 +7,7 @@ import Accordion from "../Accordion/Accordion";
 import { motion } from "motion/react";
 
 export default function ChatMessages() {
-  const { isLoadingMessages, messages, error } = useChatStateContext();
+  const { isLoadingMessages, messages, error, status } = useChatStateContext();
   console.log("Renderizei ChatMessages");
   return (
     <main
@@ -26,26 +26,34 @@ export default function ChatMessages() {
       {messages.length > 0 ? (
         <Virtuoso
           data={messages}
-          itemContent={(index, message) => (
-            <motion.div layout className="mb-2">
-              {message.parts?.find((part) => part.type === "reasoning")
-                ?.reasoning && (
-                <div className="mb-2 w-full ml-auto mr-auto">
-                  <Accordion
-                    title="Reasoning"
-                    content={
-                      message.parts.find((part) => part.type === "reasoning")
-                        ?.reasoning
-                    }
-                  />
-                </div>
-              )}
-              <ChatBalloon
-                key={`${message.id}_${index}_${message.role}`}
-                message={{ content: message.content, role: message.role }}
-              />
-            </motion.div>
-          )}
+          itemContent={(index, message) => {
+            const isStreamingMessage =
+              status === "streaming" && index === messages.length - 1;
+
+            return (
+              <motion.div
+                layout={isStreamingMessage ? false : "position"}
+                className="mb-2"
+              >
+                {message.parts?.find((part) => part.type === "reasoning")
+                  ?.reasoning && (
+                  <div className="mb-2 w-full ml-auto mr-auto">
+                    <Accordion
+                      title="Reasoning"
+                      content={
+                        message.parts.find((part) => part.type === "reasoning")
+                          ?.reasoning
+                      }
+                    />
+                  </div>
+                )}
+                <ChatBalloon
+                  key={`${message.id}_${index}_${message.role}`}
+                  message={{ content: message.content, role: message.role }}
+                />
+              </motion.div>
+            );
+          }}
           components={{
             Footer: () => <div className="h-[160px]" />,
           }}

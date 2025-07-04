@@ -4,9 +4,10 @@ import { prisma } from "@lib/prisma/client";
 import { auth } from "@lib/nextAuth/auth";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
-import { openrouter } from "@/lib/openrouter/client";
+// import { openrouter } from "@/lib/openrouter/client";
 import { GetSystemPrompt } from "./system-prompt";
 import { z } from "zod";
+import { google } from "@lib/google/client";
 
 const bodySchema = z.object({
   prompt: z.string({ message: "Prompt is required!" }),
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { chatId, prompt, reasoning } = parseResult.data;
+    const { chatId, prompt } = parseResult.data;
 
     const session = await auth();
     if (!session?.user?.id) {
@@ -132,13 +133,7 @@ export async function POST(req: NextRequest) {
       // model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
       // model: openrouter("deepseek/deepseek-r1-0528:free"),
       // model: openrouter("openrouter/cypher-alpha:free")
-      model: openrouter("openrouter/cypher-alpha:free", {
-        reasoning: reasoning
-          ? {
-              effort: "high",
-            }
-          : undefined,
-      }),
+      model: google("gemini-2.0-flash"),
       messages: aiMessages,
       system: GetSystemPrompt("pt-BR"),
       onFinish: async (completion) => {

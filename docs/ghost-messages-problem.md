@@ -503,12 +503,12 @@ let p_len = p_chars.len();
 }
 
 fn main() {
-println!("isMatch(\"aa\", \"a\") = {}", is_match("aa".to_string(), "a".to_string())); // false
+println!("isMatch(\"aa\", \"a\") = {}", is*match("aa".to_string(), "a".to_string())); // false
 println!("isMatch(\"aa\", \"aa\") = {}", is_match("aa".to_string(), "aa".to_string())); // true
 println!("isMatch(\"aaa\", \"aa\") = {}", is_match("aaa".to_string(), "aa".to_string())); // false
 println!("isMatch(\"aa\", \"a*\") = {}", is_match("aa".to_string(), "a*".to_string())); // true
-println!("isMatch(\"aa\", \"._\") = {}", is_match("aa".to_string(), "._".to_string())); // true
-println!("isMatch(\"ab\", \"._\") = {}", is_match("ab".to_string(), "._".to_string())); // true
+println!("isMatch(\"aa\", \".*\") = {}", is*match("aa".to_string(), ".*".to*string())); // true
+println!("isMatch(\"ab\", \".*\") = {}", is*match("ab".to_string(), ".*".to_string())); // true
 println!("isMatch(\"aab\", \"c*a*b\") = {}", is_match("aab".to_string(), "c*a*b".to_string())); // true
 }
 Explicação
@@ -532,12 +532,12 @@ for j in 1..=p_len { ... }:
 Este loop lida com padrões que começam com _. Se o caractere atual do padrão for _, então dp[0][j] será true se dp[0][j - 2] for true (ou seja, o \* corresponde a zero ocorrências do caractere precedente).
 for i in 1..=s_len { ... } e for j in 1..=p_len { ... }:
 
-Estes loops preenchem a tabela dp. Para cada par de caracteres s_chars[i - 1] e p_chars[j - 1]:
+Estes loops preenchem a tabela dp. Para cada par de caracteres s*chars[i - 1] e p_chars[j - 1]:
 Se p_chars[j - 1] for . ou corresponder a s_chars[i - 1], então dp[i][j] será true se dp[i - 1][j - 1] for true (ou seja, os caracteres atuais correspondem e os caracteres precedentes também correspondem).
-Se p_chars[j - 1] for _, então há duas possibilidades:
+Se p_chars[j - 1] for *, então há duas possibilidades:
 O _ corresponde a zero ocorrências do caractere precedente. Nesse caso, dp[i][j] será true se dp[i][j - 2] for true.
-O _ corresponde a uma ou mais ocorrências do caractere precedente. Nesse caso, dp[i][j] será true se dp[i - 1][j] for true e o caractere precedente corresponder ao caractere atual da string (ou seja, p_chars[j - 2] == '.' || p_chars[j - 2] == s_chars[i - 1]).
-Se p_chars[j - 1] não corresponder a s_chars[i - 1] e não for . ou _, então dp[i][j] será false.
+O _ corresponde a uma ou mais ocorrências do caractere precedente. Nesse caso, dp[i][j] será true se dp[i - 1][j] for true e o caractere precedente corresponder ao caractere atual da string (ou seja, p*chars[j - 2] == '.' || p_chars[j - 2] == s_chars[i - 1]).
+Se p_chars[j - 1] não corresponder a s_chars[i - 1] e não for . ou *, então dp[i][j] será false.
 dp[s_len][p_len]:
 
 O valor final de dp[s_len][p_len] é retornado. Este valor indica se a string s corresponde ao padrão p.
@@ -558,6 +558,3 @@ Se p[j] == '_':
 dp[i][j] = dp[i][j-2] (ignora o _ e o caractere anterior).
 Se p[j-1] == s[i] ou p[j-1] == '.': dp[i][j] = dp[i][j] || dp[i-1][j] (\* corresponde a um ou mais caracteres).
 No final, dp[s.len()][p.len()] indica se a string inteira corresponde ao padrão.
-
-Resumo
-Esse problema é um clássico de programação dinâmica e é super útil pra entender como construir soluções eficientes pra problemas complexos. Dominar essa técnica vai te abrir muitas portas no mundo do desenvolvimento! 😉🚀

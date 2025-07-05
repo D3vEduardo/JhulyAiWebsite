@@ -11,7 +11,7 @@ export default function ChatMessages() {
   console.log("Renderizei ChatMessages");
   return (
     <main
-      className="w-full pt-2 overflow-y-auto overflow-x-hidden"
+      className="w-full pt-2 overflow-y-auto overflow-x- pb-[160px]"
       id="chatMessages"
       style={{
         height: "calc(100% - 7vh)",
@@ -24,41 +24,48 @@ export default function ChatMessages() {
       )}
 
       {messages.length > 0 ? (
-        <Virtuoso
-          data={messages}
-          itemContent={(index, message) => {
-            const isStreamingMessage =
-              status === "streaming" && index === messages.length - 1;
+        // <Virtuoso
+        //   data={messages}
+        //   itemContent={(index, message) => {
+        //     const isStreamingMessage =
+        //       status === "streaming" && index === messages.length - 1;
 
-            return (
-              <motion.div
-                layout={isStreamingMessage ? false : "position"}
-                className="mb-2"
-              >
-                {message.parts?.find((part) => part.type === "reasoning")
-                  ?.reasoning && (
-                  <div className="mb-2 w-full ml-auto mr-auto">
-                    <Accordion
-                      title="Reasoning"
-                      content={
-                        message.parts.find((part) => part.type === "reasoning")
-                          ?.reasoning
-                      }
-                    />
-                  </div>
-                )}
-                <ChatBalloon
-                  key={`${message.id}_${index}_${message.role}`}
-                  message={{ content: message.content, role: message.role }}
+        //     return (
+
+        //     );
+        //   }}
+        //   components={{
+        //     Footer: () => <div className="h-[160px]" />,
+        //   }}
+        //   style={{ height: "100%" }}
+        // />
+        messages.map((message, index) => (
+          <motion.div
+            layout={
+              status === "streaming" && index === messages.length - 1
+                ? false
+                : "position"
+            }
+            className="mb-2"
+            key={`${message.id}_${index}_${message.role}`}
+          >
+            {message.parts?.find((part) => part.type === "reasoning")
+              ?.reasoning && (
+              <div className="mb-2 w-full ml-auto mr-auto">
+                <Accordion
+                  title="Reasoning"
+                  content={
+                    message.parts.find((part) => part.type === "reasoning")
+                      ?.reasoning
+                  }
                 />
-              </motion.div>
-            );
-          }}
-          components={{
-            Footer: () => <div className="h-[160px]" />,
-          }}
-          style={{ height: "100%" }}
-        />
+              </div>
+            )}
+            <ChatBalloon
+              message={{ content: message.content, role: message.role }}
+            />
+          </motion.div>
+        ))
       ) : (
         <p className="text-center text-gray-500">
           No messages yet. Start a conversation!

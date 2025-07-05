@@ -24,6 +24,5 @@ export function useChatMessages() {
       return convertedMessages;
     },
     enabled: !!chatId,
-    staleTime: Infinity,
   });
 }

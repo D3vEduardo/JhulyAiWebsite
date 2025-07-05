@@ -1,8 +1,8 @@
 "use client";
 
 import { useChatStateContext } from "@/contexts/ChatContext";
-import ChatBalloon from "../ChatBalloon/ChatBalloon";
-import { Virtuoso } from "react-virtuoso";
+import ChatBalloon, { MemoChatBalloon } from "../ChatBalloon/ChatBalloon";
+// import { Virtuoso } from "react-virtuoso";
 import Accordion from "../Accordion/Accordion";
 import { motion } from "motion/react";
 
@@ -61,8 +61,12 @@ export default function ChatMessages() {
                 />
               </div>
             )}
-            <ChatBalloon
-              message={{ content: message.content, role: message.role }}
+            <MemoChatBalloon
+              message={{
+                content: message.content,
+                role: message.role,
+                id: message.id,
+              }}
             />
           </motion.div>
         ))
@@ -76,7 +80,7 @@ export default function ChatMessages() {
       {error?.message && (
         <div className="mt-2">
           <ChatBalloon
-            message={{ content: error?.message, role: "system" }}
+            message={{ content: error?.message, role: "system", id: "error" }}
             error={true}
           />
         </div>

@@ -12,12 +12,13 @@ type PropsType = ComponentProps<"figure"> & {
   message: {
     role: RoleType;
     content: string;
+    id: string;
   };
   error?: boolean;
 };
 
 export default function ChatBalloon({ message, error }: PropsType) {
-  console.log("Renderizei ChatBalloon");
+  console.log("Renderizei ChatBalloon da mensagem", message.id);
   const variants = tv({
     base: "text-cocoa",
     variants: {
@@ -48,3 +49,10 @@ export default function ChatBalloon({ message, error }: PropsType) {
     </figure>
   );
 }
+
+export const MemoChatBalloon = memo(ChatBalloon, (prevProps, nextProps) => {
+  return (
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.message.content === nextProps.message.content
+  );
+});

@@ -19,25 +19,28 @@ A abordagem será dividida em três fases: diagnóstico, implementação da corr
 O objetivo desta fase é identificar o ponto exato da falha no fluxo de dados do frontend.
 
 **Passo 1.1: Analisar o Componente de Envio de Mensagem (`PromptForm.tsx`)**
+
 - **O que fazer:** Inspecionar o código da função que lida com o envio do formulário (provavelmente `handleSubmit` ou uma função similar).
 - **O que procurar:**
-    - Como a requisição `POST` para `/api/chat` é feita.
-    - O que acontece no `callback` de sucesso da requisição (`.then()` ou `await`).
-    - **Ponto Crítico:** Verificar se existe alguma lógica para notificar outros componentes de que os dados foram atualizados. Especificamente, procurar por chamadas como `mutate()` (típico do SWR) ou `queryClient.invalidateQueries()` (típico do React Query). A ausência dessa chamada é a causa mais provável do problema.
+  - Como a requisição `POST` para `/api/chat` é feita.
+  - O que acontece no `callback` de sucesso da requisição (`.then()` ou `await`).
+  - **Ponto Crítico:** Verificar se existe alguma lógica para notificar outros componentes de que os dados foram atualizados. Especificamente, procurar por chamadas como `mutate()` (típico do SWR) ou `queryClient.invalidateQueries()` (típico do React Query). A ausência dessa chamada é a causa mais provável do problema.
 
 **Passo 1.2: Analisar o Hook de Busca de Mensagens (`useChatMessages.ts` e `getChatMessages.ts`)**
+
 - **O que fazer:** Entender como as mensagens do chat são buscadas e disponibilizadas para os componentes.
 - **O que procurar:**
-    - Qual biblioteca de data-fetching está sendo usada (SWR, React Query, etc.).
-    - A chave de cache (`queryKey`) usada para armazenar os dados do chat. Ela provavelmente inclui o `chatId`.
-    - As opções de configuração do hook, como `revalidateOnFocus`, `staleTime`, etc., para entender o comportamento do cache.
+  - Qual biblioteca de data-fetching está sendo usada (SWR, React Query, etc.).
+  - A chave de cache (`queryKey`) usada para armazenar os dados do chat. Ela provavelmente inclui o `chatId`.
+  - As opções de configuração do hook, como `revalidateOnFocus`, `staleTime`, etc., para entender o comportamento do cache.
 
 **Passo 1.3: Analisar o Contêiner de Mensagens (`MessagesContainer.tsx`)**
+
 - **O que fazer:** Verificar como os dados do hook são consumidos e renderizados.
 - **O que procurar:**
-    - Como o hook `useChatMessages` é chamado.
-    - Se há alguma lógica condicional que possa impedir a renderização da lista de mensagens.
-    - Inspecionar o loop de renderização (ex: `.map()`) no componente `ChatMessages.tsx` para garantir que as `key`s utilizadas são únicas e estáveis (ex: `message.id`), pois `key`s instáveis podem causar problemas de renderização no React.
+  - Como o hook `useChatMessages` é chamado.
+  - Se há alguma lógica condicional que possa impedir a renderização da lista de mensagens.
+  - Inspecionar o loop de renderização (ex: `.map()`) no componente `ChatMessages.tsx` para garantir que as `key`s utilizadas são únicas e estáveis (ex: `message.id`), pois `key`s instáveis podem causar problemas de renderização no React.
 
 ---
 
@@ -55,16 +58,19 @@ O hook `useChatMessages` precisa expor a função `mutate`.
 
 ```typescript
 // Em: src/hooks/useChatMessages.ts
-import useSWR from 'swr';
+import useSWR from "swr";
 // ...
 export const useChatMessages = (chatId: string) => {
-  const { data, error, isLoading, mutate } = useSWR(`/api/chat/${chatId}`, fetcher);
+  const { data, error, isLoading, mutate } = useSWR(
+    `/api/chat/${chatId}`,
+    fetcher,
+  );
   // ...
   return { messages: data, error, isLoading, mutate }; // Expor mutate
 };
 
 // Em: src/components/csr/PromptForm/PromptForm.tsx
-import { useChatMessages } from '@/hooks/useChatMessages';
+import { useChatMessages } from "@/hooks/useChatMessages";
 
 // ... dentro do componente
 const { mutate } = useChatMessages(chatId);
@@ -74,8 +80,8 @@ const handleSubmit = async (event: React.FormEvent) => {
   // ... (lógica para pegar o input do usuário)
 
   // Envia a mensagem para a API
-  const response = await fetch('/api/chat', {
-    method: 'POST',
+  const response = await fetch("/api/chat", {
+    method: "POST",
     // ... headers e body
   });
 
@@ -96,30 +102,31 @@ const handleSubmit = async (event: React.FormEvent) => {
 
 ```typescript
 // Em: src/components/csr/PromptForm/PromptForm.tsx
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 // ... dentro do componente
 const queryClient = useQueryClient();
 
 const sendMessageMutation = useMutation({
-  mutationFn: (newMessage: any) => fetch('/api/chat', {
-    method: 'POST',
-    body: JSON.stringify(newMessage),
-    headers: { 'Content-Type': 'application/json' },
-  }),
+  mutationFn: (newMessage: any) =>
+    fetch("/api/chat", {
+      method: "POST",
+      body: JSON.stringify(newMessage),
+      headers: { "Content-Type": "application/json" },
+    }),
   onSuccess: () => {
     // **A CORREÇÃO:** Invalida a query das mensagens do chat, forçando um re-fetch.
-    queryClient.invalidateQueries({ queryKey: ['chatMessages', chatId] });
+    queryClient.invalidateQueries({ queryKey: ["chatMessages", chatId] });
   },
   onError: (error) => {
     // Lidar com erros
-  }
+  },
 });
 
 const handleSubmit = async (event: React.FormEvent) => {
   event.preventDefault();
   const userInput = // ...
-  sendMessageMutation.mutate({ text: userInput, chatId });
+    sendMessageMutation.mutate({ text: userInput, chatId });
   // ... (limpar input)
 };
 ```
@@ -131,11 +138,13 @@ const handleSubmit = async (event: React.FormEvent) => {
 Após aplicar a correção, é crucial verificar se o problema foi resolvido e se nenhum novo bug foi introduzido.
 
 **Passo 3.1: Teste de Resolução**
+
 - Iniciar um novo chat.
 - Enviar múltiplas mensagens (5 ou mais) em sequência.
 - **Critério de Sucesso:** Todas as mensagens (do usuário e da IA) devem aparecer na interface em tempo real, sem "fantasmas".
 
 **Passo 3.2: Teste de Regressão**
+
 - Abrir um chat antigo.
 - **Critério de Sucesso:** O histórico de mensagens deve carregar corretamente.
 - Enviar uma nova mensagem em um chat antigo.

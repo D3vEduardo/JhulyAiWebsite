@@ -30,7 +30,7 @@ interface ChatInput {
   onChange: (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLTextAreaElement>,
   ) => void;
 }
 
@@ -41,7 +41,7 @@ interface ChatActions {
           preventDefault?: (() => void) | undefined;
         }
       | undefined,
-    chatRequestOptions?: ChatRequestOptions | undefined
+    chatRequestOptions?: ChatRequestOptions | undefined,
   ) => void;
   stop: () => void;
   addToolResult: ({
@@ -52,7 +52,7 @@ interface ChatActions {
     result: unknown;
   }) => void;
   setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[])
+    messages: Message[] | ((messages: Message[]) => Message[]),
   ) => void;
 }
 
@@ -87,26 +87,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         await queryClient.invalidateQueries({ queryKey: ["chats"] });
       }
     },
-    [isNewChat, queryClient]
+    [isNewChat, queryClient],
   );
 
-  const onFinish = useCallback(
-    (message: Message) => {
-      const finalChatId = isNewChat ? newChatIdRef.current : chatId;
-      console.log("Final chatId onFinish:", finalChatId);
-      if (!finalChatId) {
-        alert("Final chat não existe!");
-        return;
-      }
+  const onFinish = useCallback(() => {
+    const finalChatId = isNewChat ? newChatIdRef.current : chatId;
+    console.log("Final chatId onFinish:", finalChatId);
+    if (!finalChatId) {
+      alert("Final chat não existe!");
+      return;
+    }
 
-      queryClient.invalidateQueries({
-        queryKey: ["chat", `chat_${finalChatId}`],
-      });
+    queryClient.invalidateQueries({
+      queryKey: ["chat", `chat_${finalChatId}`],
+    });
 
-      setNavigateToChatId(finalChatId);
-    },
-    [isNewChat, chatId, queryClient]
-  );
+    setNavigateToChatId(finalChatId);
+  }, [isNewChat, chatId, queryClient]);
 
   const chat = useChat({
     onResponse,
@@ -137,14 +134,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (chatMessagesQuery.data) {
       chat.setMessages(chatMessagesQuery.data);
     }
-  }, [chatMessagesQuery.data, chat.setMessages]);
-
-  // useEffect(() => {
-  //   if (pathname === "/chat/new" && chat.status !== "streaming") {
-  //     newChatIdRef.current = null;
-  //     chat.setMessages([]);
-  //   }
-  // }, [isNewChat, chat, pathname]);
+  }, [chatMessagesQuery.data, chat]);
 
   const chatState = useMemo(
     () => ({
@@ -162,7 +152,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       chat.messages,
       chat.status,
       chat.error,
-    ]
+    ],
   );
 
   const chatActions = useMemo(
@@ -172,7 +162,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       addToolResult: chat.addToolResult,
       setMessages: chat.setMessages,
     }),
-    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
+    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages],
   );
 
   const chatInput = {

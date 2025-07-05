@@ -3,7 +3,7 @@ import { Message as PrismaMessage } from "@prisma/client";
 
 export function ConvertMessageOfDatabaseToAiModel(messages: PrismaMessage[]) {
   const organizedMessages = messages.sort(
-    (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
   const formatedMessages = [];
 

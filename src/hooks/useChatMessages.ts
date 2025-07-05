@@ -11,7 +11,7 @@ export function useChatMessages() {
   useEffect(() => {
     console.log(`Invalidating chat ${chatId} messages`);
     queryClient.invalidateQueries({ queryKey: ["chat", `chat_${chatId}`] });
-  }, [chatId]);
+  }, [chatId, queryClient]);
 
   return useQuery({
     queryKey: ["chat", `chat_${chatId}`],

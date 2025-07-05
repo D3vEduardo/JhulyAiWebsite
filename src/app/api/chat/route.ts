@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
         },
         {
           status: 400,
-        }
+        },
       );
     }
 
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     if (lastMessage.role !== "user") {
       return NextResponse.json(
         { error: "Last message must be from user" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const prompt = lastMessage.content;
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       log("User not authenticated");
       return NextResponse.json(
         { error: "Unauthorized! (User not authenticated)" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -189,13 +189,13 @@ export async function POST(req: NextRequest) {
         { error: error.message },
         {
           status: error.message.toLowerCase().includes("not found") ? 404 : 500,
-        }
+        },
       );
     }
 
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

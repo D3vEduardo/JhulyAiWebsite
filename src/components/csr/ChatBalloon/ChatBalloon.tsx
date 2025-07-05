@@ -16,48 +16,35 @@ type PropsType = ComponentProps<"figure"> & {
   error?: boolean;
 };
 
-const ChatBalloon = memo(
-  ({ message, error }: PropsType) => {
-    console.log("Renderizei ChatBalloon");
-    const variants = tv({
-      base: "text-cocoa",
-      variants: {
-        color: {
-          user: "bg-apricot px-4 py-6 rounded-2xl",
-          assistant: "",
-          error: "bg-red-300 px-4 py-6 rounded-2xl text-red-900",
-        },
+export default function ChatBalloon({ message, error }: PropsType) {
+  console.log("Renderizei ChatBalloon");
+  const variants = tv({
+    base: "text-cocoa",
+    variants: {
+      color: {
+        user: "bg-apricot px-4 py-6 rounded-2xl",
+        assistant: "",
+        error: "bg-red-300 px-4 py-6 rounded-2xl text-red-900",
       },
-    });
+    },
+  });
 
-    ChatBalloon.displayName = "ChatBalloon";
+  const roles = ["user", "assistant", "error"] as const;
+  const color: VariantsType = error
+    ? "error"
+    : roles.includes(message.role as VariantsType)
+      ? (message.role as "user" | "assistant")
+      : "assistant";
 
-    const roles = ["user", "assistant", "error"] as const;
-    const color: VariantsType = error
-      ? "error"
-      : roles.includes(message.role as VariantsType)
-        ? (message.role as "user" | "assistant")
-        : "assistant";
+  const selectedVariant = {
+    color,
+  };
 
-    const selectedVariant = {
-      color,
-    };
-
-    return (
-      <figure className={variants(selectedVariant)}>
-        <Markdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>
-          {message.content}
-        </Markdown>
-      </figure>
-    );
-  },
-  (prevProps, nextProps) => {
-    return (
-      prevProps.message.content === nextProps.message.content &&
-      prevProps.message.role === nextProps.message.role &&
-      prevProps.error === nextProps.error
-    );
-  },
-);
-
-export default ChatBalloon;
+  return (
+    <figure className={variants(selectedVariant)}>
+      <Markdown rehypePlugins={[rehypeHighlight]} remarkPlugins={[remarkGfm]}>
+        {message.content}
+      </Markdown>
+    </figure>
+  );
+}

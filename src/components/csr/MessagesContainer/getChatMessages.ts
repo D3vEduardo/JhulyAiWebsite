@@ -16,7 +16,11 @@ export async function getChatMessages(chatId: string) {
     include: {
       chats: {
         include: {
-          messages: true,
+          messages: {
+            orderBy: {
+              createdAt: "asc",
+            },
+          },
         },
       },
     },

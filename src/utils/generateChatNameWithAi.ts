@@ -1,4 +1,5 @@
-import { openrouter } from "@lib/openrouter/client";
+// import { openrouter } from "@lib/openrouter/client";
+import { google } from "@lib/google/client";
 import { generateObject } from "ai";
 import { z } from "zod";
 
@@ -23,7 +24,8 @@ Title:
 `;
 
   const aiResponse = await generateObject({
-    model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
+    // model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
+    model: google("gemini-2.0-flash-lite"),
     prompt,
     maxTokens: 30,
     schema: z.object({

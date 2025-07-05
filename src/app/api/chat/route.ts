@@ -4,13 +4,22 @@ import { prisma } from "@lib/prisma/client";
 import { auth } from "@lib/nextAuth/auth";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
-import { openrouter } from "@/lib/openrouter/client";
+// import { openrouter } from "@/lib/openrouter/client";
 import { GetSystemPrompt } from "./system-prompt";
+import { debug } from "debug";
 import { z } from "zod";
-// import { google } from "@lib/google/client";
+import { google } from "@lib/google/client";
+
+const log = debug("api:chat");
+
+const messageSchema = z.object({
+  role: z.enum(["user", "assistant", "system", "tool"]),
+  content: z.string(),
+  tool_calls: z.array(z.any()).optional(),
+});
 
 const bodySchema = z.object({
-  prompt: z.string({ message: "Prompt is required!" }),
+  messages: z.array(messageSchema),
   chatId: z.string({ message: "Chat ID is required!" }),
   reasoning: z
     .boolean({
@@ -22,29 +31,38 @@ const bodySchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    log("Initiating ai flow...");
     const body = await req.json();
-    // const { prompt, chatId, reasoning } = body;
-
     const parseResult = bodySchema.safeParse(body);
 
     if (!parseResult.success) {
+      log("Invalid request body:", body);
       return NextResponse.json(
         {
           error: parseResult.error.message,
         },
         {
           status: 400,
-        },
+        }
       );
     }
 
-    const { chatId, prompt } = parseResult.data;
+    const { chatId, messages } = parseResult.data;
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role !== "user") {
+      return NextResponse.json(
+        { error: "Last message must be from user" },
+        { status: 400 }
+      );
+    }
+    const prompt = lastMessage.content;
 
     const session = await auth();
     if (!session?.user?.id) {
+      log("User not authenticated");
       return NextResponse.json(
         { error: "Unauthorized! (User not authenticated)" },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -64,7 +82,7 @@ export async function POST(req: NextRequest) {
       chatId !== "new" && chatId !== "null" && chatId !== "undefined";
 
     if (isExistingChat) {
-      console.log("Processing existing chat with ID:", chatId);
+      log("Processing existing chat with ID:", chatId);
 
       const existingChat = await prisma.chat.findFirst({
         where: {
@@ -73,7 +91,7 @@ export async function POST(req: NextRequest) {
         },
         include: {
           messages: {
-            orderBy: { id: "asc" },
+            orderBy: { createdAt: "asc" },
           },
         },
       });
@@ -93,7 +111,7 @@ export async function POST(req: NextRequest) {
         where: { id: existingChat.id },
         include: {
           messages: {
-            orderBy: { id: "asc" },
+            orderBy: { createdAt: "asc" },
           },
         },
       });
@@ -102,7 +120,7 @@ export async function POST(req: NextRequest) {
         throw new Error("Chat not found after update");
       }
     } else {
-      console.log(`Creating new chat (chatId:"${chatId}")`);
+      log(`Creating new chat (chatId:"${chatId}")`);
 
       // Criar novo chat
       chat = await prisma.chat.create({
@@ -119,36 +137,37 @@ export async function POST(req: NextRequest) {
         },
         include: {
           messages: {
-            orderBy: { id: "asc" },
+            orderBy: { createdAt: "asc" },
           },
         },
       });
 
-      console.log("New chat created with ID:", chat.id);
+      log("New chat created with ID:", chat.id);
     }
 
     const aiMessages = ConvertMessageOfDatabaseToAiModel(chat.messages);
-
+    log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
     const result = streamText({
       // model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
       // model: openrouter("deepseek/deepseek-r1-0528:free"),
-      model: openrouter("openrouter/cypher-alpha:free"),
-      // model: google("gemini-2.0-flash"),
+      // model: openrouter("openrouter/cypher-alpha:free"),
+      model: google("gemini-2.0-flash"),
       messages: aiMessages,
       system: GetSystemPrompt("pt-BR"),
       onFinish: async (completion) => {
+        log("AI response received:", completion.text);
         try {
           await prisma.message.create({
             data: {
               content: completion.text,
-              reasoning: completion.reasoning,
+              reasoning: JSON.stringify(completion.reasoning),
               role: "assistant",
               chatId: chat.id,
             },
           });
-          console.log("AI response saved successfully for chat:", chat.id);
+          log("AI response saved successfully for chat:", chat.id);
         } catch (error) {
-          console.error("Error saving AI response:", error);
+          log("Error saving AI response:", error);
         }
       },
     });
@@ -161,8 +180,8 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Error in POST handler:", error);
-    console.log("DEBUG - Chat creation flow aborted");
+    log("Error in POST /api/chat:", error);
+    log("Chat creation flow aborted");
 
     // Retornar erro mais específico
     if (error instanceof Error) {
@@ -170,13 +189,13 @@ export async function POST(req: NextRequest) {
         { error: error.message },
         {
           status: error.message.toLowerCase().includes("not found") ? 404 : 500,
-        },
+        }
       );
     }
 
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

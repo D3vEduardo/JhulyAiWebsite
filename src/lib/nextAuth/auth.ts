@@ -3,6 +3,8 @@ import Discord from "next-auth/providers/discord";
 import { env } from "@env";
 import GitHub from "next-auth/providers/github";
 import { prisma } from "../prisma/client";
+import { debug } from "debug";
+const log = debug("api:auth");
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
@@ -56,7 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     session({ session, token }) {
-      console.log("Auth Session - Token:", token);
+      log("Auth Session - Token:", token);
       if (token.id && token.name) {
         session.user.id = token.id as string;
         session.user.name = token.name as string;

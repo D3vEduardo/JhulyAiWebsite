@@ -32,7 +32,9 @@ export default function PromptForm() {
           },
         });
       }}
-      className={`absolute bg-peach left-1/2 bottom-6 -translate-x-1/2 w-95/100 overflow-hidden
+      layout={true}
+      transition={{ type: "spring", stiffness: 80 }}
+      className={`absolute bg-peach left-1/2 bottom-[4vh] -translate-x-1/2 w-95/100 overflow-hidden
                 py-2 px-2 rounded-lg border-2 border-almond z-10 flex justify-between gap-x-2
                 max-w-[900px]`}
     >

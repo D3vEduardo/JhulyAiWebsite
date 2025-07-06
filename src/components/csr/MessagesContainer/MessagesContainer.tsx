@@ -2,29 +2,30 @@
 
 import { useAside } from "@store/asideMenu";
 import { motion } from "motion/react";
+import { useWindowResize } from "@hooks/useWindowSize";
 import ChatMessages from "../ChatMessages/ChatMessages";
 import PromptForm from "../PromptForm/PromptForm";
 import ChatNavBar from "../ChatNavbar";
-import { useWindowResize } from "@hooks/useWindowSize";
+import { useIsClient } from "@hooks/useIsClient";
 
 export default function MessageContainer() {
   const { asideIsOpen } = useAside();
   const innerWidth = useWindowResize();
+  const isClient = useIsClient();
 
   const shouldShowSidebar = asideIsOpen && innerWidth > 768;
+
   const containerStyle = {
-    marginLeft: shouldShowSidebar ? "17.5rem" : "0",
-    width: shouldShowSidebar ? `${innerWidth - 280}px` : "100%",
+    marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
+    width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
   };
 
   return (
     <motion.div
-      animate={containerStyle}
-      transition={{
-        duration: 0.5,
-        type: "spring",
-      }}
-      className="w-screen h-screen relative max-h-dvh !overflow-hidden px-[2%] pt-2"
+      style={containerStyle}
+      layout={true}
+      transition={{ type: "spring", stiffness: 80 }}
+      className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative"
     >
       <ChatNavBar />
       <ChatMessages />

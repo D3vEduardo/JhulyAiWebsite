@@ -16,7 +16,13 @@ export default function AsideMenu() {
         x: asideIsOpen ? 0 : "-100%",
         opacity: asideIsOpen ? 1 : 0,
       }}
-      className="h-[96vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-lg p-2 z-50
+      transition={{
+        duration: 0.5,
+        type: "spring",
+        stiffness: 150,
+        damping: 10,
+      }}
+      className="h-[94vh] max-h-[94vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-lg p-2 z-50
         border-2 border-almond absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-5
         top-1/2 -translate-y-1/2 bg-peach"
     >

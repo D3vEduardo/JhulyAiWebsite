@@ -107,18 +107,7 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      chat = await prisma.chat.findUnique({
-        where: { id: existingChat.id },
-        include: {
-          messages: {
-            orderBy: { createdAt: "asc" },
-          },
-        },
-      });
-
-      if (!chat) {
-        throw new Error("Chat not found after update");
-      }
+      chat = existingChat;
     } else {
       log(`Creating new chat (chatId:"${chatId}")`);
 

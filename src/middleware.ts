@@ -7,7 +7,7 @@ export async function middleware(req: Request) {
   const isAuthenticated = !!session?.user;
 
   if (url.pathname.startsWith("/chat/") && !isAuthenticated) {
-    return NextResponse.redirect(new URL("/login", url));
+    return NextResponse.redirect(new URL("/overview", url));
   }
 
   if ((url.pathname === "/login" || url.pathname === "/") && isAuthenticated) {

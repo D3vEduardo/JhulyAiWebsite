@@ -2,7 +2,7 @@
 
 import ZoopText from "@components/csr/ZoopText";
 import Button from "@components/csr/Button";
-import HomeNavbar from "@components/csr/HomeNavbar";
+import HomeNavbar from "@/components/csr/OverviewNavbar";
 import { Icon } from "@iconify-icon/react";
 import { useRouter } from "next/navigation";
 

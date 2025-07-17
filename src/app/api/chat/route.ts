@@ -1,16 +1,17 @@
 import { streamText } from "ai";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@lib/prisma/client";
-import { auth } from "@lib/nextAuth/auth";
+import { auth } from "@lib/betterAuth/auth";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
-// import { openrouter } from "@/lib/openrouter/client";
+import { openrouter } from "@/lib/openrouter/client";
 import { GetSystemPrompt } from "./system-prompt";
 import { debug } from "debug";
 import { z } from "zod";
-import { google } from "@lib/google/client";
+import { headers } from "next/headers";
+// import { google } from "@lib/google/client";
 
-const log = debug("api:chat");
+const log = debug("app:api:chat");
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant", "system", "tool"]),
@@ -30,6 +31,7 @@ const bodySchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
   try {
     log("Initiating ai flow...");
     const body = await req.json();
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { chatId, messages } = parseResult.data;
+    const { chatId, messages, reasoning } = parseResult.data;
     const lastMessage = messages[messages.length - 1];
     if (lastMessage.role !== "user") {
       return NextResponse.json(
@@ -57,7 +59,9 @@ export async function POST(req: NextRequest) {
     }
     const prompt = lastMessage.content;
 
-    const session = await auth();
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
     if (!session?.user?.id) {
       log("User not authenticated");
       return NextResponse.json(
@@ -137,10 +141,16 @@ export async function POST(req: NextRequest) {
     const aiMessages = ConvertMessageOfDatabaseToAiModel(chat.messages);
     log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
     const result = streamText({
-      // model: openrouter("deepseek/deepseek-chat-v3-0324:free"),
+      model: openrouter("deepseek/deepseek-chat-v3-0324:free", {
+        reasoning: reasoning
+          ? {
+              effort: "medium",
+            }
+          : undefined,
+      }),
       // model: openrouter("deepseek/deepseek-r1-0528:free"),
       // model: openrouter("openrouter/cypher-alpha:free"),
-      model: google("gemini-2.0-flash"),
+      // model: google("gemini-2.0-flash"),
       messages: aiMessages,
       system: GetSystemPrompt("pt-BR"),
       onFinish: async (completion) => {

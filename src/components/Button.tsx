@@ -11,7 +11,13 @@ interface PropsType extends MotionButtonProps {
   children: ReactNode;
   variant?: {
     size?: "sm" | "md" | "lg";
-    color?: "danger" | "primary" | "secondary" | "tertiary" | "quarternary";
+    color?:
+      | "danger"
+      | "primary"
+      | "secondary"
+      | "tertiary"
+      | "quarternary"
+      | "quinary";
     hoverAnimationSize?: number;
     tapAnimationSize?: number;
   };
@@ -27,12 +33,12 @@ export default function Button({
 
   const button = tv({
     base: `font-medium flex items-center overflow-hidden
-        justify-center text-center rounded-lg custom-cursor-hover`,
+        justify-center text-center rounded-2xl custom-cursor-hover`,
     variants: {
       size: {
-        sm: "px-3 py-1 text-xl",
-        md: "px-4 py-2 text-2xl",
-        lg: "px-6 py-3 text-3xl",
+        sm: "p-2 text-xl",
+        md: "px-2 py-4 text-2xl",
+        lg: "py-4 px-6 text-3xl",
       },
       color: {
         danger: "bg-red-400 text-vanilla",
@@ -40,6 +46,7 @@ export default function Button({
         secondary: "bg-strawberry text-cocoa",
         tertiary: "bg-watermelon text-cocoa",
         quarternary: "bg-apricot text-cocoa",
+        quinary: "border-3 border-cinnamon/30 rounded-xl shadow-md bg-vanilla",
       },
     },
   });

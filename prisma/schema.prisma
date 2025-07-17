@@ -8,34 +8,30 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @unique @default(uuid())
-  name               String?
-  email              String?
-  socialMediaAccount SocialMediaAccount?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @default(now())
-  messages           Message[]
-  chats              Chat[]
-}
+  id            String    @id @unique @default(uuid())
+  name          String?
+  email         String?
+  emailVerified Boolean   @default(false)
+  apiKey        ApiKey?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now())
+  messages      Message[]
+  chats         Chat[]
+  image         String?
+  sessions      Session[]
+  accounts      Account[]
 
-model SocialMediaAccount {
-  id                String   @id @unique @default(uuid())
-  providerAccountId String   @unique
-  provider          String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
-  user              User     @relation(fields: [userId], references: [id])
-  userId            String   @unique
+  @@map("user")
 }
 
 model Message {
   id        String  @id @unique @default(uuid())
-  sender    User?   @relation(fields: [senderId], references: [id])
+  sender    User?   @relation(fields: [senderId], references: [id], onDelete: Cascade)
   senderId  String?
   role      String
   reasoning String?
   content   String
-  chat      Chat    @relation(fields: [chatId], references: [id])
+  chat      Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId    String
 
   createdAt DateTime @default(now())
@@ -45,10 +41,67 @@ model Message {
 model Chat {
   id       String    @id @unique @default(uuid())
   name     String
-  owner    User      @relation(fields: [ownerId], references: [id])
+  owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId  String
   messages Message[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model ApiKey {
+  id        String   @id @unique @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key       String
+  provider  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@map("api_key")
 }

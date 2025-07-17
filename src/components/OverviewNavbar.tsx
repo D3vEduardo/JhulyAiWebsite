@@ -2,7 +2,7 @@
 import Image from "next/image";
 import JhulyNoBg from "@public/avatars/avatar_nobg.png";
 import { Icon } from "@iconify-icon/react";
-import { useSession } from "@/lib/nextAuth/auth-client";
+import { authClient } from "@/lib/betterAuth/auth-client";
 import { HTMLAttributeAnchorTarget, ReactNode } from "react";
 import Link, { LinkProps } from "next/link";
 
@@ -35,12 +35,10 @@ export default function HomeNavbar() {
 }
 
 function LoginOrGoToChatItem() {
-  const { status } = useSession();
+  const { data, isPending } = authClient.useSession();
   return (
-    <NavbarItem
-      href={status === "loading" || "unauthenticated" ? "login" : "/chat/new"}
-    >
-      {status === "loading" || status === "unauthenticated" ? (
+    <NavbarItem href={isPending || !data?.user ? "login" : "/chat/new"}>
+      {isPending || !data?.user ? (
         <>
           <Icon icon="solar:login-2-bold-duotone" width="24" height="24" />{" "}
           <p></p>Login

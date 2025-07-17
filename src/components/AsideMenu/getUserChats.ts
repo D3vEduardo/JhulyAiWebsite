@@ -1,10 +1,13 @@
 "use server";
 
-import { auth } from "@/lib/nextAuth/auth";
+import { auth } from "@/lib/betterAuth/auth";
 import { prisma } from "@/lib/prisma/client";
+import { headers } from "next/headers";
 
 export async function getUserChats() {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
   if (!session?.user?.id) {
     throw new Error("Usuário não autenticado");
   }

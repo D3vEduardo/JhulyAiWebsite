@@ -69,7 +69,7 @@ export const useChatMessages = (chatId: string) => {
   return { messages: data, error, isLoading, mutate }; // Expor mutate
 };
 
-// Em: src/components/csr/PromptForm/PromptForm.tsx
+// Em: src/components/PromptForm/PromptForm.tsx
 import { useChatMessages } from "@/hooks/useChatMessages";
 
 // ... dentro do componente
@@ -101,7 +101,7 @@ const handleSubmit = async (event: React.FormEvent) => {
 **Exemplo de Código (se estiver usando TanStack Query/React Query):**
 
 ```typescript
-// Em: src/components/csr/PromptForm/PromptForm.tsx
+// Em: src/components/PromptForm/PromptForm.tsx
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 
 // ... dentro do componente

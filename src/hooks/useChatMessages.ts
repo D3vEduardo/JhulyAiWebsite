@@ -1,4 +1,4 @@
-import { getChatMessages } from "@/components/csr/MessagesContainer/getChatMessages";
+import { getChatMessages } from "@/components/MessagesContainer/getChatMessages";
 import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";

@@ -70,7 +70,7 @@ graph TD
 
 ### Frontend
 
-1. **Virtualização de Lista** (src/component/csr/ChatMessages/ChatMessages.tsx):
+1. **Virtualização de Lista** (src/component/ChatMessages/ChatMessages.tsx):
    - Implementar `react-virtuoso`
    - Renderizar apenas itens visíveis
 
@@ -87,7 +87,7 @@ graph TD
    const MemoizedBalloon = React.memo(ChatBalloon);
    ```
 
-3. **Otimizar Markdown** (src/component/csr/ChatBalloon/ChatBalloon.tsx):
+3. **Otimizar Markdown** (src/component/ChatBalloon/ChatBalloon.tsx):
    - Substituir `react-markdown` por biblioteca mais leve
    - Carregar syntax highlighting apenas quando visível
    ```tsx

@@ -10,6 +10,10 @@ const {
   GITHUB_CLIENT_SECRET,
   OPENROUTER_API_KEY,
   GOOGLE_API_KEY,
+  DATABASE_URL,
+  BETTER_AUTH_SECRET,
+  BETTER_AUTH_URL,
+  NEXT_PUBLIC_BETTER_AUTH_URL,
 } = process.env;
 
 const envSchema = z.object({
@@ -28,6 +32,13 @@ const envSchema = z.object({
     .min(1, "DGITHUB_CLIENT_SECRET é obrigatório"),
   OPENROUTER_API_KEY: z.string().min(1, "OPENROUTER_API_KEY é obrigatório"),
   GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY é obrigatório"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatório"),
+  BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET é obrigatório"),
+  BETTER_AUTH_URL: z.string().url("BETTER_AUTH_URL deve ser uma URL válida"),
+  NEXT_PUBLIC_BETTER_AUTH_URL: z
+    .string()
+    .url("NEXT_PUBLIC_BETTER_AUTH_URL deve ser uma URL válida")
+    .optional(),
 });
 
 const parsed = envSchema.safeParse({
@@ -40,6 +51,10 @@ const parsed = envSchema.safeParse({
   GITHUB_CLIENT_SECRET,
   OPENROUTER_API_KEY,
   GOOGLE_API_KEY,
+  DATABASE_URL,
+  BETTER_AUTH_SECRET,
+  BETTER_AUTH_URL,
+  NEXT_PUBLIC_BETTER_AUTH_URL,
 });
 
 if (!parsed.success) {

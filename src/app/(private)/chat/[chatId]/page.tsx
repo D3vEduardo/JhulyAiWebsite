@@ -1,7 +1,7 @@
 "use client";
 
-import AsideMenu from "@components/csr/AsideMenu/AsideMenu";
-import MessagesContainer from "@components/csr/MessagesContainer/MessagesContainer";
+import AsideMenu from "@components/AsideMenu/AsideMenu";
+import MessagesContainer from "@components/MessagesContainer/MessagesContainer";
 import { Suspense } from "react";
 
 export default function ClientChat() {

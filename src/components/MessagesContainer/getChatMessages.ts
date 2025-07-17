@@ -1,11 +1,18 @@
 "use server";
 
 import { prisma } from "@/lib/prisma/client";
-import { auth } from "@lib/nextAuth/auth";
+import { auth } from "@/lib/betterAuth/auth";
+import { headers } from "next/headers";
+import { debug } from "debug";
+
+const log = debug("app:messages:getChatMessages");
 
 export async function getChatMessages(chatId: string) {
-  console.log("Pegando mensagens do chat:", chatId);
-  const session = await auth();
+  log("Pegando mensagens do chat:", chatId);
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  log("Sessão do usuário:", session);
   if (!session || !session.user) {
     throw new Error("User not authenticated");
   }

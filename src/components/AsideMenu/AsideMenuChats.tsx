@@ -21,7 +21,13 @@ export default function AsideMenuChats() {
   >({
     queryKey: ["chats"],
     queryFn: async () => {
-      const userChats = await getUserChats();
+      const userChats: {
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        ownerId: string;
+      }[] = await getUserChats();
       return userChats || [];
     },
     staleTime: 60 * 1000,

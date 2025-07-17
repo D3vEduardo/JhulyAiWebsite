@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Itim } from "next/font/google";
 import "../globals.css";
-import { SessionProvider } from "next-auth/react";
-import Providers from "@/components/csr/Providers";
+import Providers from "@/components/Providers";
 
 const ItimFont = Itim({
   variable: "--font-itim",
@@ -25,9 +24,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${ItimFont.variable} antialiased w-screen h-dvh`}>
-        <SessionProvider>
-          <Providers>{children}</Providers>
-        </SessionProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

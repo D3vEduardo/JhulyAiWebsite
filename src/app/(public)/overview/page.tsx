@@ -1,8 +1,8 @@
 "use client";
 
-import ZoopText from "@components/csr/ZoopText";
-import Button from "@components/csr/Button";
-import HomeNavbar from "@/components/csr/OverviewNavbar";
+import ZoopText from "@components/ZoopText";
+import Button from "@components/Button";
+import HomeNavbar from "@/components/OverviewNavbar";
 import { Icon } from "@iconify-icon/react";
 import { useRouter } from "next/navigation";
 
@@ -14,17 +14,15 @@ export default function Home() {
       <HomeNavbar />
       <header className="w-screen h-full p-3 md:p-10 flex flex-col items-center justify-center gap-4">
         <div className="flex flex-col items-center justify-center w-full md:w-8/10 lg:w-73/100 text-center">
-          <div className="w-screen flex flex-col items-center justify-center g-0">
-            <h1 className="text-2xl md:text-[42px] lg:text-6xl text-cocoa overflow-hidden pb-0 md:pb-1.5">
-              Faça perguntas. Ganhe carinho.
-            </h1>
-            <div
-              className="text-2xl w-full md:text-4xl lg:text-6xl text-cocoa
-              flex items-center justify-center gap-2.5"
+          <section className="w-auto flex flex-col items-center justify-center g-0">
+            <h1
+              className="text-2xl md:text-[42px] lg:text-6xl text-cocoa
+            overflow-hidden p-1"
             >
-              <span className="overflow-hidden! pb-2">Descubra algo</span>
+              Faça perguntas. Ganhe carinho. Descubra algo
               <ZoopText
-                className="bg-strawberry rounded-xl md:rounded-2xl px-2 lg:mt-2 h-full"
+                className="bg-strawberry rounded-xl md:rounded-2xl
+                px-2 h-full ml-2"
                 texts={[
                   "novo.",
                   "incrível.",
@@ -34,8 +32,8 @@ export default function Home() {
                   "especial.",
                 ]}
               />
-            </div>
-          </div>
+            </h1>
+          </section>
           <p className="text-md md:text-lg lg:text-2xl text-cinnamon w-full lg:w-8/10">
             100% gratuita. Super fácil de usar. É só chamar que a Jhuly AI te
             ajuda com ideias, estudos, textos criativos e até aquele

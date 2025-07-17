@@ -21,7 +21,7 @@ interface ChatState {
   isNewChat: boolean;
   isLoadingMessages: boolean;
   messages: Message[];
-  status: "idle" | "loading" | "streaming" | "error" | "ready";
+  status: "streaming" | "error" | "ready" | "submitted";
   error: Error | undefined;
 }
 
@@ -131,7 +131,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   }, [isNewChat, router, pathname]);
 
   useEffect(() => {
-    if (chatMessagesQuery.data) {
+    if (chatMessagesQuery.data && chat.status !== "streaming") {
       chat.setMessages(chatMessagesQuery.data);
     }
   }, [chatMessagesQuery.data, chat]);
@@ -142,7 +142,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       isNewChat,
       isLoadingMessages: chatMessagesQuery.isLoading,
       messages: chat.messages,
-      status: chat.status as ChatState["status"],
+      status: chat.status,
       error: chat.error,
     }),
     [

@@ -15,9 +15,36 @@
   --color-brick-brown: #86331e;
 }
 
+@layer utilities {
+  .shine-text {
+    background: linear-gradient(
+      90deg,
+      var(--color-cocoa),
+      var(--color-cocoa),
+      var(--color-papaya),
+      var(--color-cocoa),
+      var(--color-cocoa)
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 2s linear infinite;
+  }
+
+  @keyframes shine {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+}
+
 :root {
-  --cursor-normal: url("/cursors/cursor-normal.png") 10 6;
-  --cursor-hover: url("/cursors/cursor-hover.png") 10 6;
+  --cursor-normal: url("/cursors/cursor-normal.cur") 0 0;
+  --cursor-hover: url("/cursors/cursor-pointer.cur") 16 16;
 }
 
 @layer base {

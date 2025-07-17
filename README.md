@@ -90,7 +90,7 @@ A seguir, uma descrição detalhada da estrutura de pastas e arquivos do projeto
 - **`src/app/api/...`**: Contém a lógica do backend. A rota `chat` lida com o streaming de respostas da IA, enquanto a rota `auth` gerencia a autenticação de usuários.
 - **`src/app/(private)` e `src/app/(public)`**: O uso de _Route Groups_ (`(private)` e `(public)`) permite organizar as rotas e aplicar layouts diferentes para seções da aplicação que são públicas ou que exigem login, sem afetar a URL final.
 - **`src/contexts/ChatContext.tsx`**: Componente crucial que utiliza o padrão _Lifting State Up_. Ele mantém o estado do `useChat` (conexão com o stream, mensagens) em um nível superior na árvore de componentes (no layout), evitando que o estado seja perdido durante a navegação entre as páginas de chat.
-- **`src/components/csr/Providers.tsx`**: Um componente wrapper que é um Client Component (`"use client"`). Ele é essencial para inicializar providers que dependem de estado do lado do cliente, como `QueryClientProvider` e `ChatProvider`, resolvendo problemas de renderização entre Server e Client Components no Next.js App Router.
+- **`src/components/Providers.tsx`**: Um componente wrapper que é um Client Component (`"use client"`). Ele é essencial para inicializar providers que dependem de estado do lado do cliente, como `QueryClientProvider` e `ChatProvider`, resolvendo problemas de renderização entre Server e Client Components no Next.js App Router.
 
 ---
 

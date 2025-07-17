@@ -1,10 +1,14 @@
-import { MiddlewareConfig, NextResponse } from "next/server";
-import { auth } from "@lib/nextAuth/auth";
+"use server";
+
+import { NextResponse } from "next/server";
+
+import { getSessionCookie } from "better-auth/cookies";
 
 export async function middleware(req: Request) {
-  const session = await auth();
+  const session = await getSessionCookie(req);
+
   const url = new URL(req.url);
-  const isAuthenticated = !!session?.user;
+  const isAuthenticated = !!session;
 
   if (url.pathname.startsWith("/chat/") && !isAuthenticated) {
     return NextResponse.redirect(new URL("/overview", url));
@@ -23,7 +27,3 @@ export async function middleware(req: Request) {
 
   return NextResponse.next();
 }
-
-export const config: MiddlewareConfig = {
-  matcher: ["/", "/login", "/chat/:path*"],
-};

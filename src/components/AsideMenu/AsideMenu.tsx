@@ -1,5 +1,5 @@
 "use client";
-import Button from "@components/csr/Button";
+import Button from "@components/Button";
 import { motion } from "motion/react";
 import { useAside } from "@store/asideMenu";
 import AsideMenuChats from "./AsideMenuChats";
@@ -58,7 +58,7 @@ export default function AsideMenu() {
           />
           <span
             className="w-full h-6 bg-gradient-to-t
-                        to-transparent from-peach fixed bottom-26"
+                        to-transparent from-peach fixed bottom-26.5"
           />
         </div>
         <AsideMenuFooter />

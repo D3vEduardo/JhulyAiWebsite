@@ -7,7 +7,7 @@ import Image from "next/image";
 import ImageJhulySorrindo from "../../../../public/stickers/jhuly_sorrindo.png";
 import ImageJhulyOi from "../../../../public/stickers/jhuly_oi.png";
 import { twMerge } from "tailwind-merge";
-import { authClient } from "@/lib/betterAuth/auth-client";
+import { authClient } from "@lib/betterAuth/auth-client";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ import Label from "@components/Label";
 
 const LoginFormSchema = z.object({
   email: z.email({
-    message: "Por favor, insira um e-mail.",
+    error: "Por favor, insira um e-mail.",
   }),
 });
 

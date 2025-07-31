@@ -1,4 +1,4 @@
-import { ComponentProps, useEffect, useRef, useState } from "react";
+import { ComponentProps, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { twMerge } from "tailwind-merge";
 
@@ -26,7 +26,7 @@ export default function ZoopText({
     <motion.span
       className={twMerge(
         "inline-grid place-items-center text-center overflow-hidden h-[1em]",
-        className
+        className,
       )}
       style={{
         gridTemplateAreas: "1 / 1",

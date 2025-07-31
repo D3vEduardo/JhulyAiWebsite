@@ -2,7 +2,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { magicLink } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { betterAuth } from "better-auth";
-import { env } from "@/env";
+import { env } from "@env";
 import { prisma } from "../prisma/client";
 import { debug } from "debug";
 

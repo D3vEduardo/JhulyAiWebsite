@@ -1,136 +1,239 @@
-import { streamText } from "ai";
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@lib/prisma/client";
-import { auth } from "@lib/betterAuth/auth";
-import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
-import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
-import { openrouter } from "@/lib/openrouter/client";
-import { GetSystemPrompt } from "./system-prompt";
 import { debug } from "debug";
-import { z } from "zod";
 import { headers } from "next/headers";
-// import { google } from "@lib/google/client";
-
+import z from "zod";
+import { prisma } from "@lib/prisma/client";
+import { validateApiKeyWithCache } from "./validateApiKeyWithCache";
+import { createModelProvider, ModelsType } from "./createModelProvider";
+import { Chat, Message } from "@prisma/client";
+import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
+import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
+import { convertToCoreMessages, streamText } from "ai";
+import { getSystemPrompt } from "./system-prompt";
+import { CompletionResult, saveAssistantMessage } from "./saveAssistantMessage";
+import { StringCompressor } from "@utils/stringCompressor";
+import { getCachedSession } from "@data/auth/getCachedSession";
 const log = debug("app:api:chat");
 
 const messageSchema = z.object({
   role: z.enum(["user", "assistant", "system", "tool"]),
   content: z.string(),
-  tool_calls: z.array(z.any()).optional(),
+  tool_calls: z
+    .array(
+      z.object({
+        id: z.string(),
+        type: z.string(),
+        function: z.object({
+          name: z.string(),
+          arguments: z.string(),
+        }),
+      }),
+    )
+    .optional(),
 });
 
 const bodySchema = z.object({
   messages: z.array(messageSchema),
-  chatId: z.string({ message: "Chat ID is required!" }),
-  reasoning: z
+  chatId: z.string({ error: "Chat ID is required!" }),
+  reasoning: z.coerce
     .boolean({
-      coerce: true,
-      message: "Reasoning must be a boolean value.",
+      error: "Reasoning must be a boolean value.",
     })
     .default(false),
+  model: z.enum(Object.values(ModelsType)).optional().default(ModelsType.BASIC),
 });
 
 export async function POST(req: NextRequest) {
-  await new Promise((resolve) => setTimeout(resolve, 3000));
   try {
-    log("Initiating ai flow...");
-    const body = await req.json();
-    const parseResult = bodySchema.safeParse(body);
+    log("Initiating AI flow...");
+    const [session, body] = await Promise.all([
+      getCachedSession(await headers()),
+      await req.json(),
+    ]);
 
-    if (!parseResult.success) {
+    const bodyParseResult = bodySchema.safeParse(body);
+
+    log("Received body:", body);
+
+    if (!bodyParseResult.success) {
       log("Invalid request body:", body);
       return NextResponse.json(
         {
-          error: parseResult.error.message,
+          error: bodyParseResult.error.message,
         },
-        {
-          status: 400,
-        },
-      );
-    }
-
-    const { chatId, messages, reasoning } = parseResult.data;
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.role !== "user") {
-      return NextResponse.json(
-        { error: "Last message must be from user" },
         { status: 400 },
       );
     }
-    const prompt = lastMessage.content;
 
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    if (!session?.user?.id) {
-      log("User not authenticated");
+    const {
+      chatId,
+      messages,
+      reasoning: reasoningEnabled,
+      model: selectedModel,
+    } = bodyParseResult.data;
+
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage.role !== "user") {
       return NextResponse.json(
-        { error: "Unauthorized! (User not authenticated)" },
+        {
+          error: "Last message must be from user!",
+        },
+        { status: 400 },
+      );
+    }
+
+    const prompt = lastMessage.content.trim();
+
+    if (!session?.user.id) {
+      log("User not authenticated! Session:", session);
+
+      return NextResponse.json(
+        {
+          error: "Unauthorized! (User not authenticaded)",
+        },
         { status: 401 },
       );
     }
 
-    const { id: databaseUserId } = await prisma.user.upsert({
-      where: { id: session.user.id },
-      update: {},
-      create: {
+    const databaseUser = await prisma.user.findUnique({
+      where: {
         id: session.user.id,
-        name: session.user.name,
         email: session.user.email,
+      },
+      select: {
+        id: true,
+        apiKey: {
+          select: {
+            key: true,
+          },
+        },
       },
     });
 
-    let chat;
+    if (!databaseUser) {
+      log(`User not found! Session:`, session);
+      return NextResponse.json(
+        {
+          error: "User not found!",
+        },
+        { status: 404 },
+      );
+    }
 
+    if (!databaseUser.apiKey?.key) {
+      log("API Key not found! User:", databaseUser);
+      return NextResponse.json(
+        {
+          error: "Unauthorized! (User API Key not found)",
+        },
+        { status: 401 },
+      );
+    }
+
+    const isValidApiKey = await validateApiKeyWithCache({
+      apiKey: databaseUser.apiKey.key,
+    });
+
+    if (!isValidApiKey) {
+      log("API Key is not valid! API Key:", databaseUser.apiKey.key);
+      return NextResponse.json(
+        {
+          error: "Unauthorized! (Invalid API Key)",
+        },
+        { status: 401 },
+      );
+    }
+
+    const model = createModelProvider({
+      apiKey: databaseUser.apiKey.key,
+      modelType: selectedModel,
+      reasoning: reasoningEnabled,
+    });
+
+    let chat: Chat & { messages: Message[] };
     const isExistingChat =
       chatId !== "new" && chatId !== "null" && chatId !== "undefined";
+
+    const compressedPrompt = await StringCompressor.compress({
+      text: prompt.trim(),
+    });
 
     if (isExistingChat) {
       log("Processing existing chat with ID:", chatId);
 
-      const existingChat = await prisma.chat.findFirst({
+      const chatExists = await prisma.chat.findFirst({
         where: {
           id: chatId,
-          ownerId: databaseUserId,
+          ownerId: databaseUser.id,
         },
         include: {
           messages: {
             orderBy: { createdAt: "asc" },
+            take: 50,
           },
         },
       });
 
-      if (!existingChat) throw new Error("Chat not found or access denied!");
+      if (!chatExists) {
+        log(
+          "Chat not found or access denied! Chat ID:",
+          chatId,
+          "Owner Id:",
+          databaseUser.id,
+        );
 
-      await prisma.message.create({
+        return NextResponse.json(
+          {
+            error: "Chat not found or access denied!",
+          },
+          { status: 404 },
+        );
+      }
+
+      const newMessage = await prisma.message.create({
         data: {
-          content: prompt.trim(),
-          role: "user",
-          chatId: existingChat.id,
-          senderId: databaseUserId,
+          content: compressedPrompt,
+          role: "USER",
+          chatId,
+          senderId: databaseUser.id,
         },
       });
 
-      chat = existingChat;
+      chat = chatExists;
+      chat.messages.push(newMessage);
     } else {
       log(`Creating new chat (chatId:"${chatId}")`);
 
-      // Criar novo chat
+      const chatNameModel = createModelProvider({
+        apiKey: databaseUser.apiKey.key,
+        modelType: ModelsType.LITE,
+      });
+
+      const newChatName = await generateChatNameWithAi({
+        userPrompt: prompt,
+        model: chatNameModel,
+      }).catch((e) => {
+        log("Error on generate chat name with AI! Error:", e);
+        return "Chat sem nome.";
+      });
+
       chat = await prisma.chat.create({
         data: {
-          name: await generateChatNameWithAi(prompt),
-          ownerId: databaseUserId,
+          name: newChatName,
+          ownerId: databaseUser.id,
           messages: {
             create: {
-              content: prompt.trim(),
-              role: "user",
-              senderId: databaseUserId,
+              content: compressedPrompt,
+              role: "USER",
+              senderId: databaseUser.id,
             },
           },
         },
         include: {
           messages: {
-            orderBy: { createdAt: "asc" },
+            orderBy: {
+              createdAt: "asc",
+            },
           },
         },
       });
@@ -138,41 +241,26 @@ export async function POST(req: NextRequest) {
       log("New chat created with ID:", chat.id);
     }
 
-    const aiMessages = ConvertMessageOfDatabaseToAiModel(chat.messages);
+    const aiMessages = await ConvertMessageOfDatabaseToAiModel(chat.messages);
     log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
     const result = streamText({
-      model: openrouter("deepseek/deepseek-chat-v3-0324:free", {
-        reasoning: reasoning
-          ? {
-              effort: "medium",
-            }
-          : undefined,
-      }),
-      // model: openrouter("deepseek/deepseek-r1-0528:free"),
-      // model: openrouter("openrouter/cypher-alpha:free"),
-      // model: google("gemini-2.0-flash"),
-      messages: aiMessages,
-      system: GetSystemPrompt("pt-BR"),
-      onFinish: async (completion) => {
+      model,
+      messages: convertToCoreMessages(aiMessages),
+      system: getSystemPrompt("pt-BR"),
+      onFinish: async (completion: CompletionResult) => {
         log("AI response received:", completion.text);
-        try {
-          await prisma.message.create({
-            data: {
-              content: completion.text,
-              reasoning: JSON.stringify(completion.reasoning),
-              role: "assistant",
-              chatId: chat.id,
-            },
+
+        setImmediate(() => {
+          saveAssistantMessage({
+            chatId: chat.id,
+            completion,
           });
-          log("AI response saved successfully for chat:", chat.id);
-        } catch (error) {
-          log("Error saving AI response:", error);
-        }
+        });
       },
     });
 
     return result.toDataStreamResponse({
-      sendReasoning: true,
+      sendReasoning: reasoningEnabled,
       headers: {
         "X-Chat-Id": chat.id,
         "X-Chat-Name": encodeURIComponent(chat.name),
@@ -182,13 +270,13 @@ export async function POST(req: NextRequest) {
     log("Error in POST /api/chat:", error);
     log("Chat creation flow aborted");
 
-    // Retornar erro mais específico
     if (error instanceof Error) {
+      const statusCode = error.message.toLowerCase().includes("not found")
+        ? 404
+        : 500;
       return NextResponse.json(
         { error: error.message },
-        {
-          status: error.message.toLowerCase().includes("not found") ? 404 : 500,
-        },
+        { status: statusCode },
       );
     }
 

@@ -1,7 +1,6 @@
 "use client";
 import { ReactNode, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { tv } from "tailwind-variants";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 
 type PropsType = {
@@ -9,40 +8,22 @@ type PropsType = {
   content: ReactNode;
 };
 
-const accordion = tv({
-  slots: {
-    base: "w-full",
-    header:
-      "flex items-center justify-between w-full p-4 bg-apricot rounded-t-lg cursor-pointer",
-    title: "text-lg font-medium text-cocoa",
-    icon: "text-cocoa",
-    content: "p-4 bg-peach rounded-b-lg",
-  },
-});
-
 export default function Accordion({ title, content }: PropsType) {
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    base,
-    header,
-    title: titleStyle,
-    icon,
-    content: contentStyle,
-  } = accordion();
 
   return (
-    <div className={base()}>
+    <div className="w-full">
       <motion.div
-        className={header()}
+        className="flex items-center justify-between w-full p-4 bg-papaya rounded-t-2xl cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
         initial={false}
       >
-        <h3 className={titleStyle()}>{title}</h3>
+        <h3 className="text-lg font-medium text-cocoa">{title}</h3>
         <motion.div
-          className={icon()}
+          className="text-cocoa"
           initial={false}
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
+          animate={{ rotate: isOpen ? 180 : 0, y: isOpen ? -4 : 4 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
         >
           <Icon icon="heroicons:chevron-down" width="24" height="24" />
         </motion.div>
@@ -50,7 +31,7 @@ export default function Accordion({ title, content }: PropsType) {
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
-            className={contentStyle()}
+            className="p-4 bg-papaya/70 rounded-b-2xl text-cocoa"
             initial="collapsed"
             animate="open"
             exit="collapsed"

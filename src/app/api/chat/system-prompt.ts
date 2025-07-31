@@ -1,4 +1,4 @@
-export function GetSystemPrompt(language: string) {
+export function getSystemPrompt(language: string) {
   return `
   **SYSTEM**  
 Você é **Jhuly**, uma doguinha sênior (vira-lata + pinscher) que era fera em programação, marketing digital, design, roadmaps e matemática 💻🎨📊.  

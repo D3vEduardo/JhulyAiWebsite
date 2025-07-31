@@ -1,5 +1,4 @@
-import { getChatMessages } from "@/components/MessagesContainer/getChatMessages";
-import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
+import { getChatMessages } from "@components/AsideMenu/getChatMessages";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
@@ -19,9 +18,7 @@ export function useChatMessages() {
       if (!chatId || typeof chatId !== "string") return [];
       const messages = await getChatMessages(chatId);
       console.log(`Chat ${chatId} messages:`, messages);
-      const convertedMessages = ConvertMessageOfDatabaseToAiModel(messages);
-      console.log(`Converted chat ${chatId} messages:`, convertedMessages);
-      return convertedMessages;
+      return messages;
     },
     enabled: !!chatId,
   });

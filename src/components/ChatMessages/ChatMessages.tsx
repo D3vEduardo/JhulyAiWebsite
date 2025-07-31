@@ -9,9 +9,10 @@ import LoadingSpritesAnimation from "@components/Loading/LoadingSpritesAnimation
 export default function ChatMessages() {
   const { isLoadingMessages, messages, error, status } = useChatStateContext();
   console.log("Renderizei ChatMessages");
+  console.log(`Received messagens on ChatMessages component:`, messages);
   return (
     <main
-      className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[160px]"
+      className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[175px]"
       id="chatMessages"
     >
       {messages.length > 0 && !isLoadingMessages
@@ -37,6 +38,7 @@ export default function ChatMessages() {
                   />
                 </div>
               )}
+
               <MemoChatBalloon
                 message={{
                   content: message.content,

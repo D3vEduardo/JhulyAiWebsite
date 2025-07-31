@@ -2,7 +2,7 @@
 import Image from "next/image";
 import JhulyNoBg from "@public/avatars/avatar_nobg.png";
 import { Icon } from "@iconify-icon/react";
-import { authClient } from "@/lib/betterAuth/auth-client";
+import { authClient } from "@lib/betterAuth/auth-client";
 import { HTMLAttributeAnchorTarget, ReactNode } from "react";
 import Link, { LinkProps } from "next/link";
 
@@ -11,7 +11,7 @@ export default function HomeNavbar() {
   return (
     <nav
       className="absolute top-6 md:top-10 left-1/2 -translate-x-1/2
-            bg-navbar px-4 py-1.5 h-14 w-9/10 md:w-7/10 rounded-xl
+            bg-navbar px-4 py-1.5 h-14 w-9/10 md:w-7/10 rounded-2xl
             border-almond border-2 flex items-center justify-between
             bg-peach"
     >
@@ -69,7 +69,7 @@ function NavbarItem({
     text-center h-full flex items-center justify-center"
     >
       <span
-        className="h-full bg-cinnamon/20 absolute bottom-0 rounded-lg
+        className="h-full bg-cinnamon/20 absolute bottom-0 rounded-2xl
         left-1/2 group-hover:left-0 w-0 group-hover:w-full transition-all duration-400 ease-in-out"
       />
       {children}

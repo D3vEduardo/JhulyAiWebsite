@@ -15,6 +15,13 @@ const eslintConfig = [
     "next/typescript",
     "plugin:prettier/recommended",
   ),
+
+  // Aqui sobrescreve a regra para desligar o no-explicit-any
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

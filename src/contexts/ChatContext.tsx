@@ -13,9 +13,8 @@ import {
 import { Message, useChat } from "@ai-sdk/react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { useChatMessages } from "@/hooks/useChatMessages";
+import { useChatMessages } from "@hooks/useChatMessages";
 import { ChatRequestOptions } from "ai";
-
 interface ChatState {
   chatId: string | null;
   isNewChat: boolean;
@@ -130,11 +129,21 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }, [isNewChat, router, pathname]);
 
+  const chatIsReady =
+    chat.status !== "streaming" && chat.status !== "submitted";
   useEffect(() => {
-    if (chatMessagesQuery.data && chat.status !== "streaming") {
+    const messagesOfQueryInString = JSON.stringify(chatMessagesQuery).trim();
+    const messagesOfAiSdkInString = JSON.stringify(chatMessagesQuery).trim();
+    const messagesWithQueryDataIsDifferent =
+      messagesOfAiSdkInString != messagesOfQueryInString;
+    if (
+      chatMessagesQuery.data &&
+      chatIsReady &&
+      messagesWithQueryDataIsDifferent
+    ) {
       chat.setMessages(chatMessagesQuery.data);
     }
-  }, [chatMessagesQuery.data, chat]);
+  }, [chatMessagesQuery.data, chat, chatMessagesQuery, chatIsReady]);
 
   const chatState = useMemo(
     () => ({

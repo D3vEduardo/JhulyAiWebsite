@@ -3,15 +3,19 @@ import Button from "../Button";
 import { Dispatch, SetStateAction, memo } from "react";
 
 type PropsType = {
-  reasoning: boolean;
+  reasoningText: boolean;
   setReasoning: Dispatch<SetStateAction<boolean>>;
   chatIsReady: boolean;
 };
-function ReasoningButton({ reasoning, setReasoning, chatIsReady }: PropsType) {
+function ReasoningButton({
+  reasoningText,
+  setReasoning,
+  chatIsReady,
+}: PropsType) {
   return (
     <Button
       type="button"
-      variant={{ color: reasoning ? "primary" : "quarternary" }}
+      variant={{ color: reasoningText ? "primary" : "quarternary" }}
       className="w-12 h-12 p-2"
       disabled={!chatIsReady}
       onClick={() => setReasoning((prev) => !prev)}

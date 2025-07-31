@@ -5,10 +5,12 @@ import { useAside } from "@store/asideMenu";
 import AsideMenuChats from "./AsideMenuChats";
 import AsideMenuFooter from "./AsideMenuFooter";
 import { useRouter } from "next/navigation";
+import { useChatActionsContext } from "@/contexts/ChatContext";
 export default function AsideMenu() {
   console.log("Renderizei AsideMenu");
   const { asideIsOpen } = useAside();
   const router = useRouter();
+  const { setMessages } = useChatActionsContext();
 
   return (
     <motion.div
@@ -22,7 +24,7 @@ export default function AsideMenu() {
         stiffness: 150,
         damping: 10,
       }}
-      className="h-[94vh] max-h-[94vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-lg p-2 z-50
+      className="h-[94vh] max-h-[94vh] w-95/100 md:w-64 flex flex-col bg-input-bg rounded-2xl p-2 z-50
         border-2 border-almond absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-5
         top-1/2 -translate-y-1/2 bg-peach"
     >
@@ -35,7 +37,10 @@ export default function AsideMenu() {
           hoverAnimationSize: 0.98,
           tapAnimationSize: 0.9,
         }}
-        onClick={() => router.replace("/chat/new")}
+        onClick={() => {
+          setMessages([]);
+          router.replace("/chat/new");
+        }}
       >
         Novo chat
       </Button>

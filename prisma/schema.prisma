@@ -10,32 +10,41 @@ datasource db {
 model User {
   id            String    @id @unique @default(uuid())
   name          String?
-  email         String?
+  email         String?   @unique // Adicionar unique para performance
   emailVerified Boolean   @default(false)
   apiKey        ApiKey?
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt // Usar @updatedAt automático
   messages      Message[]
   chats         Chat[]
   image         String?
   sessions      Session[]
   accounts      Account[]
 
+  // Índices para otimizar queries
+  @@index([email])
+  @@index([createdAt])
   @@map("user")
 }
 
 model Message {
-  id        String  @id @unique @default(uuid())
-  sender    User?   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  id        String      @id @unique @default(uuid())
+  sender    User?       @relation(fields: [senderId], references: [id], onDelete: Cascade)
   senderId  String?
-  role      String
+  role      MessageRole
   reasoning String?
-  content   String
-  chat      Chat    @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  content   String      @db.Text
+  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId    String
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Índices para performance em queries frequentes
+  @@index([chatId, createdAt])
+  @@index([senderId])
+  @@index([role])
+  @@map("message")
 }
 
 model Chat {
@@ -46,21 +55,28 @@ model Chat {
   messages Message[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Índices para otimizar busca de chats do usuário
+  @@index([ownerId, createdAt])
+  @@index([ownerId, updatedAt])
+  @@map("chat")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
-  createdAt DateTime
-  updatedAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
+  // Índices para performance de autenticação
+  @@index([userId])
+  @@index([expiresAt])
   @@map("session")
 }
 
@@ -70,16 +86,18 @@ model Account {
   providerId            String
   userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
   password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
+  @@index([userId])
+  @@index([providerId, accountId])
   @@map("account")
 }
 
@@ -88,20 +106,35 @@ model Verification {
   identifier String
   value      String
   expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
 
+  @@index([identifier])
+  @@index([expiresAt])
   @@map("verification")
 }
 
 model ApiKey {
-  id        String   @id @unique @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  key       String
-  provider  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id        String    @id @unique @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key       String    @unique // Adicionar unique para evitar duplicatas
+  isActive  Boolean   @default(true) // Campo para desabilitar keys
+  lastUsed  DateTime? // Tracking de uso
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
+  @@index([key]) // Índice para validação rápida
+  @@index([userId, isActive])
   @@map("api_key")
+}
+
+// Enum para roles de mensagem (type safety)
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+  TOOL
+
+  @@map("message_role")
 }

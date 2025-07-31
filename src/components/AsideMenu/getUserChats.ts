@@ -1,13 +1,14 @@
 "use server";
 
-import { auth } from "@/lib/betterAuth/auth";
-import { prisma } from "@/lib/prisma/client";
+import { getCachedSession } from "@/app/data/auth/getCachedSession";
+import { prisma } from "@lib/prisma/client";
 import { headers } from "next/headers";
+import { debug } from "debug";
+const log = debug("components:aside-menu:get-user-chats");
 
 export async function getUserChats() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
+  log("Getting user chats on server...");
+  const session = await getCachedSession(await headers());
   if (!session?.user?.id) {
     throw new Error("Usuário não autenticado");
   }
@@ -16,7 +17,7 @@ export async function getUserChats() {
     where: {
       id: session.user.id,
     },
-    include: {
+    select: {
       chats: true,
     },
   });
@@ -25,5 +26,6 @@ export async function getUserChats() {
     throw new Error("Usuário não encontrado");
   }
 
+  log("Get user chats on server is completed!");
   return userData.chats;
 }

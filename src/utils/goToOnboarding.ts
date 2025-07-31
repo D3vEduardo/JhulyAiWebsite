@@ -1,8 +1,11 @@
+import { apiKeySchema } from "@lib/zod/apiKeySchema";
 import { userSchema } from "@lib/zod/userSchema";
-import { User } from "better-auth";
 
-export function GoToOnboarding(user: User) {
-  const parsedUser = userSchema.safeParse(user);
+const extendedUserSchema = userSchema.extend({
+  apiKey: apiKeySchema,
+});
 
+export function GoToOnboarding(user: unknown) {
+  const parsedUser = extendedUserSchema.safeParse(user);
   return !parsedUser.success;
 }

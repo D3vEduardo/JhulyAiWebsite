@@ -1,6 +1,6 @@
 import { useState, useLayoutEffect } from "react";
 
-export function useWindowResize() {
+export function useWindowSize(): number {
   const [innerWidth, setInnerWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0,
   );

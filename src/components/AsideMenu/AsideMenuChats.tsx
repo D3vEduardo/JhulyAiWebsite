@@ -4,9 +4,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Button from "../Button";
 import { getUserChats } from "./getUserChats";
 import { useParams, useRouter } from "next/navigation";
-import { getChatMessages } from "../MessagesContainer/getChatMessages";
+import { getChatMessages } from "./getChatMessages";
+import { useWindowSize } from "@hooks/useWindowSize";
+import { useAside } from "@store/asideMenu";
 
 export default function AsideMenuChats() {
+  const widthOfScreen = useWindowSize();
+  const { asideIsOpen, toggleAside } = useAside();
   console.log("Renderizei AsideMenuChats");
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -21,6 +25,7 @@ export default function AsideMenuChats() {
   >({
     queryKey: ["chats"],
     queryFn: async () => {
+      console.log("Getting user chats...");
       const userChats: {
         id: string;
         name: string;
@@ -28,9 +33,12 @@ export default function AsideMenuChats() {
         updatedAt: Date;
         ownerId: string;
       }[] = await getUserChats();
+      console.log("Get user chats is completed!");
       return userChats || [];
     },
     staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 
   // Prefetch chat messages on hover
@@ -58,9 +66,10 @@ export default function AsideMenuChats() {
                 className="py-2 justify-start text-start items-start w-full min-h-11 !overflow-hidden"
                 key={index}
                 onMouseEnter={() => prefetchMessages(chat.id)}
-                onClick={() =>
-                  router.replace(`/chat/${chat.id}`, { scroll: false })
-                }
+                onClick={() => {
+                  router.replace(`/chat/${chat.id}`, { scroll: false });
+                  if (widthOfScreen <= 769 && asideIsOpen) toggleAside();
+                }}
                 variant={{
                   size: "sm",
                   color: chatId == chat.id ? "quarternary" : "tertiary",

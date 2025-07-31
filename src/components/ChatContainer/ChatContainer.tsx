@@ -2,15 +2,15 @@
 
 import { useAside } from "@store/asideMenu";
 import { motion } from "motion/react";
-import { useWindowResize } from "@hooks/useWindowSize";
+import { useWindowSize } from "@hooks/useWindowSize";
 import ChatMessages from "../ChatMessages/ChatMessages";
 import PromptForm from "../PromptForm/PromptForm";
-import ChatNavBar from "../ChatNavbar";
+import ChatNavBar from "../ChatNavbar/ChatNavbar";
 import { useIsClient } from "@hooks/useIsClient";
 
-export default function MessageContainer() {
+export default function ChatContainer() {
   const { asideIsOpen } = useAside();
-  const innerWidth = useWindowResize();
+  const innerWidth = useWindowSize();
   const isClient = useIsClient();
 
   const shouldShowSidebar = asideIsOpen && innerWidth > 768;

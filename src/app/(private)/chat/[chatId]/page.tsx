@@ -1,7 +1,7 @@
 "use client";
 
 import AsideMenu from "@components/AsideMenu/AsideMenu";
-import MessagesContainer from "@components/MessagesContainer/MessagesContainer";
+import ChatContainer from "@components/ChatContainer/ChatContainer";
 import { Suspense } from "react";
 
 export default function ClientChat() {
@@ -9,7 +9,7 @@ export default function ClientChat() {
     <main className="flex flex-col w-screen h-dvh relative !overflow-hidden">
       <AsideMenu />
       <Suspense fallback={<div>Loading...</div>}>
-        <MessagesContainer />
+        <ChatContainer />
       </Suspense>
     </main>
   );

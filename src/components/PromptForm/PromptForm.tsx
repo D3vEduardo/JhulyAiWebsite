@@ -12,6 +12,7 @@ import {
   useChatInputContext,
 } from "@/contexts/ChatContext";
 import { useDropdown } from "@store/dropdown";
+import { CustomTooltip } from "../CustomTooltip";
 
 export default function PromptForm() {
   const { value: input } = useChatInputContext();
@@ -53,6 +54,7 @@ export default function PromptForm() {
           stop={stop}
           messagesLength={messages.length}
         />
+        <CustomTooltip anchorSelect=".prompt-form-button" delayShow={500} />
       </section>
     </motion.form>
   );

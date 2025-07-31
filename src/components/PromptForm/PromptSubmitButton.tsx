@@ -12,7 +12,9 @@ function PromptSubmitButton({ chatIsReady, stop, messagesLength }: PropsType) {
   return (
     <Button
       type={chatIsReady ? "submit" : "button"}
-      className="aspect-square w-12 h-12 p-0 flex items-center justify-center"
+      className="aspect-square w-12 h-12 p-0 flex items-center
+      justify-center prompt-form-button"
+      data-tooltip-content="Enviar prompt"
       variant={{
         color: chatIsReady ? "secondary" : "danger",
         size: "sm",

@@ -16,7 +16,10 @@ function ReasoningButton({
     <Button
       type="button"
       variant={{ color: reasoningText ? "primary" : "quarternary" }}
-      className="w-12 h-12 p-2"
+      className="w-12 h-12 p-2 prompt-form-button"
+      data-tooltip-content={
+        reasoningText ? "Desativar raciocínio" : "Ativar raciocínio"
+      }
       disabled={!chatIsReady}
       onClick={() => setReasoning((prev) => !prev)}
     >

@@ -5,6 +5,7 @@ import Input from "@components/Input";
 import { useForm } from "react-hook-form";
 import Label from "@components/Label";
 import { ReactNode, useState } from "react";
+import * as React from "react";
 import Button from "@components/Button";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 import { getUserData, OboardingAction } from "./actions";
@@ -12,8 +13,9 @@ import { onboardingFormSchema } from "@lib/zod/onboardingFormSchema";
 import { ApiKey, User } from "@prisma/client";
 import { FieldsType, RegisterType } from "./types";
 import { useRouter } from "next/navigation";
-import { Tooltip } from "react-tooltip";
 import { useQuery } from "@tanstack/react-query";
+import LoadingScreen from "@components/Loading/LoadingScreen";
+import { CustomTooltip } from "@components/CustomTooltip";
 
 export type PageProps = {
   user: User & {
@@ -22,8 +24,7 @@ export type PageProps = {
 };
 
 export default function Onboarding() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading: queryIsLoading } = useQuery({
     queryKey: ["onboarding_user_data"],
     queryFn: getUserData,
   });
@@ -33,13 +34,18 @@ export default function Onboarding() {
     register,
     handleSubmit,
     setError,
-    formState: { errors },
+    reset,
+    formState: {
+      errors,
+      isSubmitSuccessful: formIsSubmitSuccessful,
+      isSubmitting: formActionIsSubmitting,
+    },
   } = useForm({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
-      name: user?.name || "",
-      email: user?.email || "",
-      apiKey: user?.apiKey?.key || "",
+      name: "",
+      email: "",
+      apiKey: "",
     },
   });
 
@@ -53,23 +59,30 @@ export default function Onboarding() {
         }
         return !(user as Record<string, unknown>)[field];
       })
-    : requiredFields; // If user is not loaded yet, assume all fields need to be filled
+    : requiredFields;
 
-  // Show loading state while user data is being fetched
-  if (isLoading) {
-    return (
-      <dialog className="flex flex-col h-svh w-screen items-center justify-center absolute left-0 top-0 bg-vanilla/50 backdrop-blur-md z-[99]">
-        <div className="flex items-center space-x-2">
-          <Icon
-            icon="mdi:loading"
-            width="24"
-            height="24"
-            className="animate-spin"
-          />
-          <p className="text-lg text-cocoa">Carregando...</p>
-        </div>
-      </dialog>
-    );
+  React.useEffect(() => {
+    if (user) {
+      console.log("Resetando formulário com dados do usuário:", {
+        name: user.name || "",
+        email: user.email || "",
+        apiKey: user.apiKey?.key || "",
+      });
+      reset({
+        name: user.name || "",
+        email: user.email || "",
+        apiKey: user.apiKey?.key || "",
+      });
+    }
+  }, [user, reset]);
+
+  React.useEffect(() => {
+    console.log("Campos não preenchidos:", fieldsNotFilled);
+    console.log("Dados do usuário:", user);
+  }, [fieldsNotFilled, user]);
+
+  if (queryIsLoading) {
+    return <LoadingScreen />;
   }
 
   // Only redirect if user data is loaded and all fields are filled
@@ -107,7 +120,7 @@ export default function Onboarding() {
       className="flex flex-col h-svh w-screen items-center justify-center absolute left-0 top-0
         bg-vanilla/50 backdrop-blur-md z-[99]"
     >
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl py-1 font-bold text-cocoa">
           Bem-vindo ao Onboarding!
         </h1>
@@ -119,7 +132,6 @@ export default function Onboarding() {
         onSubmit={handleSubmit(
           async (data) => {
             try {
-              setIsSubmitting(true);
               console.log("Onboarding data:", data);
 
               const result = await OboardingAction(data);
@@ -154,12 +166,20 @@ export default function Onboarding() {
                 type: "server",
                 message: "Erro inesperado. Tente novamente.",
               });
-            } finally {
-              setIsSubmitting(false);
             }
           },
           (validationErrors) => {
-            console.error("Erros de validação:", validationErrors);
+            console.error(
+              "Erros de validação detalhados:",
+              JSON.stringify(validationErrors, null, 2)
+            );
+
+            if (Object.keys(validationErrors).length > 0) {
+              setError("root", {
+                type: "validation",
+                message: "Por favor, corrija os erros nos campos acima.",
+              });
+            }
           }
         )}
         className="flex flex-col items-center justify-center w-full mt-5 gap-y-2"
@@ -185,15 +205,23 @@ export default function Onboarding() {
           }}
           className="w-9/10 sm:w-[450px] md:w-[500px] mt-4 text-2xl space-x-1"
           type="submit"
-          disabled={isSubmitting}
+          disabled={formActionIsSubmitting || formIsSubmitSuccessful}
         >
           <Icon
-            icon={isSubmitting ? "mdi:loading" : "lets-icons:save-duotone"}
+            icon={
+              formActionIsSubmitting ? "mdi:loading" : "lets-icons:save-duotone"
+            }
             width="24"
             height="24"
-            className={isSubmitting ? "animate-spin" : ""}
+            className={formActionIsSubmitting ? "animate-spin" : ""}
           />
-          <p>{isSubmitting ? "Salvando..." : "Salvar"}</p>
+          <p>
+            {formActionIsSubmitting
+              ? "Salvando..."
+              : formIsSubmitSuccessful
+                ? "Tudo salvo! Aguarde alguns segundos..."
+                : "Salvar"}
+          </p>
         </Button>
       </form>
     </dialog>
@@ -293,10 +321,9 @@ function ApiKeyInput({
         />
         <p>OpenRouter Api Key: </p>
       </Label>
-      <Tooltip
+      <CustomTooltip
         noArrow={false}
         id="about-openrouter-apikey"
-        className="overflow-hidden !rounded-2xl !bg-almond !text-cocoa"
         clickable
         delayHide={500}
       >
@@ -312,7 +339,7 @@ function ApiKeyInput({
           </a>
           !
         </p>
-      </Tooltip>
+      </CustomTooltip>
       <Input
         type="password"
         placeholder="mInHaApIkEY..."

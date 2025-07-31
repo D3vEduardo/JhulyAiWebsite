@@ -23,7 +23,7 @@ export type PageProps = {
 
 export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { data: user } = useQuery({
+  const { data: user, isLoading } = useQuery({
     queryKey: ["onboarding_user_data"],
     queryFn: getUserData,
   });
@@ -44,11 +44,36 @@ export default function Onboarding() {
   });
 
   const requiredFields: FieldsType = ["name", "email", "apiKey"];
-  const fieldsNotFilled = requiredFields.filter(
-    (field) => !(user as Record<string, unknown>)[field],
-  );
 
-  if (fieldsNotFilled.length === 0) {
+  // Add null check for user before filtering
+  const fieldsNotFilled = user
+    ? requiredFields.filter((field) => {
+        if (field === "apiKey") {
+          return !user.apiKey?.key;
+        }
+        return !(user as Record<string, unknown>)[field];
+      })
+    : requiredFields; // If user is not loaded yet, assume all fields need to be filled
+
+  // Show loading state while user data is being fetched
+  if (isLoading) {
+    return (
+      <dialog className="flex flex-col h-svh w-screen items-center justify-center absolute left-0 top-0 bg-vanilla/50 backdrop-blur-md z-[99]">
+        <div className="flex items-center space-x-2">
+          <Icon
+            icon="mdi:loading"
+            width="24"
+            height="24"
+            className="animate-spin"
+          />
+          <p className="text-lg text-cocoa">Carregando...</p>
+        </div>
+      </dialog>
+    );
+  }
+
+  // Only redirect if user data is loaded and all fields are filled
+  if (user && fieldsNotFilled.length === 0) {
     router.push("/overview");
     return null;
   }
@@ -113,7 +138,7 @@ export default function Onboarding() {
                       type: "server",
                       message: message,
                     });
-                  },
+                  }
                 );
               }
 
@@ -135,7 +160,7 @@ export default function Onboarding() {
           },
           (validationErrors) => {
             console.error("Erros de validação:", validationErrors);
-          },
+          }
         )}
         className="flex flex-col items-center justify-center w-full mt-5 gap-y-2"
       >

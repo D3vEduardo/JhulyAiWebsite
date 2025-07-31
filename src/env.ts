@@ -50,8 +50,6 @@ const envSchema = z.object({
 
 const parsed = envSchema.safeParse({
   PRIVATE_OPENROUTER_API_KEY,
-  NEXT_AUTH_SECRET,
-  NEXT_AUTH_URL,
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
@@ -69,10 +67,10 @@ const parsed = envSchema.safeParse({
 if (!parsed.success) {
   console.error(
     "Erro de validação das variáveis de ambiente:",
-    parsed.error.format(),
+    parsed.error.format()
   );
   throw new Error(
-    "Variáveis de ambiente inválidas ou ausentes. Corrija o arquivo .env.local antes de iniciar a aplicação.",
+    "Variáveis de ambiente inválidas ou ausentes. Corrija o arquivo .env.local antes de iniciar a aplicação."
   );
 }
 

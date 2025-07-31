@@ -65,12 +65,10 @@ const parsed = envSchema.safeParse({
 });
 
 if (!parsed.success) {
-  console.error(
-    "Erro de validação das variáveis de ambiente:",
-    parsed.error.format()
-  );
+  console.error("Erro de validação das variáveis de ambiente:", parsed.error);
   throw new Error(
-    "Variáveis de ambiente inválidas ou ausentes. Corrija o arquivo .env.local antes de iniciar a aplicação."
+    "Variáveis de ambiente inválidas ou ausentes. Corrija o arquivo .env.local antes de iniciar a aplicação.",
+    parsed.error
   );
 }
 

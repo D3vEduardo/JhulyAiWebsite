@@ -2,8 +2,6 @@ import { z } from "zod";
 
 const {
   PRIVATE_OPENROUTER_API_KEY,
-  NEXT_AUTH_SECRET,
-  NEXT_AUTH_URL,
   DISCORD_CLIENT_ID,
   DISCORD_CLIENT_SECRET,
   GITHUB_CLIENT_ID,
@@ -22,8 +20,6 @@ const envSchema = z.object({
   PRIVATE_OPENROUTER_API_KEY: z
     .string()
     .min(1, "PRIVATE_OPENROUTER_API_KEY é obrigatório"),
-  NEXT_AUTH_SECRET: z.string().min(1, "NEXT_AUTH_SECRET é obrigatório"),
-  NEXT_AUTH_URL: z.string().url("NEXT_AUTH_URL deve ser uma URL válida"),
   DISCORD_CLIENT_ID: z.string().min(1, "DISCORD_CLIENT_ID é obrigatório"),
   DISCORD_CLIENT_SECRET: z
     .string()

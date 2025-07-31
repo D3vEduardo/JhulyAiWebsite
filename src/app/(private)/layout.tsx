@@ -32,7 +32,14 @@ const isProtectedRoute = (pathname: string | null): boolean => {
   return pathname === "/onboarding" || pathname.startsWith("/chat");
 };
 
-const validateRequiredFields = (user: any): string[] => {
+interface UserType {
+  name?: string | null;
+  email?: string | null;
+  apiKey?: { key?: string | null } | null;
+  [key: string]: unknown;
+}
+
+const validateRequiredFields = (user: UserType): string[] => {
   const requiredFields: FieldsType = ["name", "email", "apiKey"];
   return requiredFields.filter((field) => {
     if (field === "apiKey") {

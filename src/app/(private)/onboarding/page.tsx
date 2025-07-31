@@ -14,13 +14,14 @@ import { FieldsType, RegisterType } from "./types";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
 
-export default function Onboarding({
-  user,
-}: {
+// Definição clara do tipo das props, para manter alinhado
+export type PageProps = {
   user: User & {
     apiKey: ApiKey | null;
   };
-}) {
+};
+
+export default function Onboarding({ user }: PageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -94,19 +95,13 @@ export default function Onboarding({
 
               const result = await OboardingAction(data);
 
-              // ✅ Verifica se foi sucesso
               if (result.success) {
-                // Redireciona para /chat/new em caso de sucesso
                 router.push("/chat/new");
                 return;
               }
 
-              // ✅ Se chegou aqui, houve erro
-
-              // Limpa erros anteriores
               setError("root", { message: "" });
 
-              // Trata erros específicos de campos
               if (result.fieldErrors) {
                 Object.entries(result.fieldErrors).forEach(
                   ([fieldName, message]) => {
@@ -118,7 +113,6 @@ export default function Onboarding({
                 );
               }
 
-              // Trata erro geral
               if (result.error) {
                 setError("root", {
                   type: "server",
@@ -137,12 +131,10 @@ export default function Onboarding({
           },
           (validationErrors) => {
             console.error("Erros de validação:", validationErrors);
-            // Os erros de validação já são tratados automaticamente pelo React Hook Form
           },
         )}
         className="flex flex-col items-center justify-center w-full mt-5 gap-y-2"
       >
-        {/* ✅ Mostra erro geral se existir */}
         {errors.root?.message && (
           <div className="w-full max-w-screen md:w-[500px] p-3 mb-2 bg-red-100 border border-red-400 text-red-700 rounded-md">
             <div className="flex items-center space-x-2">
@@ -203,9 +195,7 @@ function NameInput({
         type="text"
         placeholder="Fulano..."
         {...register("name")}
-        className={`w-full ${
-          error ? "border-red-500 focus:border-red-500" : ""
-        }`}
+        className={`w-full ${error ? "border-red-500 focus:border-red-500" : ""}`}
       />
       {error && (
         <div className="flex items-center space-x-1 mt-1">
@@ -238,9 +228,7 @@ function EmailInput({
         type="email"
         placeholder="seu@email.com"
         {...register("email")}
-        className={`w-full ${
-          error ? "border-red-500 focus:border-red-500" : ""
-        }`}
+        className={`w-full ${error ? "border-red-500 focus:border-red-500" : ""}`}
       />
       {error && (
         <div className="flex items-center space-x-1 mt-1">
@@ -279,8 +267,7 @@ function ApiKeyInput({
       <Tooltip
         noArrow={false}
         id="about-openrouter-apikey"
-        className="overflow-hidden !rounded-2xl !bg-almond
-        !text-cocoa"
+        className="overflow-hidden !rounded-2xl !bg-almond !text-cocoa"
         clickable
         delayHide={500}
       >
@@ -290,6 +277,7 @@ function ApiKeyInput({
             href="https://openrouter.ai/settings/keys"
             className="font-bold underline"
             target="_blank"
+            rel="noreferrer"
           >
             aqui
           </a>
@@ -300,9 +288,7 @@ function ApiKeyInput({
         type="password"
         placeholder="mInHaApIkEY..."
         {...register("apiKey")}
-        className={`w-full ${
-          error ? "border-red-500 focus:border-red-500" : ""
-        }`}
+        className={`w-full ${error ? "border-red-500 focus:border-red-500" : ""}`}
       />
       {error && (
         <div className="flex items-center space-x-1 mt-1">

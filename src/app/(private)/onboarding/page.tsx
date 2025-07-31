@@ -7,22 +7,26 @@ import Label from "@components/Label";
 import { ReactNode, useState } from "react";
 import Button from "@components/Button";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
-import { OboardingAction } from "./actions";
+import { getUserData, OboardingAction } from "./actions";
 import { onboardingFormSchema } from "@lib/zod/onboardingFormSchema";
 import { ApiKey, User } from "@prisma/client";
 import { FieldsType, RegisterType } from "./types";
 import { useRouter } from "next/navigation";
 import { Tooltip } from "react-tooltip";
+import { useQuery } from "@tanstack/react-query";
 
-// Definição clara do tipo das props, para manter alinhado
 export type PageProps = {
   user: User & {
     apiKey: ApiKey | null;
   };
 };
 
-export default function Onboarding({ user }: PageProps) {
+export default function Onboarding() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: user } = useQuery({
+    queryKey: ["onboarding_user_data"],
+    queryFn: getUserData,
+  });
   const router = useRouter();
 
   const {

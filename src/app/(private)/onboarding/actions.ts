@@ -157,3 +157,26 @@ export async function OboardingAction(
     };
   }
 }
+
+export async function getUserData() {
+  const header = await headers();
+  const session = await getCachedSession(header);
+
+  if (!session) return;
+
+  const userDatabase = await prisma.user.findUnique({
+    where: {
+      id: session.user.id,
+      email: session.user.email,
+    },
+    select: {
+      name: true,
+      email: true,
+      apiKey: true,
+    },
+  });
+
+  if (!userDatabase) return;
+
+  return userDatabase;
+}

@@ -6,7 +6,7 @@ import { getUserChats } from "./getUserChats";
 import { useParams, useRouter } from "next/navigation";
 import { getChatMessages } from "./getChatMessages";
 import { useWindowSize } from "@hooks/useWindowSize";
-import { useAside } from "@store/asideMenu";
+import { DESKTOP_BREAKPOINT, useAside } from "@store/asideMenu";
 
 export default function AsideMenuChats() {
   const widthOfScreen = useWindowSize();
@@ -68,7 +68,8 @@ export default function AsideMenuChats() {
                 onMouseEnter={() => prefetchMessages(chat.id)}
                 onClick={() => {
                   router.replace(`/chat/${chat.id}`, { scroll: false });
-                  if (widthOfScreen <= 769 && asideIsOpen) toggleAside();
+                  if (widthOfScreen < DESKTOP_BREAKPOINT && asideIsOpen)
+                    toggleAside();
                 }}
                 variant={{
                   size: "sm",
@@ -85,7 +86,7 @@ export default function AsideMenuChats() {
           })}
         </>
       ) : (
-        <p>loading...</p>
+        <p>Loading...</p>
       )}
     </div>
   );

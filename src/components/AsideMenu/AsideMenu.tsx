@@ -1,23 +1,37 @@
 "use client";
 import Button from "@components/Button";
-import { motion } from "motion/react";
+import { motion, TargetAndTransition, VariantLabels } from "motion/react";
 import { useAside } from "@store/asideMenu";
 import AsideMenuChats from "./AsideMenuChats";
 import AsideMenuFooter from "./AsideMenuFooter";
 import { useRouter } from "next/navigation";
 import { useChatActionsContext } from "@/contexts/ChatContext";
+import { useMemo } from "react";
+
+type MotionDivAnimationType =
+  | boolean
+  | TargetAndTransition
+  | VariantLabels
+  | undefined;
+
 export default function AsideMenu() {
   console.log("Renderizei AsideMenu");
   const { asideIsOpen } = useAside();
+
+  const containerStyles: MotionDivAnimationType = useMemo(
+    () => ({
+      x: asideIsOpen ? 0 : "-100%",
+      opacity: asideIsOpen ? 1 : 0,
+    }),
+    [asideIsOpen]
+  );
+
   const router = useRouter();
   const { setMessages } = useChatActionsContext();
 
   return (
     <motion.div
-      animate={{
-        x: asideIsOpen ? 0 : "-100%",
-        opacity: asideIsOpen ? 1 : 0,
-      }}
+      animate={containerStyles}
       transition={{
         duration: 0.5,
         type: "spring",
@@ -44,7 +58,7 @@ export default function AsideMenu() {
       >
         Novo chat
       </Button>
-      {/*Dvisória abaixo*/}
+      {/*Divisória abaixo*/}
       <div
         className="relative flex items-center justify-center
             text-center my-2 overflow-hidden"
@@ -53,9 +67,9 @@ export default function AsideMenu() {
         <p className="text-input-border text-center w-full">Chats</p>
         <span className="w-full rounded-2xl bg-strawberry h-0.5" />
       </div>
-      {/*Dvisória acima*/}
+      {/*Divisória acima*/}
       <section className="flex flex-col justify-between h-full">
-        <div className="flex flex-col gap-2 w-full overflow-hidden h-[70vh relative">
+        <div className="flex flex-col gap-2 w-full overflow-hidden h-[70vh] relative">
           <AsideMenuChats />
           <span
             className="w-full h-6 bg-gradient-to-b

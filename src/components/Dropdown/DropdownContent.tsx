@@ -26,10 +26,10 @@ export function DropdownContent({
           exit={{ opacity: 0, scale: 0.95, y: -10 }}
           transition={{ duration: 0.15 }}
           className={twMerge(
-            `absolute z-50 mt-1 !w-xs !max-w-xs bg-peach/90
+            `absolute z-50 mt-1 !w-auto !max-w-xs bg-peach/90
           backdrop-blur-md border-2 border-apricot rounded-2xl
           shadow-lg max-h-60 overflow-auto text-cocoa`,
-            className,
+            className
           )}
           role="listbox"
           tabIndex={-1}

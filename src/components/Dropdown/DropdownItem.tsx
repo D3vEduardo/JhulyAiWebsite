@@ -14,7 +14,7 @@ export function DropdownItem({ id, value, children, icon }: DropdownItemProps) {
   return (
     <li
       onClick={() => selectValue(id, value, String(children), icon)}
-      className="cursor-pointer px-4 py-2  w-full"
+      className="cursor-pointer px-4 py-2  w-auto"
       tabIndex={0}
     >
       <span className="flex items-center justify-start gap-x-1.5">

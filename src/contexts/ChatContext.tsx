@@ -29,7 +29,7 @@ interface ChatInput {
   onChange: (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>,
+      | React.ChangeEvent<HTMLTextAreaElement>
   ) => void;
 }
 
@@ -40,7 +40,7 @@ interface ChatActions {
           preventDefault?: (() => void) | undefined;
         }
       | undefined,
-    chatRequestOptions?: ChatRequestOptions | undefined,
+    chatRequestOptions?: ChatRequestOptions | undefined
   ) => void;
   stop: () => void;
   addToolResult: ({
@@ -51,7 +51,7 @@ interface ChatActions {
     result: unknown;
   }) => void;
   setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[]),
+    messages: Message[] | ((messages: Message[]) => Message[])
   ) => void;
 }
 
@@ -86,7 +86,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         await queryClient.invalidateQueries({ queryKey: ["chats"] });
       }
     },
-    [isNewChat, queryClient],
+    [isNewChat, queryClient]
   );
 
   const onFinish = useCallback(() => {
@@ -117,33 +117,77 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    const chatMessagesContainer = document.getElementById("chatMessages");
+
+    if (chatMessagesContainer) {
+      const { scrollTop, scrollHeight, clientHeight } = chatMessagesContainer;
+
+      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
+
+      console.log("Scroll info:", {
+        scrollTop,
+        scrollHeight,
+        clientHeight,
+        isNearBottom,
+        distanceFromBottom: scrollHeight - (scrollTop + clientHeight),
+      });
+
+      // Só faz scroll se estiver próximo do final
+      if (isNearBottom) {
+        chatMessagesContainer.scrollTo({
+          top: scrollHeight,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [chatId, chat.status, chat.messages, chatMessagesQuery]);
+
+  useEffect(() => {
     if (navigateToChatId) {
       router.push(`/chat/${navigateToChatId}`, { scroll: false });
       setNavigateToChatId(null);
     }
   }, [navigateToChatId, router]);
 
-  useEffect(() => {
-    if (isNewChat && !newChatIdRef.current && pathname !== "/chat/new") {
-      router.push("/chat/new", { scroll: false });
-    }
-  }, [isNewChat, router, pathname]);
-
   const chatIsReady =
     chat.status !== "streaming" && chat.status !== "submitted";
+
   useEffect(() => {
-    const messagesOfQueryInString = JSON.stringify(chatMessagesQuery).trim();
-    const messagesOfAiSdkInString = JSON.stringify(chatMessagesQuery).trim();
-    const messagesWithQueryDataIsDifferent =
-      messagesOfAiSdkInString != messagesOfQueryInString;
-    if (
-      chatMessagesQuery.data &&
-      chatIsReady &&
-      messagesWithQueryDataIsDifferent
-    ) {
-      chat.setMessages(chatMessagesQuery.data);
+    if (!isNewChat && chatIsReady && chatMessagesQuery.data && chatId) {
+      const cachedMessages = queryClient.getQueryData<Message[]>([
+        "chat",
+        `chat_${chatId}`,
+      ]);
+
+      if (cachedMessages && cachedMessages.length > 0) {
+        const currentMessagesIds = chat.messages.map((m) => m.id).sort();
+        const cachedMessagesIds = cachedMessages.map((m) => m.id).sort();
+
+        const messagesDifferent =
+          JSON.stringify(currentMessagesIds) !==
+          JSON.stringify(cachedMessagesIds);
+
+        if (messagesDifferent) {
+          console.log("Sincronizando mensagens do cache para chatId:", chatId);
+          chat.setMessages(cachedMessages);
+        }
+      }
     }
-  }, [chatMessagesQuery.data, chat, chatMessagesQuery, chatIsReady]);
+  }, [
+    chatId,
+    isNewChat,
+    chatIsReady,
+    chatMessagesQuery.data,
+    chat.messages.length,
+    queryClient,
+  ]);
+
+  useEffect(() => {
+    if (isNewChat && chat.messages.length > 0) {
+      console.log("Limpando mensagens para novo chat");
+      chat.setMessages([]);
+    }
+  }, [isNewChat, chat.setMessages]);
 
   const chatState = useMemo(
     () => ({
@@ -161,7 +205,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       chat.messages,
       chat.status,
       chat.error,
-    ],
+    ]
   );
 
   const chatActions = useMemo(
@@ -171,7 +215,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       addToolResult: chat.addToolResult,
       setMessages: chat.setMessages,
     }),
-    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages],
+    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
   );
 
   const chatInput = {

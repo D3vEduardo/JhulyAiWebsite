@@ -24,7 +24,7 @@ export function Dropdown({
   }, [id, defaultValue, onSelect, createDropdown]);
 
   return (
-    <div className={twMerge("inline-block w-full max-w-xs p-1", className)}>
+    <div className={twMerge("inline-block w-auto max-w-xs p-1", className)}>
       {children}
     </div>
   );

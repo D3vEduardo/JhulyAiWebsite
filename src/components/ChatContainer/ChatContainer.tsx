@@ -7,18 +7,24 @@ import ChatMessages from "../ChatMessages/ChatMessages";
 import PromptForm from "../PromptForm/PromptForm";
 import ChatNavBar from "../ChatNavbar/ChatNavbar";
 import { useIsClient } from "@hooks/useIsClient";
+import { useMemo } from "react";
 
 export default function ChatContainer() {
   const { asideIsOpen } = useAside();
   const innerWidth = useWindowSize();
   const isClient = useIsClient();
 
-  const shouldShowSidebar = asideIsOpen && innerWidth > 768;
+  const shouldShowSidebar = useMemo(() => {
+    return asideIsOpen && innerWidth > 768;
+  }, [asideIsOpen, innerWidth]);
 
-  const containerStyle = {
-    marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
-    width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
-  };
+  const containerStyle = useMemo(
+    () => ({
+      marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
+      width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
+    }),
+    [isClient, shouldShowSidebar]
+  );
 
   return (
     <motion.div

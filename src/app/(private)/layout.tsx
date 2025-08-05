@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { GoToOnboarding } from "@utils/goToOnboarding";
+// import { GoToOnboarding } from "@utils/goToOnboarding";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { debug } from "debug";

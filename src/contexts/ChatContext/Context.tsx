@@ -17,7 +17,7 @@ export interface ChatInput {
   onChange: (
     e:
       | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>
+      | React.ChangeEvent<HTMLTextAreaElement>,
   ) => void;
 }
 
@@ -28,7 +28,7 @@ export interface ChatActions {
           preventDefault?: (() => void) | undefined;
         }
       | undefined,
-    chatRequestOptions?: ChatRequestOptions | undefined
+    chatRequestOptions?: ChatRequestOptions | undefined,
   ) => void;
   stop: () => void;
   addToolResult: ({
@@ -39,12 +39,12 @@ export interface ChatActions {
     result: unknown;
   }) => void;
   setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[])
+    messages: Message[] | ((messages: Message[]) => Message[]),
   ) => void;
 }
 
 export const ChatStateContext = createContext<ChatState | undefined>(undefined);
 export const ChatActionsContext = createContext<ChatActions | undefined>(
-  undefined
+  undefined,
 );
 export const ChatInputContext = createContext<ChatInput | undefined>(undefined);

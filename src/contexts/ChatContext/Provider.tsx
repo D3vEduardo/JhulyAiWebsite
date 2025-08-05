@@ -18,14 +18,6 @@ import {
 import { getMoreRecentMessages } from "./getMoreRecentMessages";
 
 // Tipos para as opções do onFinish
-interface FinishOptions {
-  usage?: {
-    promptTokens?: number;
-    completionTokens?: number;
-    totalTokens?: number;
-  };
-  finishReason?: "stop" | "length" | "content_filter" | "tool_calls" | string;
-}
 
 // Type guard para verificar se uma mensagem tem ID
 function hasMessageId(message: unknown): message is Message & { id: string } {
@@ -69,7 +61,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Corrigir a assinatura do onFinish para AI SDK v4
   const onFinish = useCallback(
-    (message: Message, options?: FinishOptions) => {
+    (message: Message) => {
       const finalChatId = isNewChat ? newChatIdRef.current : chatId;
       console.log("Final chatId onFinish:", finalChatId);
       if (!finalChatId) {

@@ -17,6 +17,26 @@ import {
 } from "./Context";
 import { getMoreRecentMessages } from "./getMoreRecentMessages";
 
+// Tipos para as opções do onFinish
+interface FinishOptions {
+  usage?: {
+    promptTokens?: number;
+    completionTokens?: number;
+    totalTokens?: number;
+  };
+  finishReason?: "stop" | "length" | "content_filter" | "tool_calls" | string;
+}
+
+// Type guard para verificar se uma mensagem tem ID
+function hasMessageId(message: unknown): message is Message & { id: string } {
+  return (
+    message !== null &&
+    typeof message === "object" &&
+    "id" in message &&
+    typeof (message as { id: unknown }).id === "string"
+  );
+}
+
 export function ChatProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -49,13 +69,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   // Corrigir a assinatura do onFinish para AI SDK v4
   const onFinish = useCallback(
-    (
-      message: Message,
-      options?: {
-        usage?: any;
-        finishReason?: string;
-      }
-    ) => {
+    (message: Message, options?: FinishOptions) => {
       const finalChatId = isNewChat ? newChatIdRef.current : chatId;
       console.log("Final chatId onFinish:", finalChatId);
       if (!finalChatId) {
@@ -130,27 +144,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       ]);
 
       if (cachedMessages && cachedMessages.length > 0) {
-        // Verificar se as mensagens têm a propriedade 'id' antes de tentar acessá-la
+        // Usar type guard para verificar mensagens com ID
         const currentMessagesIds = chat.messages
-          .filter(
-            (m) =>
-              m &&
-              typeof m === "object" &&
-              "id" in m &&
-              typeof m.id === "string"
-          )
-          .map((m) => (m as any).id)
+          .filter(hasMessageId)
+          .map((m) => m.id)
           .sort();
 
         const cachedMessagesIds = cachedMessages
-          .filter(
-            (m) =>
-              m &&
-              typeof m === "object" &&
-              "id" in m &&
-              typeof m.id === "string"
-          )
-          .map((m) => (m as any).id)
+          .filter(hasMessageId)
+          .map((m) => m.id)
           .sort();
 
         const messagesDifferent =

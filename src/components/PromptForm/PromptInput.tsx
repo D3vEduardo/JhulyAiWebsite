@@ -1,14 +1,18 @@
 import { memo } from "react";
 import { useChatInputContext } from "@/contexts/ChatContext/Hooks";
+import { FocusEvent } from "react";
 
-function PromptInput() {
+function PromptInput({}: {}) {
   const { value: input, onChange: handleInputChange } = useChatInputContext();
-  // const { value:  } = useChatInputContext();
   console.log("Renderizei PromptInput");
+
+  function onInputFocus(e: FocusEvent<HTMLTextAreaElement, Element>) {}
+
   return (
     <textarea
       onChange={handleInputChange}
       value={input}
+      onFocus={onInputFocus}
       placeholder="Digite sua mensagem aqui..."
       className="w-full min-h-full p-2 focus:outline-none resize-none py-1 px-2"
     ></textarea>

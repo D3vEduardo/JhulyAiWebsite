@@ -2,7 +2,7 @@
 
 import ZoopText from "@components/ZoopText";
 import Button from "@components/Button";
-import HomeNavbar from "@components/OverviewNavbar";
+import HomeNavbar from "@/components/OverviewNavbar/OverviewNavbar";
 import { Icon } from "@iconify-icon/react";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,7 @@ export default function Home() {
         <div className="flex flex-col items-center justify-center w-full md:w-8/10 lg:w-73/100 text-center">
           <section className="w-auto flex flex-col items-center justify-center g-0">
             <h1
-              className="text-2xl md:text-[42px] lg:text-6xl text-cocoa
+              className="text-3xl md:text-[40px] lg:text-6xl text-cocoa
             overflow-hidden p-1"
             >
               Faça perguntas. Ganhe carinho. Descubra algo

@@ -7,8 +7,6 @@ export function useWindowSize(): number {
 
   useLayoutEffect(() => {
     const handleResize = () => setInnerWidth(window.innerWidth);
-
-    // Inicializar o valor
     setInnerWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
 

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-vanilla: #fff8f6;
   --color-cocoa: #662e1f;
@@ -13,6 +15,19 @@
   --color-surface-input: var(--color-peach);
   --color-border-input: var(--color-almond);
   --color-brick-brown: #86331e;
+
+  --color-vanilla-dark: #1e1a19;
+  --color-cocoa-dark: #fcd8c9;
+  --color-cinnamon-dark: #d8b9ae;
+  --color-papaya-dark: #ff9478;
+  --color-strawberry-dark: #ffb8a4;
+  --color-peach-dark: #3b2d29;
+  --color-almond-dark: #5a4741;
+  --color-watermelon-dark: #4b3834;
+  --color-apricot-dark: #6a4f49;
+  --color-surface-input-dark: var(--color-peach);
+  --color-border-input-dark: var(--color-almond);
+  --color-brick-brown-dark: #ffe3d9;
 }
 
 @layer utilities {

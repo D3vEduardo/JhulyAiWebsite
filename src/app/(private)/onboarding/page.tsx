@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@components/Input";
 import { useForm } from "react-hook-form";
 import Label from "@components/Label";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import * as React from "react";
 import Button from "@components/Button";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
@@ -150,7 +150,7 @@ export default function Onboarding() {
                       type: "server",
                       message: message,
                     });
-                  }
+                  },
                 );
               }
 
@@ -171,7 +171,7 @@ export default function Onboarding() {
           (validationErrors) => {
             console.error(
               "Erros de validação detalhados:",
-              JSON.stringify(validationErrors, null, 2)
+              JSON.stringify(validationErrors, null, 2),
             );
 
             if (Object.keys(validationErrors).length > 0) {
@@ -180,7 +180,7 @@ export default function Onboarding() {
                 message: "Por favor, corrija os erros nos campos acima.",
               });
             }
-          }
+          },
         )}
         className="flex flex-col items-center justify-center w-full mt-5 gap-y-2"
       >

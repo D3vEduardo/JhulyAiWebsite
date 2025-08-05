@@ -23,6 +23,6 @@ export const useAside = create<AsideState>()(
     {
       name: "aside-menu-storage",
       partialize: (state) => ({ asideIsOpen: state.asideIsOpen }),
-    }
-  )
+    },
+  ),
 );

@@ -23,7 +23,7 @@ export default function ChatContainer() {
       marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
       width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
     }),
-    [isClient, shouldShowSidebar]
+    [isClient, shouldShowSidebar],
   );
 
   return (

@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
-import { Itim } from "next/font/google";
-import "../globals.css";
-
-const ItimFont = Itim({
-  variable: "--font-itim",
-  weight: ["400"],
-  preload: true,
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Jhuly AI",
-  description: "Agente IA que te ajuda com código.",
+  description: "Agente IA que te ajuda com tudo que você precisa.",
 };
 
 export default function RootLayout({
@@ -19,11 +10,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="pt-BR">
-      <body className={`${ItimFont.variable} antialiased w-screen h-dvh`}>
-        {children}
-      </body>
-    </html>
-  );
+  return <>{children}</>;
 }

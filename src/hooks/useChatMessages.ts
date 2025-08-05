@@ -8,6 +8,9 @@ export function useChatMessages() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    const isExistingChat =
+      chatId !== "new" && chatId !== "null" && chatId !== "undefined";
+    if (!isExistingChat) return;
     console.log(`Invalidating chat ${chatId} messages`);
     queryClient.invalidateQueries({ queryKey: ["chat", `chat_${chatId}`] });
   }, [chatId, queryClient]);

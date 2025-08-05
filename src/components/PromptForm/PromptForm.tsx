@@ -10,7 +10,7 @@ import {
   useChatStateContext,
   useChatActionsContext,
   useChatInputContext,
-} from "@/contexts/ChatContext";
+} from "@/contexts/ChatContext/Hooks";
 import { useDropdown } from "@store/dropdown";
 import { CustomTooltip } from "../CustomTooltip";
 

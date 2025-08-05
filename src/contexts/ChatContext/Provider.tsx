@@ -1,63 +1,21 @@
-"use client";
-
+import { useChatMessages } from "@/hooks/useChatMessages";
+import { useChat, Message } from "@ai-sdk/react"; // Importar Message do ai-sdk/react, não do react-hook-form
+import { useQueryClient } from "@tanstack/react-query";
+import { usePathname, useRouter } from "next/navigation"; // Usar ambos do next/navigation
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
+  ReactNode,
   useRef,
   useState,
-  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
 } from "react";
-import { Message, useChat } from "@ai-sdk/react";
-import { usePathname, useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import { useChatMessages } from "@hooks/useChatMessages";
-import { ChatRequestOptions } from "ai";
-interface ChatState {
-  chatId: string | null;
-  isNewChat: boolean;
-  isLoadingMessages: boolean;
-  messages: Message[];
-  status: "streaming" | "error" | "ready" | "submitted";
-  error: Error | undefined;
-}
-
-interface ChatInput {
-  value: string;
-  onChange: (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLTextAreaElement>,
-  ) => void;
-}
-
-interface ChatActions {
-  handleSubmit: (
-    event?:
-      | {
-          preventDefault?: (() => void) | undefined;
-        }
-      | undefined,
-    chatRequestOptions?: ChatRequestOptions | undefined,
-  ) => void;
-  stop: () => void;
-  addToolResult: ({
-    toolCallId,
-    result,
-  }: {
-    toolCallId: string;
-    result: unknown;
-  }) => void;
-  setMessages: (
-    messages: Message[] | ((messages: Message[]) => Message[]),
-  ) => void;
-}
-
-const ChatStateContext = createContext<ChatState | undefined>(undefined);
-const ChatActionsContext = createContext<ChatActions | undefined>(undefined);
-const ChatInputContext = createContext<ChatInput | undefined>(undefined);
+import {
+  ChatStateContext,
+  ChatActionsContext,
+  ChatInputContext,
+} from "./Context";
+import { getMoreRecentMessages } from "./getMoreRecentMessages";
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -86,11 +44,18 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         await queryClient.invalidateQueries({ queryKey: ["chats"] });
       }
     },
-    [isNewChat, queryClient],
+    [isNewChat, queryClient]
   );
 
+  // Corrigir a assinatura do onFinish para AI SDK v4
   const onFinish = useCallback(
-    (message: Message) => {
+    (
+      message: Message,
+      options?: {
+        usage?: any;
+        finishReason?: string;
+      }
+    ) => {
       const finalChatId = isNewChat ? newChatIdRef.current : chatId;
       console.log("Final chatId onFinish:", finalChatId);
       if (!finalChatId) {
@@ -105,7 +70,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
       setNavigateToChatId(finalChatId);
     },
-    [isNewChat, chatId, queryClient, chatMessagesQuery.data],
+    [isNewChat, chatId, queryClient, chatMessagesQuery.data]
   );
 
   const chat = useChat({
@@ -148,7 +113,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (navigateToChatId) {
-      router.push(`/chat/${navigateToChatId}`, { scroll: false });
+      // Remover a opção scroll que não existe no Next.js 13+
+      router.push(`/chat/${navigateToChatId}`);
       setNavigateToChatId(null);
     }
   }, [navigateToChatId, router]);
@@ -164,16 +130,62 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       ]);
 
       if (cachedMessages && cachedMessages.length > 0) {
-        const currentMessagesIds = chat.messages.map((m) => m.id).sort();
-        const cachedMessagesIds = cachedMessages.map((m) => m.id).sort();
+        // Verificar se as mensagens têm a propriedade 'id' antes de tentar acessá-la
+        const currentMessagesIds = chat.messages
+          .filter(
+            (m) =>
+              m &&
+              typeof m === "object" &&
+              "id" in m &&
+              typeof m.id === "string"
+          )
+          .map((m) => (m as any).id)
+          .sort();
+
+        const cachedMessagesIds = cachedMessages
+          .filter(
+            (m) =>
+              m &&
+              typeof m === "object" &&
+              "id" in m &&
+              typeof m.id === "string"
+          )
+          .map((m) => (m as any).id)
+          .sort();
 
         const messagesDifferent =
           JSON.stringify(currentMessagesIds) !==
           JSON.stringify(cachedMessagesIds);
 
         if (messagesDifferent) {
-          console.log("Sincronizando mensagens do cache para chatId:", chatId);
-          chat.setMessages(cachedMessages);
+          console.log(
+            "Detectadas diferenças nas mensagens para chatId:",
+            chatId
+          );
+
+          // Usar a função para determinar qual conjunto é mais atual
+          const moreRecentMessages = getMoreRecentMessages({
+            messages1: chat.messages,
+            messages2: cachedMessages,
+          });
+
+          // Verificar se as mensagens em cache são mais atuais usando referência de array
+          if (
+            JSON.stringify(moreRecentMessages) ===
+            JSON.stringify(cachedMessages)
+          ) {
+            console.log(
+              "Sincronizando mensagens do cache para chatId:",
+              chatId
+            );
+            chat.setMessages(cachedMessages);
+          } else {
+            console.log(
+              "Mensagens do chat atual são mais recentes, mantendo estado atual"
+            );
+            // Opcional: atualizar o cache com as mensagens mais recentes
+            queryClient.setQueryData(["chat", `chat_${chatId}`], chat.messages);
+          }
         }
       }
     }
@@ -210,7 +222,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       chat.messages,
       chat.status,
       chat.error,
-    ],
+    ]
   );
 
   const chatActions = useMemo(
@@ -220,7 +232,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       addToolResult: chat.addToolResult,
       setMessages: chat.setMessages,
     }),
-    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages],
+    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
   );
 
   const chatInput = {
@@ -237,28 +249,4 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       </ChatActionsContext.Provider>
     </ChatStateContext.Provider>
   );
-}
-
-export function useChatStateContext() {
-  const context = useContext(ChatStateContext);
-  if (context === undefined) {
-    throw new Error("useChatStateContext must be used within a ChatProvider");
-  }
-  return context;
-}
-
-export function useChatActionsContext() {
-  const context = useContext(ChatActionsContext);
-  if (context === undefined) {
-    throw new Error("useChatActionsContext must be used within a ChatProvider");
-  }
-  return context;
-}
-
-export function useChatInputContext() {
-  const context = useContext(ChatInputContext);
-  if (context === undefined) {
-    throw new Error("useChatInputContext must be used within a ChatProvider");
-  }
-  return context;
 }

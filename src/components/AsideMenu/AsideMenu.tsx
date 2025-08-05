@@ -5,7 +5,7 @@ import { useAside } from "@store/asideMenu";
 import AsideMenuChats from "./AsideMenuChats";
 import AsideMenuFooter from "./AsideMenuFooter";
 import { useRouter } from "next/navigation";
-import { useChatActionsContext } from "@/contexts/ChatContext";
+import { useChatActionsContext } from "@/contexts/ChatContext/Hooks";
 import { useMemo } from "react";
 
 type MotionDivAnimationType =
@@ -23,7 +23,7 @@ export default function AsideMenu() {
       x: asideIsOpen ? 0 : "-100%",
       opacity: asideIsOpen ? 1 : 0,
     }),
-    [asideIsOpen],
+    [asideIsOpen]
   );
 
   const router = useRouter();

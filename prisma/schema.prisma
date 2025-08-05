@@ -118,13 +118,13 @@ model ApiKey {
   id        String    @id @unique @default(uuid())
   userId    String    @unique
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  key       String    @unique // Adicionar unique para evitar duplicatas
-  isActive  Boolean   @default(true) // Campo para desabilitar keys
-  lastUsed  DateTime? // Tracking de uso
+  key       String
+  isActive  Boolean   @default(true)
+  lastUsed  DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  @@index([key]) // Índice para validação rápida
+  @@index([key])
   @@index([userId, isActive])
   @@map("api_key")
 }

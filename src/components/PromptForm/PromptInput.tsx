@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { useChatInputContext } from "@/contexts/ChatContext";
+import { useChatInputContext } from "@/contexts/ChatContext/Hooks";
 
 function PromptInput() {
   const { value: input, onChange: handleInputChange } = useChatInputContext();

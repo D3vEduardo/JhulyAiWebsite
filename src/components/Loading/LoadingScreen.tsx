@@ -1,6 +1,6 @@
 "use client";
 
-import { useChatStateContext } from "@/contexts/ChatContext";
+import { useChatStateContext } from "@/contexts/ChatContext/Hooks";
 import LoadingSpritesAnimation from "./LoadingSpritesAnimation";
 
 export default function LoadingScreen() {

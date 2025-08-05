@@ -1,6 +1,6 @@
 "use client";
 
-import { useChatStateContext } from "@/contexts/ChatContext";
+import { useChatStateContext } from "@/contexts/ChatContext/Hooks";
 import ChatBalloon, { MemoChatBalloon } from "../ChatBalloon/ChatBalloon";
 import Accordion from "../Accordion/Accordion";
 import { motion } from "motion/react";

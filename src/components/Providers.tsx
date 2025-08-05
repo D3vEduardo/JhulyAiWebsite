@@ -1,7 +1,7 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ChatProvider } from "@/contexts/ChatContext";
+import { ChatProvider } from "@/contexts/ChatContext/Provider";
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -46,9 +46,27 @@ export default async function RootLayout({
 
   const session = await getCachedSession(reqHeaders);
 
+  if (pathname === "/login" && !session?.user) {
+    log("🔓 Acesso liberado para /login sem sessão");
+    return <>{children}</>;
+  }
+
+  if (pathname === "/chat/new" && !session?.user) {
+    log("⛔ Sem sessão, vai pro /login");
+    redirect("/login");
+    return;
+  }
+
+  if (pathname === "/login" && session?.user) {
+    log("⚠️ Usuário já logado, manda pro /chat/new");
+    redirect("/chat/new");
+    return;
+  }
+
   if (!session?.user) {
-    log("⛔ Sessão inválida ou ausente. Redirecionando para /overview.");
-    redirect("/overview");
+    log("⛔ Usuário não autenticado, manda pro /login");
+    redirect("/login");
+    return;
   }
 
   log("✅ Sessão válida:", session.user.id, session.user.email);
@@ -56,40 +74,28 @@ export default async function RootLayout({
   const userDatabase = await getCachedUser(session.user.id, session.user.email);
 
   if (!userDatabase) {
-    log("❌ Usuário não encontrado no banco. Redirecionando para /login.");
+    log("❌ Usuário não encontrado no banco, manda pro /login");
     redirect("/login");
+    return;
   }
 
   log("📦 Usuário encontrado no banco:", userDatabase.id);
 
-  const isGoToOnboarding = GoToOnboarding(userDatabase);
-  log("🔎 Deve ir para onboarding?", isGoToOnboarding);
+  const requiredFields = validateRequiredFields(userDatabase);
+  const isGoToOnboarding = requiredFields.length > 0;
 
-  // Lógica de redirecionamento
-  if (pathname?.startsWith("/chat")) {
-    if (isGoToOnboarding) {
-      log(
-        "🚦 Usuário precisa fazer onboarding. Redirecionando para /onboarding.",
-      );
-      redirect("/onboarding");
-    }
-  } else if (pathname === "/onboarding") {
-    if (!isGoToOnboarding) {
-      log(
-        "🔁 Usuário já passou pelo onboarding. Redirecionando para /chat/new.",
-      );
-      redirect("/chat/new");
-    }
+  log("🔎 Campos pendentes para onboarding?", requiredFields);
 
-    const fieldsNotFilled = validateRequiredFields(userDatabase);
-    log("📋 Campos obrigatórios não preenchidos:", fieldsNotFilled);
+  if (isGoToOnboarding && pathname !== "/onboarding") {
+    log("🚦 User precisa completar onboarding. Vai pra /onboarding");
+    redirect("/onboarding");
+    return;
+  }
 
-    if (fieldsNotFilled.length === 0) {
-      log(
-        "✅ Todos os campos obrigatórios preenchidos. Redirecionando para /chat/new.",
-      );
-      redirect("/chat/new");
-    }
+  if (pathname === "/onboarding" && !isGoToOnboarding) {
+    log("🎉 Onboarding completo. Vai pra /chat/new");
+    redirect("/chat/new");
+    return;
   }
 
   log("🧱 Renderizando layout com children.");

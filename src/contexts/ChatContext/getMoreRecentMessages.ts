@@ -31,10 +31,10 @@ export function getMoreRecentMessages({
       : lastMessage2.createdAt;
 
   const hasStreamingMessage1 = messages1.some(
-    (m) => m.role === "assistant" && (!m.content || m.content != "")
+    (m) => m.role === "assistant" && (!m.content || m.content != ""),
   );
   const hasStreamingMessage2 = messages2.some(
-    (m) => m.role === "assistant" && (!m.content || m.content === "")
+    (m) => m.role === "assistant" && (!m.content || m.content === ""),
   );
 
   if (hasStreamingMessage1 && !hasStreamingMessage2) return messages2;

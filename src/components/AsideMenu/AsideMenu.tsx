@@ -16,7 +16,7 @@ type MotionDivAnimationType =
 
 export default function AsideMenu() {
   console.log("Renderizei AsideMenu");
-  const { asideIsOpen } = useAside();
+  const { asideIsOpen, toggleAside } = useAside();
 
   const containerStyles: MotionDivAnimationType = useMemo(
     () => ({
@@ -53,6 +53,7 @@ export default function AsideMenu() {
         }}
         onClick={() => {
           setMessages([]);
+          toggleAside();
           router.replace("/chat/new");
         }}
       >

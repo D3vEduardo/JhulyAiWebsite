@@ -2,7 +2,7 @@
 
 import PromptInput from "./PromptInput";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
@@ -22,9 +22,11 @@ export default function PromptForm() {
   const chatIsReady = status === "ready" || status === "error";
   const [reasoning, setReasoning] = useState<boolean>(false);
   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
     <motion.form
+      ref={formRef}
       onSubmit={async (e) => {
         e.preventDefault();
         handleSubmit(e, {
@@ -42,7 +44,7 @@ export default function PromptForm() {
                 py-2 px-2 rounded-2xl border-2 border-almond z-10 flex justify-between gap-x-2
                 max-w-[900px]`}
     >
-      <PromptInput />
+      <PromptInput formRef={formRef} />
       <section className="flex flex-col md:flex-initial justify-end gap-2 py-1 px-2">
         <ReasoningButton
           reasoningText={reasoning}

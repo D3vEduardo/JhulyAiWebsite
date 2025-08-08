@@ -17,9 +17,6 @@ import {
 } from "./Context";
 import { getMoreRecentMessages } from "./getMoreRecentMessages";
 
-// Tipos para as opções do onFinish
-
-// Type guard para verificar se uma mensagem tem ID
 function hasMessageId(message: unknown): message is Message & { id: string } {
   return (
     message !== null &&
@@ -58,8 +55,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     },
     [isNewChat, queryClient]
   );
-
-  // Corrigir a assinatura do onFinish para AI SDK v4
   const onFinish = useCallback(
     (message: Message) => {
       const finalChatId = isNewChat ? newChatIdRef.current : chatId;
@@ -80,6 +75,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   );
 
   const chat = useChat({
+    id: chatId || "new",
     onFinish,
     onResponse,
     onError(error) {
@@ -97,29 +93,22 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     if (chatMessagesContainer) {
       const { scrollTop, scrollHeight, clientHeight } = chatMessagesContainer;
 
-      const isNearBottom = scrollTop + clientHeight >= scrollHeight - 100;
-
       console.log("Scroll info:", {
         scrollTop,
         scrollHeight,
         clientHeight,
-        isNearBottom,
         distanceFromBottom: scrollHeight - (scrollTop + clientHeight),
       });
 
-      // Só faz scroll se estiver próximo do final
-      if (isNearBottom) {
-        chatMessagesContainer.scrollTo({
-          top: scrollHeight,
-          behavior: "smooth",
-        });
-      }
+      chatMessagesContainer.scrollTo({
+        top: scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [chatId, chat.status, chat.messages, chatMessagesQuery]);
 
   useEffect(() => {
     if (navigateToChatId) {
-      // Remover a opção scroll que não existe no Next.js 13+
       router.push(`/chat/${navigateToChatId}`);
       setNavigateToChatId(null);
     }
@@ -136,7 +125,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       ]);
 
       if (cachedMessages && cachedMessages.length > 0) {
-        // Usar type guard para verificar mensagens com ID
         const currentMessagesIds = chat.messages
           .filter(hasMessageId)
           .map((m) => m.id)
@@ -157,13 +145,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             chatId
           );
 
-          // Usar a função para determinar qual conjunto é mais atual
           const moreRecentMessages = getMoreRecentMessages({
             messages1: chat.messages,
             messages2: cachedMessages,
           });
 
-          // Verificar se as mensagens em cache são mais atuais usando referência de array
           if (
             JSON.stringify(moreRecentMessages) ===
             JSON.stringify(cachedMessages)
@@ -177,7 +163,6 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             console.log(
               "Mensagens do chat atual são mais recentes, mantendo estado atual"
             );
-            // Opcional: atualizar o cache com as mensagens mais recentes
             queryClient.setQueryData(["chat", `chat_${chatId}`], chat.messages);
           }
         }
@@ -194,11 +179,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   ]);
 
   useEffect(() => {
+    console.log("Verificando se precisa limpar mensagens do chat.");
     if (isNewChat && chat.messages.length > 0) {
       console.log("Limpando mensagens para novo chat");
       chat.setMessages([]);
+      return;
     }
-  }, [isNewChat, chat.setMessages, chat]);
+  }, [chatId, isNewChat, chat]);
 
   const chatState = useMemo(
     () => ({

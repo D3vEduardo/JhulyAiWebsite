@@ -18,17 +18,16 @@ export default function ChatContainer() {
     return asideIsOpen && innerWidth > 768;
   }, [asideIsOpen, innerWidth]);
 
-  const containerStyle = useMemo(
-    () => ({
-      marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
-      width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
-    }),
-    [isClient, shouldShowSidebar],
-  );
-
   return (
     <motion.div
-      style={containerStyle}
+      initial={{
+        marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
+        width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
+      }}
+      animate={{
+        marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
+        width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
+      }}
       layout={true}
       transition={{ type: "spring", stiffness: 80 }}
       className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative"

@@ -1,4 +1,3 @@
-// src/app/(private)/onboarding/layout.tsx
 "use server";
 
 import { headers } from "next/headers";
@@ -16,9 +15,6 @@ export default async function OnboardingLayout({
   if (!session || !session.user) {
     redirect("/overview");
   }
-
-  // Você pode carregar dados globais para a rota aqui, se quiser
-  // Mas melhor deixar os dados específicos para as páginas
 
   return <>{children}</>;
 }

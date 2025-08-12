@@ -51,7 +51,6 @@ export default function Onboarding() {
 
   const requiredFields: FieldsType = ["name", "email", "apiKey"];
 
-  // Add null check for user before filtering
   const fieldsNotFilled = user
     ? requiredFields.filter((field) => {
         if (field === "apiKey") {
@@ -85,7 +84,6 @@ export default function Onboarding() {
     return <LoadingScreen />;
   }
 
-  // Only redirect if user data is loaded and all fields are filled
   if (user && fieldsNotFilled.length === 0) {
     router.push("/overview");
     return null;

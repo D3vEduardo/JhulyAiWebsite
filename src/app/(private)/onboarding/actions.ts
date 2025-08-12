@@ -54,7 +54,6 @@ export async function OboardingAction(
       };
     }
 
-    // Verificação de sessão
     const header = await headers();
     const session = await getCachedSession(header);
 
@@ -85,7 +84,6 @@ export async function OboardingAction(
       };
     }
 
-    // Verifica se email já existe (se diferente do atual)
     if (email && email !== databaseUser.email) {
       const existingUser = await prisma.user.findUnique({
         where: { email },
@@ -101,14 +99,12 @@ export async function OboardingAction(
       }
     }
 
-    // Envia email de verificação se necessário
     if (!session.user.emailVerified && email) {
       await auth.api.sendVerificationEmail({
         body: { email },
       });
     }
 
-    // Atualiza dados do usuário
     await prisma.user.update({
       where: {
         id: databaseUser.id,
@@ -133,12 +129,10 @@ export async function OboardingAction(
   } catch (error) {
     log("Database error:", error);
 
-    // Tratamento específico para erros do Prisma
     if (error && typeof error === "object" && "code" in error) {
       const prismaError = error as { code: string; meta?: { target: string } };
 
       if (prismaError.code === "P2002") {
-        // Violação de constraint unique
         const target = prismaError.meta?.target;
         if (target?.includes("email")) {
           return {

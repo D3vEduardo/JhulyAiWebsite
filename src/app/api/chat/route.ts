@@ -8,33 +8,15 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
 import { Chat, Message } from "@prisma/client";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
-import { convertToCoreMessages, streamText } from "ai";
-import { getSystemPrompt } from "./system-prompt";
-import { CompletionResult, saveAssistantMessage } from "./saveAssistantMessage";
+import { convertToModelMessages, createUIMessageStreamResponse } from "ai";
 import { StringCompressor } from "@utils/stringCompressor";
 import { getCachedSession } from "@data/auth/getCachedSession";
+import { createCustomUIMessageStream } from "./createCustomUIMessageStream";
 const log = debug("app:api:chat");
 
-const messageSchema = z.object({
-  role: z.enum(["user", "assistant", "system", "tool"]),
-  content: z.string(),
-  tool_calls: z
-    .array(
-      z.object({
-        id: z.string(),
-        type: z.string(),
-        function: z.object({
-          name: z.string(),
-          arguments: z.string(),
-        }),
-      }),
-    )
-    .optional(),
-});
-
 const bodySchema = z.object({
-  messages: z.array(messageSchema),
-  chatId: z.string({ error: "Chat ID is required!" }),
+  prompt: z.string(),
+  id: z.string({ error: "Chat ID is required!" }),
   reasoning: z.coerce
     .boolean({
       error: "Reasoning must be a boolean value.",
@@ -66,23 +48,11 @@ export async function POST(req: NextRequest) {
     }
 
     const {
-      chatId,
-      messages,
+      id: chatId,
+      prompt,
       reasoning: reasoningEnabled,
       model: selectedModel,
     } = bodyParseResult.data;
-
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.role !== "user") {
-      return NextResponse.json(
-        {
-          error: "Last message must be from user!",
-        },
-        { status: 400 },
-      );
-    }
-
-    const prompt = lastMessage.content.trim();
 
     if (!session?.user.id) {
       log("User not authenticated! Session:", session);
@@ -243,27 +213,19 @@ export async function POST(req: NextRequest) {
 
     const aiMessages = await ConvertMessageOfDatabaseToAiModel(chat.messages);
     log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
-    const result = streamText({
+    const stream = createCustomUIMessageStream({
+      chatId: chat.id,
+      messages: convertToModelMessages(aiMessages),
       model,
-      messages: convertToCoreMessages(aiMessages),
-      system: getSystemPrompt("pt-BR"),
-      onFinish: async (completion: CompletionResult) => {
-        log("AI response received:", completion.text);
-
-        setImmediate(() => {
-          saveAssistantMessage({
-            chatId: chat.id,
-            completion,
-          });
-        });
-      },
+      redirect: !isExistingChat,
     });
 
-    return result.toDataStreamResponse({
-      sendReasoning: reasoningEnabled,
+    return createUIMessageStreamResponse({
+      stream,
       headers: {
         "X-Chat-Id": chat.id,
         "X-Chat-Name": encodeURIComponent(chat.name),
+        "X-Redirect": isExistingChat ? "false" : "true",
       },
     });
   } catch (error) {

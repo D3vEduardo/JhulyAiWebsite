@@ -10,18 +10,17 @@ datasource db {
 model User {
   id            String    @id @unique @default(uuid())
   name          String?
-  email         String?   @unique // Adicionar unique para performance
+  email         String?   @unique
   emailVerified Boolean   @default(false)
   apiKey        ApiKey?
   createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt // Usar @updatedAt automático
+  updatedAt     DateTime  @updatedAt
   messages      Message[]
   chats         Chat[]
   image         String?
   sessions      Session[]
   accounts      Account[]
 
-  // Índices para otimizar queries
   @@index([email])
   @@index([createdAt])
   @@map("user")
@@ -40,7 +39,6 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Índices para performance em queries frequentes
   @@index([chatId, createdAt])
   @@index([senderId])
   @@index([role])
@@ -57,7 +55,6 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Índices para otimizar busca de chats do usuário
   @@index([ownerId, createdAt])
   @@index([ownerId, updatedAt])
   @@map("chat")
@@ -74,7 +71,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Índices para performance de autenticação
   @@index([userId])
   @@index([expiresAt])
   @@map("session")
@@ -129,7 +125,6 @@ model ApiKey {
   @@map("api_key")
 }
 
-// Enum para roles de mensagem (type safety)
 enum MessageRole {
   USER
   ASSISTANT

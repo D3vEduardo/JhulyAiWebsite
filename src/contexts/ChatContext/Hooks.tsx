@@ -1,30 +1,10 @@
 import { useContext } from "react";
-import {
-  ChatStateContext,
-  ChatActionsContext,
-  ChatInputContext,
-} from "./Context";
+import { ChatContext } from "./Context";
 
-export function useChatStateContext() {
-  const context = useContext(ChatStateContext);
-  if (context === undefined) {
-    throw new Error("useChatStateContext must be used within a ChatProvider");
-  }
-  return context;
-}
-
-export function useChatActionsContext() {
-  const context = useContext(ChatActionsContext);
-  if (context === undefined) {
-    throw new Error("useChatActionsContext must be used within a ChatProvider");
-  }
-  return context;
-}
-
-export function useChatInputContext() {
-  const context = useContext(ChatInputContext);
-  if (context === undefined) {
-    throw new Error("useChatInputContext must be used within a ChatProvider");
+export function useChatContext() {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error("useChat deve ser usado dentro de um ChatProvider");
   }
   return context;
 }

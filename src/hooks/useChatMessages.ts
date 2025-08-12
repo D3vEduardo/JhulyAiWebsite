@@ -3,9 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 
-export function useChatMessages() {
-  const { chatId } = useParams();
+export function useChatMessages({
+  externalChatId,
+}: {
+  externalChatId?: string;
+} = {}) {
+  const { chatId: chatIdOfParams } = useParams();
   const queryClient = useQueryClient();
+  const chatId = externalChatId || chatIdOfParams || "new";
 
   useEffect(() => {
     const isExistingChat =

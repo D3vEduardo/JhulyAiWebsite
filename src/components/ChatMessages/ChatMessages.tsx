@@ -1,13 +1,25 @@
 "use client";
 
-import { useChatStateContext } from "@/contexts/ChatContext/Hooks";
+import { useChatContext } from "@/contexts/ChatContext/Hooks";
 import ChatBalloon, { MemoChatBalloon } from "../ChatBalloon/ChatBalloon";
 import Accordion from "../Accordion/Accordion";
 import { motion } from "motion/react";
 import LoadingSpritesAnimation from "@components/Loading/LoadingSpritesAnimation";
+import { useIsClient } from "@/hooks/useIsClient";
 
 export default function ChatMessages() {
-  const { isLoadingMessages, messages, error, status } = useChatStateContext();
+  const { status, messages, messagesIsLoading, error } = useChatContext();
+  const isClient = useIsClient();
+
+  if (!isClient) {
+    return (
+      <main
+        className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[175px]"
+        id="chatMessages"
+      />
+    );
+  }
+
   console.log("Renderizei ChatMessages");
   console.log(`Received messagens on ChatMessages component:`, messages);
   return (
@@ -15,40 +27,55 @@ export default function ChatMessages() {
       className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[175px]"
       id="chatMessages"
     >
-      {messages.length > 0 && !isLoadingMessages
-        ? messages.map((message, index) => (
+      {messages.length > 0 && !messagesIsLoading
+        ? messages.map((message, messageIndex) => (
             <motion.div
               layout={
-                status === "streaming" && index === messages.length - 1
+                status === "streaming" && messageIndex === messages.length - 1
                   ? false
                   : "position"
               }
               className="mb-2 h-auto w-full overflow-y-hidden"
-              key={`${message.id}_${index}_${message.role}`}
+              key={`${message.id}_${messageIndex}_${message.role}`}
             >
               {message.parts?.find((part) => part.type === "reasoning")
-                ?.reasoning && (
+                ?.text && (
                 <div className="mb-2 w-full ml-auto mr-auto">
                   <Accordion
                     title="Reasoning"
                     content={
                       message.parts.find((part) => part.type === "reasoning")
-                        ?.reasoning
+                        ?.text
                     }
                   />
                 </div>
               )}
 
-              <MemoChatBalloon
-                message={{
-                  content: message.content,
-                  role: message.role,
-                  id: message.id,
-                }}
-              />
+              {messageIndex === messages.length - 1 &&
+              status === "streaming" ? (
+                <ChatBalloon
+                  message={{
+                    content:
+                      message.parts.find((part) => part.type === "text")
+                        ?.text || "",
+                    role: message.role,
+                    id: message.id,
+                  }}
+                />
+              ) : (
+                <MemoChatBalloon
+                  message={{
+                    content:
+                      message.parts.find((part) => part.type === "text")
+                        ?.text || "",
+                    role: message.role,
+                    id: message.id,
+                  }}
+                />
+              )}
             </motion.div>
           ))
-        : !isLoadingMessages && (
+        : !messagesIsLoading && (
             <p className="text-center text-gray-500">
               No messages yet. Start a conversation!
             </p>

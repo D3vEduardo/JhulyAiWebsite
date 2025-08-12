@@ -1,29 +1,28 @@
+"use client";
+
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 import Button from "../Button";
-import { memo } from "react";
+import { useChatContext } from "@/contexts/ChatContext/Hooks";
 
-type PropsType = {
-  chatIsReady: boolean;
-  stop: () => void;
-  messagesLength: number;
-};
+export default function PromptSubmitButton() {
+  const { stop, messages, isLoading } = useChatContext();
+  const messagesLength = messages.length;
 
-function PromptSubmitButton({ chatIsReady, stop, messagesLength }: PropsType) {
   return (
     <Button
-      type={chatIsReady ? "submit" : "button"}
+      type={!isLoading ? "submit" : "button"}
       className="aspect-square w-12 h-12 p-0 flex items-center
       justify-center prompt-form-button"
       data-tooltip-content="Enviar prompt"
       variant={{
-        color: chatIsReady ? "secondary" : "danger",
+        color: !isLoading ? "secondary" : "danger",
         size: "sm",
       }}
       onClick={() => {
-        if (!chatIsReady) stop();
+        if (!!isLoading) stop();
       }}
     >
-      {chatIsReady ? (
+      {!isLoading ? (
         <Icon
           icon="iconamoon:send-bold"
           width="24"
@@ -50,5 +49,3 @@ function PromptSubmitButton({ chatIsReady, stop, messagesLength }: PropsType) {
     </Button>
   );
 }
-
-export default memo(PromptSubmitButton);

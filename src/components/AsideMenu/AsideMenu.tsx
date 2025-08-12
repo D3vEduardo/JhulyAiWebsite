@@ -1,12 +1,12 @@
 "use client";
 import Button from "@components/Button";
 import { motion, TargetAndTransition, VariantLabels } from "motion/react";
-import { useAside } from "@store/asideMenu";
+import { DESKTOP_BREAKPOINT, useAside } from "@store/asideMenu";
 import AsideMenuChats from "./AsideMenuChats";
 import AsideMenuFooter from "./AsideMenuFooter";
 import { useRouter } from "next/navigation";
-import { useChatActionsContext } from "@/contexts/ChatContext/Hooks";
 import { useMemo } from "react";
+import { useWindowSize } from "@/hooks/useWindowSize";
 
 type MotionDivAnimationType =
   | boolean
@@ -17,17 +17,17 @@ type MotionDivAnimationType =
 export default function AsideMenu() {
   console.log("Renderizei AsideMenu");
   const { asideIsOpen, toggleAside } = useAside();
+  const innerWidth = useWindowSize();
 
   const containerStyles: MotionDivAnimationType = useMemo(
     () => ({
       x: asideIsOpen ? 0 : "-100%",
       opacity: asideIsOpen ? 1 : 0,
     }),
-    [asideIsOpen]
+    [asideIsOpen],
   );
 
   const router = useRouter();
-  const { setMessages } = useChatActionsContext();
 
   return (
     <motion.div
@@ -52,9 +52,9 @@ export default function AsideMenu() {
           tapAnimationSize: 0.9,
         }}
         onClick={() => {
-          setMessages([]);
-          toggleAside();
+          if (innerWidth < DESKTOP_BREAKPOINT && asideIsOpen) toggleAside();
           router.replace("/chat/new");
+          window.dispatchEvent(new CustomEvent("new-chat-requested"));
         }}
       >
         Novo chat

@@ -4,22 +4,12 @@ import { StringCompressor } from "@utils/stringCompressor";
 
 type MessageWithSender = Message & { sender?: User | null };
 
-function convertRoleToUIFormat(
-  role: MessageRole,
-): "user" | "assistant" | "system" {
-  switch (role) {
-    case MessageRole.USER:
-      return "user";
-    case MessageRole.ASSISTANT:
-      return "assistant";
-    case MessageRole.SYSTEM:
-      return "system";
-    case MessageRole.TOOL:
-      return "assistant";
-    default:
-      return "user";
-  }
-}
+const roleMap: Record<MessageRole, UIMessage["role"]> = {
+  [MessageRole.USER]: "user",
+  [MessageRole.ASSISTANT]: "assistant",
+  [MessageRole.SYSTEM]: "system",
+  [MessageRole.TOOL]: "assistant",
+};
 
 export async function ConvertMessageOfDatabaseToAiModel(
   messages: MessageWithSender[],
@@ -27,36 +17,25 @@ export async function ConvertMessageOfDatabaseToAiModel(
   const sorted = [...messages].sort(
     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
   );
-  const uiMessages: UIMessage[] = [];
 
-  for (const msg of sorted) {
-    const [contentText, reasoningText] = await Promise.all([
-      StringCompressor.decompress({
-        compressedText: msg.content,
-      }),
-      StringCompressor.decompress({
-        compressedText: msg.reasoning || "",
-      }),
-    ]);
+  return Promise.all(
+    sorted.map(async (msg) => {
+      const [text, reasoningText] = await Promise.all([
+        StringCompressor.decompress({ compressedText: msg.content }),
+        StringCompressor.decompress({ compressedText: msg.reasoning || "" }),
+      ]);
 
-    const parts: UIMessage["parts"] = [{ type: "text", text: contentText }];
+      const parts: UIMessage["parts"] = [{ type: "text", text }];
 
-    if (msg.reasoning) {
-      parts.push({
-        type: "reasoning",
-        reasoning: reasoningText,
-        details: [{ type: "text", text: msg.reasoning }],
-      });
-    }
+      if (msg.reasoning) {
+        parts.push({ type: "reasoning", text: reasoningText });
+      }
 
-    uiMessages.push({
-      id: msg.id,
-      role: convertRoleToUIFormat(msg.role),
-      content: contentText,
-      parts,
-      createdAt: msg.createdAt,
-    });
-  }
-
-  return uiMessages;
+      return {
+        id: String(msg.id),
+        role: roleMap[msg.role],
+        parts,
+      };
+    }),
+  );
 }

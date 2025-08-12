@@ -41,7 +41,6 @@ export default function AsideMenuChats() {
     refetchOnReconnect: true,
   });
 
-  // Prefetch chat messages on hover
   const prefetchMessages = (chatId: string) => {
     queryClient.prefetchQuery({
       queryKey: ["chat", `chat_${chatId}`],

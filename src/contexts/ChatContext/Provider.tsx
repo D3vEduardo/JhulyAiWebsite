@@ -1,233 +1,123 @@
 import { useChatMessages } from "@/hooks/useChatMessages";
-import { useChat, Message } from "@ai-sdk/react"; // Importar Message do ai-sdk/react, não do react-hook-form
+import { useChat } from "@ai-sdk/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation"; // Usar ambos do next/navigation
-import {
-  ReactNode,
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "react";
-import {
-  ChatStateContext,
-  ChatActionsContext,
-  ChatInputContext,
-} from "./Context";
-import { getMoreRecentMessages } from "./getMoreRecentMessages";
+import { UIMessage, DefaultChatTransport } from "ai";
+import { ReactNode, useCallback, useEffect, useRef } from "react";
+import { ChatContext } from "./Context";
+import { ChatContextType } from "./types";
 
-function hasMessageId(message: unknown): message is Message & { id: string } {
-  return (
-    message !== null &&
-    typeof message === "object" &&
-    "id" in message &&
-    typeof (message as { id: unknown }).id === "string"
-  );
+interface ChatProviderProps {
+  chatId: string | null;
+  children: ReactNode;
 }
 
-export function ChatProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
+export function ChatProvider({ chatId, children }: ChatProviderProps) {
   const queryClient = useQueryClient();
-
-  const chatId = pathname.includes("/chat/")
-    ? (pathname.split("/").pop() ?? null)
-    : null;
-  const isNewChat = chatId === "new";
+  const isNewChat = chatId === "new" || !chatId;
   const newChatIdRef = useRef<string | null>(null);
-  const [navigateToChatId, setNavigateToChatId] = useState<string | null>(null);
 
   const chatMessagesQuery = useChatMessages();
 
-  const onResponse = useCallback(
-    async (response: Response) => {
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Ocorreu um erro desconhecido.");
-      }
-
-      const newChatIdFromHeader = response.headers.get("X-Chat-Id");
-      if (isNewChat && newChatIdFromHeader) {
-        newChatIdRef.current = newChatIdFromHeader;
-        await queryClient.invalidateQueries({ queryKey: ["chats"] });
-      }
-    },
-    [isNewChat, queryClient]
-  );
   const onFinish = useCallback(
-    (message: Message) => {
-      const finalChatId = isNewChat ? newChatIdRef.current : chatId;
-      console.log("Final chatId onFinish:", finalChatId);
-      if (!finalChatId) {
-        alert("Final chat não existe!");
+    ({ message }: { message: UIMessage }) => {
+      if (!chatId || isNewChat) {
+        const finalChatId = newChatIdRef.current;
+        if (finalChatId) {
+          queryClient.setQueryData(
+            ["chat", `chat_${finalChatId}`],
+            (oldData: UIMessage[] = []) => [...oldData, message],
+          );
+
+          window.dispatchEvent(
+            new CustomEvent("chat-created", {
+              detail: { chatId: finalChatId },
+            }),
+          );
+        }
         return;
       }
 
-      queryClient.setQueryData(["chat", `chat_${chatId}`], () => [
-        ...(chatMessagesQuery.data ?? []),
-        message,
-      ]);
-
-      setNavigateToChatId(finalChatId);
+      queryClient.setQueryData(
+        ["chat", `chat_${chatId}`],
+        (oldData: UIMessage[] = []) => [...oldData, message],
+      );
     },
-    [isNewChat, chatId, queryClient, chatMessagesQuery.data]
+    [chatId, isNewChat, queryClient],
+  );
+
+  const onData = useCallback(
+    async (message: { type: `data-${string}`; data: unknown }) => {
+      if (message.type === "data-chat-created") {
+        const data = message.data as { chatId?: string; redirect?: boolean };
+
+        if (data.chatId) {
+          newChatIdRef.current = data.chatId;
+          console.log("Novo chatId salvo:", data.chatId);
+        }
+      }
+    },
+    [],
   );
 
   const chat = useChat({
     id: chatId || "new",
+    messages: isNewChat ? [] : chatMessagesQuery.data || [],
     onFinish,
-    onResponse,
-    onError(error) {
+    onData,
+    onError: (error) => {
       console.error("Chat error:", error);
     },
-    initialMessages: isNewChat ? [] : (chatMessagesQuery.data ?? []),
-    body: {
-      chatId,
-    },
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      body: { chatId },
+    }),
   });
 
   useEffect(() => {
-    const chatMessagesContainer = document.getElementById("chatMessages");
-
-    if (chatMessagesContainer) {
-      const { scrollTop, scrollHeight, clientHeight } = chatMessagesContainer;
-
-      console.log("Scroll info:", {
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        distanceFromBottom: scrollHeight - (scrollTop + clientHeight),
-      });
-
-      chatMessagesContainer.scrollTo({
-        top: scrollHeight,
+    const chatContainer = document.getElementById("chatMessages");
+    if (
+      chatContainer &&
+      chat.status !== "streaming" &&
+      chat.messages.length > 0
+    ) {
+      chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
         behavior: "smooth",
       });
     }
-  }, [chatId, chat.status, chat.messages, chatMessagesQuery]);
+  }, [chat.messages, chat.status]);
 
   useEffect(() => {
-    if (navigateToChatId) {
-      router.push(`/chat/${navigateToChatId}`);
-      setNavigateToChatId(null);
-    }
-  }, [navigateToChatId, router]);
-
-  const chatIsReady =
-    chat.status !== "streaming" && chat.status !== "submitted";
-
-  useEffect(() => {
-    if (!isNewChat && chatIsReady && chatMessagesQuery.data && chatId) {
-      const cachedMessages = queryClient.getQueryData<Message[]>([
-        "chat",
-        `chat_${chatId}`,
-      ]);
-
-      if (cachedMessages && cachedMessages.length > 0) {
-        const currentMessagesIds = chat.messages
-          .filter(hasMessageId)
-          .map((m) => m.id)
-          .sort();
-
-        const cachedMessagesIds = cachedMessages
-          .filter(hasMessageId)
-          .map((m) => m.id)
-          .sort();
-
-        const messagesDifferent =
-          JSON.stringify(currentMessagesIds) !==
-          JSON.stringify(cachedMessagesIds);
-
-        if (messagesDifferent) {
-          console.log(
-            "Detectadas diferenças nas mensagens para chatId:",
-            chatId
-          );
-
-          const moreRecentMessages = getMoreRecentMessages({
-            messages1: chat.messages,
-            messages2: cachedMessages,
-          });
-
-          if (
-            JSON.stringify(moreRecentMessages) ===
-            JSON.stringify(cachedMessages)
-          ) {
-            console.log(
-              "Sincronizando mensagens do cache para chatId:",
-              chatId
-            );
-            chat.setMessages(cachedMessages);
-          } else {
-            console.log(
-              "Mensagens do chat atual são mais recentes, mantendo estado atual"
-            );
-            queryClient.setQueryData(["chat", `chat_${chatId}`], chat.messages);
-          }
-        }
+    const handleNewChatRequested = () => {
+      if (isNewChat) {
+        chat.setMessages([]);
+        newChatIdRef.current = null;
       }
-    }
-  }, [
-    chat,
+    };
+
+    window.addEventListener("new-chat-requested", handleNewChatRequested);
+
+    return () => {
+      window.removeEventListener("new-chat-requested", handleNewChatRequested);
+    };
+  }, [isNewChat, chat.setMessages, chat]);
+
+  const contextValue: ChatContextType = {
+    messages: chat.messages,
+    messagesIsLoading: chatMessagesQuery.isLoading,
+    isLoading: chat.status === "streaming" || chat.status === "submitted",
+    error: chat.error,
+
+    sendMessage: chat.sendMessage,
+    stop: chat.stop,
+    setMessages: chat.setMessages,
+    status: chat.status,
+
     chatId,
     isNewChat,
-    chatIsReady,
-    chatMessagesQuery.data,
-    chat.messages.length,
-    queryClient,
-  ]);
-
-  useEffect(() => {
-    console.log("Verificando se precisa limpar mensagens do chat.");
-    if (isNewChat && chat.messages.length > 0) {
-      console.log("Limpando mensagens para novo chat");
-      chat.setMessages([]);
-      return;
-    }
-  }, [chatId, isNewChat, chat]);
-
-  const chatState = useMemo(
-    () => ({
-      chatId,
-      isNewChat,
-      isLoadingMessages: chatMessagesQuery.isLoading,
-      messages: chat.messages,
-      status: chat.status,
-      error: chat.error,
-    }),
-    [
-      chatId,
-      isNewChat,
-      chatMessagesQuery.isLoading,
-      chat.messages,
-      chat.status,
-      chat.error,
-    ]
-  );
-
-  const chatActions = useMemo(
-    () => ({
-      handleSubmit: chat.handleSubmit,
-      stop: chat.stop,
-      addToolResult: chat.addToolResult,
-      setMessages: chat.setMessages,
-    }),
-    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
-  );
-
-  const chatInput = {
-    value: chat.input,
-    onChange: chat.handleInputChange,
   };
 
   return (
-    <ChatStateContext.Provider value={chatState}>
-      <ChatActionsContext.Provider value={chatActions}>
-        <ChatInputContext.Provider value={chatInput}>
-          {children}
-        </ChatInputContext.Provider>
-      </ChatActionsContext.Provider>
-    </ChatStateContext.Provider>
+    <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
   );
 }

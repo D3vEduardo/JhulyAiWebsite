@@ -3,23 +3,15 @@
 import PromptInput from "./PromptInput";
 import { motion } from "motion/react";
 import { useRef, useState } from "react";
-import { useParams } from "next/navigation";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
-import {
-  useChatStateContext,
-  useChatActionsContext,
-  useChatInputContext,
-} from "@/contexts/ChatContext/Hooks";
+import { useChatContext } from "@/contexts/ChatContext/Hooks";
 import { useDropdown } from "@store/dropdown";
 import { CustomTooltip } from "../CustomTooltip";
 
 export default function PromptForm() {
-  const { value: input } = useChatInputContext();
-  const { status, messages } = useChatStateContext();
-  const { handleSubmit, stop } = useChatActionsContext();
-  const { chatId } = useParams();
-  const chatIsReady = status === "ready" || status === "error";
+  const { sendMessage, isLoading } = useChatContext();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [reasoning, setReasoning] = useState<boolean>(false);
   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
   const formRef = useRef<HTMLFormElement>(null);
@@ -29,14 +21,26 @@ export default function PromptForm() {
       ref={formRef}
       onSubmit={async (e) => {
         e.preventDefault();
-        handleSubmit(e, {
-          body: {
-            prompt: input,
-            reasoning: reasoning,
-            chatId,
-            model: dropdown.selectedValue?.value || "BASIC",
+        console.log(
+          "Enviando mensagem do formulário de prompt. Prompt:",
+          inputRef?.current?.value,
+        );
+
+        if (isLoading || !inputRef?.current?.value.trim()) return;
+
+        sendMessage(
+          {
+            text: inputRef.current.value,
           },
-        });
+          {
+            body: {
+              prompt: inputRef.current.value,
+              reasoning: reasoning,
+              // chatId,
+              model: dropdown.selectedValue?.value || "BASIC",
+            },
+          },
+        );
       }}
       layout={true}
       transition={{ type: "spring", stiffness: 80 }}
@@ -44,18 +48,10 @@ export default function PromptForm() {
                 py-2 px-2 rounded-2xl border-2 border-almond z-10 flex justify-between gap-x-2
                 max-w-[900px]`}
     >
-      <PromptInput formRef={formRef} />
+      <PromptInput formRef={formRef} inputRef={inputRef} />
       <section className="flex flex-col md:flex-initial justify-end gap-2 py-1 px-2">
-        <ReasoningButton
-          reasoningText={reasoning}
-          setReasoning={setReasoning}
-          chatIsReady={chatIsReady}
-        />
-        <PromptSubmitButton
-          chatIsReady={chatIsReady}
-          stop={stop}
-          messagesLength={messages.length}
-        />
+        <ReasoningButton reasoning={reasoning} setReasoning={setReasoning} />
+        <PromptSubmitButton />
         <CustomTooltip anchorSelect=".prompt-form-button" delayShow={500} />
       </section>
     </motion.form>

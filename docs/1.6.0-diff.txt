@@ -1,0 +1,1856 @@
+diff --git a/package.json b/package.json
+index e2504ba..3158724 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "jhuly-website",
+-  "version": "1.5.0",
++  "version": "1.6.0",
+   "private": true,
+   "scripts": {
+     "dev": "next dev --turbopack",
+@@ -13,13 +13,13 @@
+     "prisma:push": "dotenv -- pnpm prisma db push"
+   },
+   "dependencies": {
+-    "@ai-sdk/google": "^1.2.22",
+-    "@ai-sdk/react": "^1.2.12",
++    "@ai-sdk/google": "^2.0.4",
++    "@ai-sdk/react": "^2.0.10",
+     "@hookform/resolvers": "^5.1.1",
+-    "@openrouter/ai-sdk-provider": "0.7.1",
++    "@openrouter/ai-sdk-provider": "1.1.2",
+     "@prisma/client": "^6.13.0",
+     "@tanstack/react-query": "^5.83.0",
+-    "ai": "^4.3.19",
++    "ai": "^5.0.10",
+     "better-auth": "^1.3.0",
+     "highlight.js": "^11.11.1",
+     "motion": "^12.23.6",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 77a116d..683877a 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -9,17 +9,17 @@ importers:
+   .:
+     dependencies:
+       '@ai-sdk/google':
+-        specifier: ^1.2.22
+-        version: 1.2.22(zod@4.0.5)
++        specifier: ^2.0.4
++        version: 2.0.4(zod@4.0.5)
+       '@ai-sdk/react':
+-        specifier: ^1.2.12
+-        version: 1.2.12(react@19.1.0)(zod@4.0.5)
++        specifier: ^2.0.10
++        version: 2.0.10(react@19.1.0)(zod@4.0.5)
+       '@hookform/resolvers':
+         specifier: ^5.1.1
+         version: 5.1.1(react-hook-form@7.60.0(react@19.1.0))
+       '@openrouter/ai-sdk-provider':
+-        specifier: 0.7.1
+-        version: 0.7.1(ai@4.3.19(react@19.1.0)(zod@4.0.5))(zod@4.0.5)
++        specifier: 1.1.2
++        version: 1.1.2(ai@5.0.10(zod@4.0.5))(zod@4.0.5)
+       '@prisma/client':
+         specifier: ^6.13.0
+         version: 6.13.0(prisma@6.13.0(typescript@5.8.3))(typescript@5.8.3)
+@@ -27,8 +27,8 @@ importers:
+         specifier: ^5.83.0
+         version: 5.83.0(react@19.1.0)
+       ai:
+-        specifier: ^4.3.19
+-        version: 4.3.19(react@19.1.0)(zod@4.0.5)
++        specifier: ^5.0.10
++        version: 5.0.10(zod@4.0.5)
+       better-auth:
+         specifier: ^1.3.0
+         version: 1.3.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+@@ -132,38 +132,38 @@ importers:
+ 
+ packages:
+ 
+-  '@ai-sdk/google@1.2.22':
+-    resolution: {integrity: sha512-Ppxu3DIieF1G9pyQ5O1Z646GYR0gkC57YdBqXJ82qvCdhEhZHu0TWhmnOoeIWe2olSbuDeoOY+MfJrW8dzS3Hw==}
++  '@ai-sdk/gateway@1.0.4':
++    resolution: {integrity: sha512-1roLdgMbFU3Nr4MC97/te7w6OqxsWBkDUkpbCcvxF3jz/ku91WVaJldn/PKU8feMKNyI5W9wnqhbjb1BqbExOQ==}
+     engines: {node: '>=18'}
+     peerDependencies:
+-      zod: ^3.0.0
++      zod: ^3.25.76 || ^4
+ 
+-  '@ai-sdk/provider-utils@2.2.8':
+-    resolution: {integrity: sha512-fqhG+4sCVv8x7nFzYnFo19ryhAa3w096Kmc3hWxMQfW/TubPOmt3A6tYZhl4mUfQWWQMsuSkLrtjlWuXBVSGQA==}
++  '@ai-sdk/google@2.0.4':
++    resolution: {integrity: sha512-d8CF3uzabVqxPwcuXLVv5OIq55bM5oKKNNMQacYQMEv3I9W6EYYYeaM9Buo+/yi1IdKsRIPsa9LQO/H9S9x8yQ==}
+     engines: {node: '>=18'}
+     peerDependencies:
+-      zod: ^3.23.8
++      zod: ^3.25.76 || ^4
+ 
+-  '@ai-sdk/provider@1.1.3':
+-    resolution: {integrity: sha512-qZMxYJ0qqX/RfnuIaab+zp8UAeJn/ygXXAffR5I4N0n1IrvA6qBsjc8hXLmBiMV2zoXlifkacF7sEFnYnjBcqg==}
++  '@ai-sdk/provider-utils@3.0.1':
++    resolution: {integrity: sha512-/iP1sKc6UdJgGH98OCly7sWJKv+J9G47PnTjIj40IJMUQKwDrUMyf7zOOfRtPwSuNifYhSoJQ4s1WltI65gJ/g==}
++    engines: {node: '>=18'}
++    peerDependencies:
++      zod: ^3.25.76 || ^4
++
++  '@ai-sdk/provider@2.0.0':
++    resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
+     engines: {node: '>=18'}
+ 
+-  '@ai-sdk/react@1.2.12':
+-    resolution: {integrity: sha512-jK1IZZ22evPZoQW3vlkZ7wvjYGYF+tRBKXtrcolduIkQ/m/sOAVcVeVDUDvh1T91xCnWCdUGCPZg2avZ90mv3g==}
++  '@ai-sdk/react@2.0.10':
++    resolution: {integrity: sha512-8Wq1vtuokfal3DNIRA6ckRwoKZ1imoSUS0VUgT11eDkOm33PP3A770jGqK0NV0uKh9odyy5fpGtswI2pxMCPug==}
+     engines: {node: '>=18'}
+     peerDependencies:
+       react: ^18 || ^19 || ^19.0.0-rc
+-      zod: ^3.23.8
++      zod: ^3.25.76 || ^4
+     peerDependenciesMeta:
+       zod:
+         optional: true
+ 
+-  '@ai-sdk/ui-utils@1.2.11':
+-    resolution: {integrity: sha512-3zcwCc8ezzFlwp3ZD15wAPjf2Au4s3vAbKsXQVyhxODHcmu0iyPO2Eua6D/vicq/AUm/BAo60r97O6HU+EI0+w==}
+-    engines: {node: '>=18'}
+-    peerDependencies:
+-      zod: ^3.23.8
+-
+   '@alloc/quick-lru@5.2.0':
+     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
+     engines: {node: '>=10'}
+@@ -500,12 +500,12 @@ packages:
+     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
+     engines: {node: '>=12.4.0'}
+ 
+-  '@openrouter/ai-sdk-provider@0.7.1':
+-    resolution: {integrity: sha512-jppCJErJ13KKnr0rOJrElmrlGul+0G5OO45Tqn1II2uIVcJLjyuzyS1hkCWD3fmlKVAuwVbyumTh6JQsS4e+4g==}
++  '@openrouter/ai-sdk-provider@1.1.2':
++    resolution: {integrity: sha512-cfiKVpNygGFaJojBHFvtTf7UiF458Xh9yPcTg4FXF7bGYN5V33Rxx9dXNE12fjv6lHeC5C7jwQHDrzUIFol1iQ==}
+     engines: {node: '>=18'}
+     peerDependencies:
+-      ai: ^4.3.16
+-      zod: ^3.25.34
++      ai: ^5.0.0
++      zod: ^3.24.1 || ^v4
+ 
+   '@opentelemetry/api@1.9.0':
+     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
+@@ -684,9 +684,6 @@ packages:
+   '@types/debug@4.1.12':
+     resolution: {integrity: sha512-vIChWdVG3LG1SMxEvI/AK+FWJthlrqlTu7fbrlywTkkaONwk/UAGaULXRlf8vkzFBLVm0zkMdCquhL5aOjhXPQ==}
+ 
+-  '@types/diff-match-patch@1.0.36':
+-    resolution: {integrity: sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==}
+-
+   '@types/estree-jsx@1.0.5':
+     resolution: {integrity: sha512-52CcUVNFyfb1A2ALocQw/Dd1BQFNmSdkuC3BkZ6iqhdMfQz7JWOFRuJFloOzjk+6WijU56m9oKXFAXc7o3Towg==}
+ 
+@@ -895,15 +892,11 @@ packages:
+     engines: {node: '>=0.4.0'}
+     hasBin: true
+ 
+-  ai@4.3.19:
+-    resolution: {integrity: sha512-dIE2bfNpqHN3r6IINp9znguYdhIOheKW2LDigAMrgt/upT3B8eBGPSCblENvaZGoq+hxaN9fSMzjWpbqloP+7Q==}
++  ai@5.0.10:
++    resolution: {integrity: sha512-oPvaifsnHZzT3I07qI9jgWDOGpXDAFSXJ54rgpeHSq6qKQlQ3vwaCgQz861wb+5iJ/kk+B/qm3i5Yfghc/+XSw==}
+     engines: {node: '>=18'}
+     peerDependencies:
+-      react: ^18 || ^19 || ^19.0.0-rc
+-      zod: ^3.23.8
+-    peerDependenciesMeta:
+-      react:
+-        optional: true
++      zod: ^3.25.76 || ^4
+ 
+   ajv@6.12.6:
+     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
+@@ -1038,10 +1031,6 @@ packages:
+     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
+     engines: {node: '>=10'}
+ 
+-  chalk@5.4.1:
+-    resolution: {integrity: sha512-zgVZuo2WcZgfUEmsn6eO3kINexW8RAE4maiQ8QNs8CtpPCSyMiYsULR3HQYkm3w8FIA3SberyMJMSldGsW+U3w==}
+-    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
+-
+   character-entities-html4@2.1.0:
+     resolution: {integrity: sha512-1v7fgQRj6hnSwFpq1Eu0ynr/CDEw0rXo2B61qXrLNdHZmPKgb7fqS1a2JwF0rISo9q77jDI8VMEHoApn8qDoZA==}
+ 
+@@ -1172,9 +1161,6 @@ packages:
+   devlop@1.1.0:
+     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
+ 
+-  diff-match-patch@1.0.5:
+-    resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
+-
+   doctrine@2.1.0:
+     resolution: {integrity: sha512-35mSku4ZXK0vfCuHEDAwt55dg2jNajHZ1odvF+8SSr82EsZY4QmXfuWso8oEd8zRhVObSN18aM0CjSdoBX7zIw==}
+     engines: {node: '>=0.10.0'}
+@@ -1376,6 +1362,10 @@ packages:
+     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
+     engines: {node: '>=0.10.0'}
+ 
++  eventsource-parser@3.0.3:
++    resolution: {integrity: sha512-nVpZkTMM9rF6AQ9gPJpFsNAMt48wIzB5TQgiTLdHiuO8XEDhUgZEhqKlZWXbIzo9VmJ/HvysHqEaVeD5v9TPvA==}
++    engines: {node: '>=20.0.0'}
++
+   exsolve@1.0.7:
+     resolution: {integrity: sha512-VO5fQUzZtI6C+vx4w/4BWJpg3s/5l+6pRQEHzFRM8WFi4XffSP1Z+4qi7GbjWbvRQEbdIco5mIMq+zX4rPuLrw==}
+ 
+@@ -1758,11 +1748,6 @@ packages:
+     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
+     hasBin: true
+ 
+-  jsondiffpatch@0.6.0:
+-    resolution: {integrity: sha512-3QItJOXp2AP1uv7waBkao5nCvhEv+QmJAd38Ybq7wNI74Q+BBmnLn4EDKz6yI9xGAIQoUF87qHt+kc1IVxB4zQ==}
+-    engines: {node: ^18.0.0 || >=20.0.0}
+-    hasBin: true
+-
+   jsx-ast-utils@3.3.5:
+     resolution: {integrity: sha512-ZZow9HBI5O6EPgSJLUb8n2NKgmVWTwCvHGwFuJlMjvLFqlGG6pjirPhtdsseaLZjSibD8eegzmYpUZwoIlj2cQ==}
+     engines: {node: '>=4.0'}
+@@ -2381,9 +2366,6 @@ packages:
+   scheduler@0.26.0:
+     resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
+ 
+-  secure-json-parse@2.7.0:
+-    resolution: {integrity: sha512-6aU+Rwsezw7VR8/nyvKTx8QpWH9FrcYiXXlqC4z5d5XQBDRqtbfsRjnwGyqbi3gddNtWHuEk9OANUotL26qKUw==}
+-
+   semver@6.3.1:
+     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
+     hasBin: true
+@@ -2739,40 +2721,40 @@ packages:
+ 
+ snapshots:
+ 
+-  '@ai-sdk/google@1.2.22(zod@4.0.5)':
++  '@ai-sdk/gateway@1.0.4(zod@4.0.5)':
+     dependencies:
+-      '@ai-sdk/provider': 1.1.3
+-      '@ai-sdk/provider-utils': 2.2.8(zod@4.0.5)
++      '@ai-sdk/provider': 2.0.0
++      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.5)
+       zod: 4.0.5
+ 
+-  '@ai-sdk/provider-utils@2.2.8(zod@4.0.5)':
++  '@ai-sdk/google@2.0.4(zod@4.0.5)':
+     dependencies:
+-      '@ai-sdk/provider': 1.1.3
+-      nanoid: 3.3.11
+-      secure-json-parse: 2.7.0
++      '@ai-sdk/provider': 2.0.0
++      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.5)
++      zod: 4.0.5
++
++  '@ai-sdk/provider-utils@3.0.1(zod@4.0.5)':
++    dependencies:
++      '@ai-sdk/provider': 2.0.0
++      '@standard-schema/spec': 1.0.0
++      eventsource-parser: 3.0.3
+       zod: 4.0.5
++      zod-to-json-schema: 3.24.6(zod@4.0.5)
+ 
+-  '@ai-sdk/provider@1.1.3':
++  '@ai-sdk/provider@2.0.0':
+     dependencies:
+       json-schema: 0.4.0
+ 
+-  '@ai-sdk/react@1.2.12(react@19.1.0)(zod@4.0.5)':
++  '@ai-sdk/react@2.0.10(react@19.1.0)(zod@4.0.5)':
+     dependencies:
+-      '@ai-sdk/provider-utils': 2.2.8(zod@4.0.5)
+-      '@ai-sdk/ui-utils': 1.2.11(zod@4.0.5)
++      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.5)
++      ai: 5.0.10(zod@4.0.5)
+       react: 19.1.0
+       swr: 2.3.4(react@19.1.0)
+       throttleit: 2.1.0
+     optionalDependencies:
+       zod: 4.0.5
+ 
+-  '@ai-sdk/ui-utils@1.2.11(zod@4.0.5)':
+-    dependencies:
+-      '@ai-sdk/provider': 1.1.3
+-      '@ai-sdk/provider-utils': 2.2.8(zod@4.0.5)
+-      zod: 4.0.5
+-      zod-to-json-schema: 3.24.6(zod@4.0.5)
+-
+   '@alloc/quick-lru@5.2.0': {}
+ 
+   '@ampproject/remapping@2.3.0':
+@@ -3054,11 +3036,9 @@ snapshots:
+ 
+   '@nolyfill/is-core-module@1.0.39': {}
+ 
+-  '@openrouter/ai-sdk-provider@0.7.1(ai@4.3.19(react@19.1.0)(zod@4.0.5))(zod@4.0.5)':
++  '@openrouter/ai-sdk-provider@1.1.2(ai@5.0.10(zod@4.0.5))(zod@4.0.5)':
+     dependencies:
+-      '@ai-sdk/provider': 1.1.3
+-      '@ai-sdk/provider-utils': 2.2.8(zod@4.0.5)
+-      ai: 4.3.19(react@19.1.0)(zod@4.0.5)
++      ai: 5.0.10(zod@4.0.5)
+       zod: 4.0.5
+ 
+   '@opentelemetry/api@1.9.0': {}
+@@ -3245,8 +3225,6 @@ snapshots:
+     dependencies:
+       '@types/ms': 2.1.0
+ 
+-  '@types/diff-match-patch@1.0.36': {}
+-
+   '@types/estree-jsx@1.0.5':
+     dependencies:
+       '@types/estree': 1.0.8
+@@ -3445,17 +3423,13 @@ snapshots:
+ 
+   acorn@8.15.0: {}
+ 
+-  ai@4.3.19(react@19.1.0)(zod@4.0.5):
++  ai@5.0.10(zod@4.0.5):
+     dependencies:
+-      '@ai-sdk/provider': 1.1.3
+-      '@ai-sdk/provider-utils': 2.2.8(zod@4.0.5)
+-      '@ai-sdk/react': 1.2.12(react@19.1.0)(zod@4.0.5)
+-      '@ai-sdk/ui-utils': 1.2.11(zod@4.0.5)
++      '@ai-sdk/gateway': 1.0.4(zod@4.0.5)
++      '@ai-sdk/provider': 2.0.0
++      '@ai-sdk/provider-utils': 3.0.1(zod@4.0.5)
+       '@opentelemetry/api': 1.9.0
+-      jsondiffpatch: 0.6.0
+       zod: 4.0.5
+-    optionalDependencies:
+-      react: 19.1.0
+ 
+   ajv@6.12.6:
+     dependencies:
+@@ -3642,8 +3616,6 @@ snapshots:
+       ansi-styles: 4.3.0
+       supports-color: 7.2.0
+ 
+-  chalk@5.4.1: {}
+-
+   character-entities-html4@2.1.0: {}
+ 
+   character-entities-legacy@3.0.0: {}
+@@ -3760,8 +3732,6 @@ snapshots:
+     dependencies:
+       dequal: 2.0.3
+ 
+-  diff-match-patch@1.0.5: {}
+-
+   doctrine@2.1.0:
+     dependencies:
+       esutils: 2.0.3
+@@ -4103,6 +4073,8 @@ snapshots:
+ 
+   esutils@2.0.3: {}
+ 
++  eventsource-parser@3.0.3: {}
++
+   exsolve@1.0.7: {}
+ 
+   extend@3.0.2: {}
+@@ -4507,12 +4479,6 @@ snapshots:
+     dependencies:
+       minimist: 1.2.8
+ 
+-  jsondiffpatch@0.6.0:
+-    dependencies:
+-      '@types/diff-match-patch': 1.0.36
+-      chalk: 5.4.1
+-      diff-match-patch: 1.0.5
+-
+   jsx-ast-utils@3.3.5:
+     dependencies:
+       array-includes: 3.1.9
+@@ -5379,8 +5345,6 @@ snapshots:
+ 
+   scheduler@0.26.0: {}
+ 
+-  secure-json-parse@2.7.0: {}
+-
+   semver@6.3.1: {}
+ 
+   semver@7.7.2: {}
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 4361565..3bf676d 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -10,18 +10,17 @@ datasource db {
+ model User {
+   id            String    @id @unique @default(uuid())
+   name          String?
+-  email         String?   @unique // Adicionar unique para performance
++  email         String?   @unique
+   emailVerified Boolean   @default(false)
+   apiKey        ApiKey?
+   createdAt     DateTime  @default(now())
+-  updatedAt     DateTime  @updatedAt // Usar @updatedAt automático
++  updatedAt     DateTime  @updatedAt
+   messages      Message[]
+   chats         Chat[]
+   image         String?
+   sessions      Session[]
+   accounts      Account[]
+ 
+-  // Índices para otimizar queries
+   @@index([email])
+   @@index([createdAt])
+   @@map("user")
+@@ -40,7 +39,6 @@ model Message {
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+ 
+-  // Índices para performance em queries frequentes
+   @@index([chatId, createdAt])
+   @@index([senderId])
+   @@index([role])
+@@ -57,7 +55,6 @@ model Chat {
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+ 
+-  // Índices para otimizar busca de chats do usuário
+   @@index([ownerId, createdAt])
+   @@index([ownerId, updatedAt])
+   @@map("chat")
+@@ -74,7 +71,6 @@ model Session {
+   userId    String
+   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+-  // Índices para performance de autenticação
+   @@index([userId])
+   @@index([expiresAt])
+   @@map("session")
+@@ -129,7 +125,6 @@ model ApiKey {
+   @@map("api_key")
+ }
+ 
+-// Enum para roles de mensagem (type safety)
+ enum MessageRole {
+   USER
+   ASSISTANT
+diff --git a/src/app/(private)/onboarding/actions.ts b/src/app/(private)/onboarding/actions.ts
+index 25b5bf1..dafbb45 100644
+--- a/src/app/(private)/onboarding/actions.ts
++++ b/src/app/(private)/onboarding/actions.ts
+@@ -54,7 +54,6 @@ export async function OboardingAction(
+       };
+     }
+ 
+-    // Verificação de sessão
+     const header = await headers();
+     const session = await getCachedSession(header);
+ 
+@@ -85,7 +84,6 @@ export async function OboardingAction(
+       };
+     }
+ 
+-    // Verifica se email já existe (se diferente do atual)
+     if (email && email !== databaseUser.email) {
+       const existingUser = await prisma.user.findUnique({
+         where: { email },
+@@ -101,14 +99,12 @@ export async function OboardingAction(
+       }
+     }
+ 
+-    // Envia email de verificação se necessário
+     if (!session.user.emailVerified && email) {
+       await auth.api.sendVerificationEmail({
+         body: { email },
+       });
+     }
+ 
+-    // Atualiza dados do usuário
+     await prisma.user.update({
+       where: {
+         id: databaseUser.id,
+@@ -133,12 +129,10 @@ export async function OboardingAction(
+   } catch (error) {
+     log("Database error:", error);
+ 
+-    // Tratamento específico para erros do Prisma
+     if (error && typeof error === "object" && "code" in error) {
+       const prismaError = error as { code: string; meta?: { target: string } };
+ 
+       if (prismaError.code === "P2002") {
+-        // Violação de constraint unique
+         const target = prismaError.meta?.target;
+         if (target?.includes("email")) {
+           return {
+diff --git a/src/app/(private)/onboarding/layout.tsx b/src/app/(private)/onboarding/layout.tsx
+index 3e9531b..84dfdb2 100644
+--- a/src/app/(private)/onboarding/layout.tsx
++++ b/src/app/(private)/onboarding/layout.tsx
+@@ -1,4 +1,3 @@
+-// src/app/(private)/onboarding/layout.tsx
+ "use server";
+ 
+ import { headers } from "next/headers";
+@@ -17,8 +16,5 @@ export default async function OnboardingLayout({
+     redirect("/overview");
+   }
+ 
+-  // Você pode carregar dados globais para a rota aqui, se quiser
+-  // Mas melhor deixar os dados específicos para as páginas
+-
+   return <>{children}</>;
+ }
+diff --git a/src/app/(private)/onboarding/page.tsx b/src/app/(private)/onboarding/page.tsx
+index 92331f0..8294ab3 100644
+--- a/src/app/(private)/onboarding/page.tsx
++++ b/src/app/(private)/onboarding/page.tsx
+@@ -51,7 +51,6 @@ export default function Onboarding() {
+ 
+   const requiredFields: FieldsType = ["name", "email", "apiKey"];
+ 
+-  // Add null check for user before filtering
+   const fieldsNotFilled = user
+     ? requiredFields.filter((field) => {
+         if (field === "apiKey") {
+@@ -85,7 +84,6 @@ export default function Onboarding() {
+     return <LoadingScreen />;
+   }
+ 
+-  // Only redirect if user data is loaded and all fields are filled
+   if (user && fieldsNotFilled.length === 0) {
+     router.push("/overview");
+     return null;
+diff --git a/src/app/api/chat/route.ts b/src/app/api/chat/route.ts
+index cc15589..f1b771e 100644
+--- a/src/app/api/chat/route.ts
++++ b/src/app/api/chat/route.ts
+@@ -8,33 +8,15 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
+ import { Chat, Message } from "@prisma/client";
+ import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
+ import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
+-import { convertToCoreMessages, streamText } from "ai";
+-import { getSystemPrompt } from "./system-prompt";
+-import { CompletionResult, saveAssistantMessage } from "./saveAssistantMessage";
++import { convertToModelMessages, createUIMessageStreamResponse } from "ai";
+ import { StringCompressor } from "@utils/stringCompressor";
+ import { getCachedSession } from "@data/auth/getCachedSession";
++import { createCustomUIMessageStream } from "./createCustomUIMessageStream";
+ const log = debug("app:api:chat");
+ 
+-const messageSchema = z.object({
+-  role: z.enum(["user", "assistant", "system", "tool"]),
+-  content: z.string(),
+-  tool_calls: z
+-    .array(
+-      z.object({
+-        id: z.string(),
+-        type: z.string(),
+-        function: z.object({
+-          name: z.string(),
+-          arguments: z.string(),
+-        }),
+-      }),
+-    )
+-    .optional(),
+-});
+-
+ const bodySchema = z.object({
+-  messages: z.array(messageSchema),
+-  chatId: z.string({ error: "Chat ID is required!" }),
++  prompt: z.string(),
++  id: z.string({ error: "Chat ID is required!" }),
+   reasoning: z.coerce
+     .boolean({
+       error: "Reasoning must be a boolean value.",
+@@ -66,24 +48,12 @@ export async function POST(req: NextRequest) {
+     }
+ 
+     const {
+-      chatId,
+-      messages,
++      id: chatId,
++      prompt,
+       reasoning: reasoningEnabled,
+       model: selectedModel,
+     } = bodyParseResult.data;
+ 
+-    const lastMessage = messages[messages.length - 1];
+-    if (lastMessage.role !== "user") {
+-      return NextResponse.json(
+-        {
+-          error: "Last message must be from user!",
+-        },
+-        { status: 400 },
+-      );
+-    }
+-
+-    const prompt = lastMessage.content.trim();
+-
+     if (!session?.user.id) {
+       log("User not authenticated! Session:", session);
+ 
+@@ -243,27 +213,19 @@ export async function POST(req: NextRequest) {
+ 
+     const aiMessages = await ConvertMessageOfDatabaseToAiModel(chat.messages);
+     log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
+-    const result = streamText({
++    const stream = createCustomUIMessageStream({
++      chatId: chat.id,
++      messages: convertToModelMessages(aiMessages),
+       model,
+-      messages: convertToCoreMessages(aiMessages),
+-      system: getSystemPrompt("pt-BR"),
+-      onFinish: async (completion: CompletionResult) => {
+-        log("AI response received:", completion.text);
+-
+-        setImmediate(() => {
+-          saveAssistantMessage({
+-            chatId: chat.id,
+-            completion,
+-          });
+-        });
+-      },
++      redirect: !isExistingChat,
+     });
+ 
+-    return result.toDataStreamResponse({
+-      sendReasoning: reasoningEnabled,
++    return createUIMessageStreamResponse({
++      stream,
+       headers: {
+         "X-Chat-Id": chat.id,
+         "X-Chat-Name": encodeURIComponent(chat.name),
++        "X-Redirect": isExistingChat ? "false" : "true",
+       },
+     });
+   } catch (error) {
+diff --git a/src/app/api/chat/saveAssistantMessage.ts b/src/app/api/chat/saveAssistantMessage.ts
+index c8f58dd..7f04ab9 100644
+--- a/src/app/api/chat/saveAssistantMessage.ts
++++ b/src/app/api/chat/saveAssistantMessage.ts
+@@ -1,41 +1,35 @@
+ import { StringCompressor } from "@utils/stringCompressor";
+ import { prisma } from "@lib/prisma/client";
+-import { FinishReason } from "ai";
++import { LanguageModelUsage, StepResult, ToolSet } from "ai";
+ import { debug } from "debug";
+ const log = debug("app:api:chat:save-assistant-message");
+ 
+-export interface CompletionResult {
+-  text: string;
+-  reasoning?: string;
+-  finishReason: FinishReason;
+-  usage: {
+-    promptTokens: number;
+-    completionTokens: number;
+-    totalTokens: number;
+-  };
+-}
++export type EventResultType = StepResult<ToolSet> & {
++  readonly steps: StepResult<ToolSet>[];
++  readonly totalUsage: LanguageModelUsage;
++};
+ 
+ export async function saveAssistantMessage({
+   chatId,
+-  completion,
++  event,
+ }: {
+   chatId: string;
+-  completion: CompletionResult;
++  event: EventResultType;
+ }) {
+   try {
+-    const [compressedMessage, compressedPrompt] = await Promise.all([
++    const [compressedMessage, compressedReasoning] = await Promise.all([
+       StringCompressor.compress({
+-        text: completion.text.trim(),
++        text: event.text.trim(),
+       }),
+       StringCompressor.compress({
+-        text: completion.reasoning?.trim() || "",
++        text: event.reasoningText?.trim() || "",
+       }),
+     ]);
+ 
+     await prisma.message.create({
+       data: {
+         content: compressedMessage,
+-        reasoning: compressedPrompt,
++        reasoning: compressedReasoning,
+         role: "ASSISTANT",
+         chatId,
+       },
+diff --git a/src/components/AsideMenu/AsideMenu.tsx b/src/components/AsideMenu/AsideMenu.tsx
+index 6f02966..e5602c6 100644
+--- a/src/components/AsideMenu/AsideMenu.tsx
++++ b/src/components/AsideMenu/AsideMenu.tsx
+@@ -1,12 +1,12 @@
+ "use client";
+ import Button from "@components/Button";
+ import { motion, TargetAndTransition, VariantLabels } from "motion/react";
+-import { useAside } from "@store/asideMenu";
++import { DESKTOP_BREAKPOINT, useAside } from "@store/asideMenu";
+ import AsideMenuChats from "./AsideMenuChats";
+ import AsideMenuFooter from "./AsideMenuFooter";
+ import { useRouter } from "next/navigation";
+-import { useChatActionsContext } from "@/contexts/ChatContext/Hooks";
+ import { useMemo } from "react";
++import { useWindowSize } from "@/hooks/useWindowSize";
+ 
+ type MotionDivAnimationType =
+   | boolean
+@@ -17,17 +17,17 @@ type MotionDivAnimationType =
+ export default function AsideMenu() {
+   console.log("Renderizei AsideMenu");
+   const { asideIsOpen, toggleAside } = useAside();
++  const innerWidth = useWindowSize();
+ 
+   const containerStyles: MotionDivAnimationType = useMemo(
+     () => ({
+       x: asideIsOpen ? 0 : "-100%",
+       opacity: asideIsOpen ? 1 : 0,
+     }),
+-    [asideIsOpen]
++    [asideIsOpen],
+   );
+ 
+   const router = useRouter();
+-  const { setMessages } = useChatActionsContext();
+ 
+   return (
+     <motion.div
+@@ -52,9 +52,9 @@ export default function AsideMenu() {
+           tapAnimationSize: 0.9,
+         }}
+         onClick={() => {
+-          setMessages([]);
+-          toggleAside();
++          if (innerWidth < DESKTOP_BREAKPOINT && asideIsOpen) toggleAside();
+           router.replace("/chat/new");
++          window.dispatchEvent(new CustomEvent("new-chat-requested"));
+         }}
+       >
+         Novo chat
+diff --git a/src/components/AsideMenu/AsideMenuChats.tsx b/src/components/AsideMenu/AsideMenuChats.tsx
+index b31fdb8..f123685 100644
+--- a/src/components/AsideMenu/AsideMenuChats.tsx
++++ b/src/components/AsideMenu/AsideMenuChats.tsx
+@@ -41,7 +41,6 @@ export default function AsideMenuChats() {
+     refetchOnReconnect: true,
+   });
+ 
+-  // Prefetch chat messages on hover
+   const prefetchMessages = (chatId: string) => {
+     queryClient.prefetchQuery({
+       queryKey: ["chat", `chat_${chatId}`],
+diff --git a/src/components/ChatContainer/ChatContainer.tsx b/src/components/ChatContainer/ChatContainer.tsx
+index 57fa9aa..9de60f4 100644
+--- a/src/components/ChatContainer/ChatContainer.tsx
++++ b/src/components/ChatContainer/ChatContainer.tsx
+@@ -3,38 +3,87 @@
+ import { useAside } from "@store/asideMenu";
+ import { motion } from "motion/react";
+ import { useWindowSize } from "@hooks/useWindowSize";
++import { useIsClient } from "@hooks/useIsClient";
++import { usePathname, useRouter } from "next/navigation";
++import { useEffect, useMemo } from "react";
++
+ import ChatMessages from "../ChatMessages/ChatMessages";
+ import PromptForm from "../PromptForm/PromptForm";
+ import ChatNavBar from "../ChatNavbar/ChatNavbar";
+-import { useIsClient } from "@hooks/useIsClient";
+-import { useMemo } from "react";
++import { ChatProvider } from "@/contexts/ChatContext/Provider";
+ 
+ export default function ChatContainer() {
+   const { asideIsOpen } = useAside();
+   const innerWidth = useWindowSize();
+   const isClient = useIsClient();
++  const pathname = usePathname();
++  const router = useRouter();
++
++  const chatId = pathname.includes("/chat/")
++    ? (pathname.split("/").pop() ?? null)
++    : null;
+ 
+   const shouldShowSidebar = useMemo(() => {
+     return asideIsOpen && innerWidth > 768;
+   }, [asideIsOpen, innerWidth]);
+ 
++  useEffect(() => {
++    const handleChatCreated = (event: CustomEvent) => {
++      const { chatId: newChatId } = event.detail;
++      if (newChatId) {
++        router.replace(`/chat/${newChatId}`);
++      }
++    };
++
++    window.addEventListener("chat-created", handleChatCreated as EventListener);
++
++    return () => {
++      window.removeEventListener(
++        "chat-created",
++        handleChatCreated as EventListener,
++      );
++    };
++  }, [router]);
++
++  if (!chatId) {
++    return (
++      <motion.div
++        initial={{
++          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
++          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
++        }}
++        animate={{
++          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
++          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
++        }}
++        layout={true}
++        transition={{ type: "spring", stiffness: 80 }}
++        className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative flex items-center justify-center"
++      >
++        <div>Selecione um chat ou crie um novo</div>
++      </motion.div>
++    );
++  }
++
+   return (
+-    <motion.div
+-      initial={{
+-        marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
+-        width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
+-      }}
+-      animate={{
+-        marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
+-        width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
+-      }}
+-      layout={true}
+-      transition={{ type: "spring", stiffness: 80 }}
+-      className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative"
+-    >
+-      <ChatNavBar />
+-      <ChatMessages />
+-      <PromptForm />
+-    </motion.div>
++    <ChatProvider chatId={chatId}>
++      <motion.div
++        initial={{
++          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
++          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
++        }}
++        animate={{
++          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
++          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
++        }}
++        layout={true}
++        transition={{ type: "spring", stiffness: 80 }}
++        className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative"
++      >
++        <ChatNavBar />
++        <ChatMessages />
++        <PromptForm />
++      </motion.div>
++    </ChatProvider>
+   );
+ }
+diff --git a/src/components/ChatMessages/ChatMessages.tsx b/src/components/ChatMessages/ChatMessages.tsx
+index 0fcd9cc..0d4fd65 100644
+--- a/src/components/ChatMessages/ChatMessages.tsx
++++ b/src/components/ChatMessages/ChatMessages.tsx
+@@ -1,13 +1,25 @@
+ "use client";
+ 
+-import { useChatStateContext } from "@/contexts/ChatContext/Hooks";
++import { useChatContext } from "@/contexts/ChatContext/Hooks";
+ import ChatBalloon, { MemoChatBalloon } from "../ChatBalloon/ChatBalloon";
+ import Accordion from "../Accordion/Accordion";
+ import { motion } from "motion/react";
+ import LoadingSpritesAnimation from "@components/Loading/LoadingSpritesAnimation";
++import { useIsClient } from "@/hooks/useIsClient";
+ 
+ export default function ChatMessages() {
+-  const { isLoadingMessages, messages, error, status } = useChatStateContext();
++  const { status, messages, messagesIsLoading, error } = useChatContext();
++  const isClient = useIsClient();
++
++  if (!isClient) {
++    return (
++      <main
++        className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[175px]"
++        id="chatMessages"
++      />
++    );
++  }
++
+   console.log("Renderizei ChatMessages");
+   console.log(`Received messagens on ChatMessages component:`, messages);
+   return (
+@@ -15,40 +27,55 @@ export default function ChatMessages() {
+       className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[175px]"
+       id="chatMessages"
+     >
+-      {messages.length > 0 && !isLoadingMessages
+-        ? messages.map((message, index) => (
++      {messages.length > 0 && !messagesIsLoading
++        ? messages.map((message, messageIndex) => (
+             <motion.div
+               layout={
+-                status === "streaming" && index === messages.length - 1
++                status === "streaming" && messageIndex === messages.length - 1
+                   ? false
+                   : "position"
+               }
+               className="mb-2 h-auto w-full overflow-y-hidden"
+-              key={`${message.id}_${index}_${message.role}`}
++              key={`${message.id}_${messageIndex}_${message.role}`}
+             >
+               {message.parts?.find((part) => part.type === "reasoning")
+-                ?.reasoning && (
++                ?.text && (
+                 <div className="mb-2 w-full ml-auto mr-auto">
+                   <Accordion
+                     title="Reasoning"
+                     content={
+                       message.parts.find((part) => part.type === "reasoning")
+-                        ?.reasoning
++                        ?.text
+                     }
+                   />
+                 </div>
+               )}
+ 
+-              <MemoChatBalloon
+-                message={{
+-                  content: message.content,
+-                  role: message.role,
+-                  id: message.id,
+-                }}
+-              />
++              {messageIndex === messages.length - 1 &&
++              status === "streaming" ? (
++                <ChatBalloon
++                  message={{
++                    content:
++                      message.parts.find((part) => part.type === "text")
++                        ?.text || "",
++                    role: message.role,
++                    id: message.id,
++                  }}
++                />
++              ) : (
++                <MemoChatBalloon
++                  message={{
++                    content:
++                      message.parts.find((part) => part.type === "text")
++                        ?.text || "",
++                    role: message.role,
++                    id: message.id,
++                  }}
++                />
++              )}
+             </motion.div>
+           ))
+-        : !isLoadingMessages && (
++        : !messagesIsLoading && (
+             <p className="text-center text-gray-500">
+               No messages yet. Start a conversation!
+             </p>
+diff --git a/src/components/Loading/LoadingScreen.tsx b/src/components/Loading/LoadingScreen.tsx
+index 66bc7c4..8d2485a 100644
+--- a/src/components/Loading/LoadingScreen.tsx
++++ b/src/components/Loading/LoadingScreen.tsx
+@@ -1,12 +1,12 @@
+ "use client";
+ 
+-import { useChatStateContext } from "@/contexts/ChatContext/Hooks";
+ import LoadingSpritesAnimation from "./LoadingSpritesAnimation";
++import { useChatMessages } from "@/hooks/useChatMessages";
+ 
+ export default function LoadingScreen() {
+-  const { isLoadingMessages } = useChatStateContext();
++  const { isLoading: messagesIsLoading } = useChatMessages();
+ 
+-  if (!isLoadingMessages) return null;
++  if (!messagesIsLoading) return null;
+ 
+   return (
+     <div
+diff --git a/src/components/PromptForm/PromptForm.tsx b/src/components/PromptForm/PromptForm.tsx
+index 500a6db..1d457c1 100644
+--- a/src/components/PromptForm/PromptForm.tsx
++++ b/src/components/PromptForm/PromptForm.tsx
+@@ -3,23 +3,15 @@
+ import PromptInput from "./PromptInput";
+ import { motion } from "motion/react";
+ import { useRef, useState } from "react";
+-import { useParams } from "next/navigation";
+ import PromptSubmitButton from "./PromptSubmitButton";
+ import ReasoningButton from "./ReasoningButton";
+-import {
+-  useChatStateContext,
+-  useChatActionsContext,
+-  useChatInputContext,
+-} from "@/contexts/ChatContext/Hooks";
++import { useChatContext } from "@/contexts/ChatContext/Hooks";
+ import { useDropdown } from "@store/dropdown";
+ import { CustomTooltip } from "../CustomTooltip";
+ 
+ export default function PromptForm() {
+-  const { value: input } = useChatInputContext();
+-  const { status, messages } = useChatStateContext();
+-  const { handleSubmit, stop } = useChatActionsContext();
+-  const { chatId } = useParams();
+-  const chatIsReady = status === "ready" || status === "error";
++  const { sendMessage, isLoading } = useChatContext();
++  const inputRef = useRef<HTMLTextAreaElement>(null);
+   const [reasoning, setReasoning] = useState<boolean>(false);
+   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
+   const formRef = useRef<HTMLFormElement>(null);
+@@ -29,14 +21,26 @@ export default function PromptForm() {
+       ref={formRef}
+       onSubmit={async (e) => {
+         e.preventDefault();
+-        handleSubmit(e, {
+-          body: {
+-            prompt: input,
+-            reasoning: reasoning,
+-            chatId,
+-            model: dropdown.selectedValue?.value || "BASIC",
++        console.log(
++          "Enviando mensagem do formulário de prompt. Prompt:",
++          inputRef?.current?.value,
++        );
++
++        if (isLoading || !inputRef?.current?.value.trim()) return;
++
++        sendMessage(
++          {
++            text: inputRef.current.value,
++          },
++          {
++            body: {
++              prompt: inputRef.current.value,
++              reasoning: reasoning,
++              // chatId,
++              model: dropdown.selectedValue?.value || "BASIC",
++            },
+           },
+-        });
++        );
+       }}
+       layout={true}
+       transition={{ type: "spring", stiffness: 80 }}
+@@ -44,18 +48,10 @@ export default function PromptForm() {
+                 py-2 px-2 rounded-2xl border-2 border-almond z-10 flex justify-between gap-x-2
+                 max-w-[900px]`}
+     >
+-      <PromptInput formRef={formRef} />
++      <PromptInput formRef={formRef} inputRef={inputRef} />
+       <section className="flex flex-col md:flex-initial justify-end gap-2 py-1 px-2">
+-        <ReasoningButton
+-          reasoningText={reasoning}
+-          setReasoning={setReasoning}
+-          chatIsReady={chatIsReady}
+-        />
+-        <PromptSubmitButton
+-          chatIsReady={chatIsReady}
+-          stop={stop}
+-          messagesLength={messages.length}
+-        />
++        <ReasoningButton reasoning={reasoning} setReasoning={setReasoning} />
++        <PromptSubmitButton />
+         <CustomTooltip anchorSelect=".prompt-form-button" delayShow={500} />
+       </section>
+     </motion.form>
+diff --git a/src/components/PromptForm/PromptInput.tsx b/src/components/PromptForm/PromptInput.tsx
+index e7c21e8..11b05fd 100644
+--- a/src/components/PromptForm/PromptInput.tsx
++++ b/src/components/PromptForm/PromptInput.tsx
+@@ -1,19 +1,16 @@
+-import { memo, RefObject } from "react";
+-import { useChatInputContext } from "@/contexts/ChatContext/Hooks";
+-// import { FocusEvent } from "react";
++import { memo, RefObject } from "react"; // import { FocusEvent } from "react";
+ 
+ interface iProps {
+   formRef: RefObject<HTMLFormElement | null>;
++  inputRef: RefObject<HTMLTextAreaElement | null>;
+ }
+ 
+-function PromptInput({ formRef }: iProps) {
+-  const { value: input, onChange: handleInputChange } = useChatInputContext();
++function PromptInput({ formRef, inputRef }: iProps) {
+   console.log("Renderizei PromptInput");
+ 
+   return (
+     <textarea
+-      onChange={handleInputChange}
+-      value={input}
++      ref={inputRef}
+       onFocus={() => {
+         document.addEventListener("keypress", (e) => {
+           if (e.key === "Enter" && !e.shiftKey && formRef.current) {
+diff --git a/src/components/PromptForm/PromptSubmitButton.tsx b/src/components/PromptForm/PromptSubmitButton.tsx
+index 0877d83..235e3b7 100644
+--- a/src/components/PromptForm/PromptSubmitButton.tsx
++++ b/src/components/PromptForm/PromptSubmitButton.tsx
+@@ -1,29 +1,28 @@
++"use client";
++
+ import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
+ import Button from "../Button";
+-import { memo } from "react";
++import { useChatContext } from "@/contexts/ChatContext/Hooks";
+ 
+-type PropsType = {
+-  chatIsReady: boolean;
+-  stop: () => void;
+-  messagesLength: number;
+-};
++export default function PromptSubmitButton() {
++  const { stop, messages, isLoading } = useChatContext();
++  const messagesLength = messages.length;
+ 
+-function PromptSubmitButton({ chatIsReady, stop, messagesLength }: PropsType) {
+   return (
+     <Button
+-      type={chatIsReady ? "submit" : "button"}
++      type={!isLoading ? "submit" : "button"}
+       className="aspect-square w-12 h-12 p-0 flex items-center
+       justify-center prompt-form-button"
+       data-tooltip-content="Enviar prompt"
+       variant={{
+-        color: chatIsReady ? "secondary" : "danger",
++        color: !isLoading ? "secondary" : "danger",
+         size: "sm",
+       }}
+       onClick={() => {
+-        if (!chatIsReady) stop();
++        if (!!isLoading) stop();
+       }}
+     >
+-      {chatIsReady ? (
++      {!isLoading ? (
+         <Icon
+           icon="iconamoon:send-bold"
+           width="24"
+@@ -50,5 +49,3 @@ function PromptSubmitButton({ chatIsReady, stop, messagesLength }: PropsType) {
+     </Button>
+   );
+ }
+-
+-export default memo(PromptSubmitButton);
+diff --git a/src/components/PromptForm/ReasoningButton.tsx b/src/components/PromptForm/ReasoningButton.tsx
+index f43e644..7223d2d 100644
+--- a/src/components/PromptForm/ReasoningButton.tsx
++++ b/src/components/PromptForm/ReasoningButton.tsx
+@@ -1,26 +1,26 @@
++"use client";
++
+ import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
+ import Button from "../Button";
+ import { Dispatch, SetStateAction, memo } from "react";
++import { useChatContext } from "@/contexts/ChatContext/Hooks";
+ 
+ type PropsType = {
+-  reasoningText: boolean;
++  reasoning: boolean;
+   setReasoning: Dispatch<SetStateAction<boolean>>;
+-  chatIsReady: boolean;
+ };
+-function ReasoningButton({
+-  reasoningText,
+-  setReasoning,
+-  chatIsReady,
+-}: PropsType) {
++function ReasoningButton({ reasoning, setReasoning }: PropsType) {
++  const { isLoading } = useChatContext();
++
+   return (
+     <Button
+       type="button"
+-      variant={{ color: reasoningText ? "primary" : "quarternary" }}
++      variant={{ color: reasoning ? "primary" : "quarternary" }}
+       className="w-12 h-12 p-2 prompt-form-button"
+       data-tooltip-content={
+-        reasoningText ? "Desativar raciocínio" : "Ativar raciocínio"
++        reasoning ? "Desativar raciocínio" : "Ativar raciocínio"
+       }
+-      disabled={!chatIsReady}
++      disabled={isLoading}
+       onClick={() => setReasoning((prev) => !prev)}
+     >
+       <Icon icon="streamline:brain-remix" width="24" height="24" />
+diff --git a/src/components/Providers.tsx b/src/components/Providers.tsx
+index b4c9f67..dd68ceb 100644
+--- a/src/components/Providers.tsx
++++ b/src/components/Providers.tsx
+@@ -1,7 +1,6 @@
+ "use client";
+ 
+ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+-import { ChatProvider } from "@/contexts/ChatContext/Provider";
+ 
+ const queryClient = new QueryClient({
+   defaultOptions: {
+@@ -15,8 +14,6 @@ const queryClient = new QueryClient({
+ 
+ export default function Providers({ children }: { children: React.ReactNode }) {
+   return (
+-    <QueryClientProvider client={queryClient}>
+-      <ChatProvider>{children}</ChatProvider>
+-    </QueryClientProvider>
++    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+   );
+ }
+diff --git a/src/contexts/ChatContext/Context.tsx b/src/contexts/ChatContext/Context.tsx
+index b9518e2..bdab6aa 100644
+--- a/src/contexts/ChatContext/Context.tsx
++++ b/src/contexts/ChatContext/Context.tsx
+@@ -1,50 +1,4 @@
+-"use client";
+-
+ import { createContext } from "react";
+-import { Message } from "@ai-sdk/react";
+-import { ChatRequestOptions } from "ai";
+-interface ChatState {
+-  chatId: string | null;
+-  isNewChat: boolean;
+-  isLoadingMessages: boolean;
+-  messages: Message[];
+-  status: "streaming" | "error" | "ready" | "submitted";
+-  error: Error | undefined;
+-}
+-
+-export interface ChatInput {
+-  value: string;
+-  onChange: (
+-    e:
+-      | React.ChangeEvent<HTMLInputElement>
+-      | React.ChangeEvent<HTMLTextAreaElement>,
+-  ) => void;
+-}
+-
+-export interface ChatActions {
+-  handleSubmit: (
+-    event?:
+-      | {
+-          preventDefault?: (() => void) | undefined;
+-        }
+-      | undefined,
+-    chatRequestOptions?: ChatRequestOptions | undefined,
+-  ) => void;
+-  stop: () => void;
+-  addToolResult: ({
+-    toolCallId,
+-    result,
+-  }: {
+-    toolCallId: string;
+-    result: unknown;
+-  }) => void;
+-  setMessages: (
+-    messages: Message[] | ((messages: Message[]) => Message[]),
+-  ) => void;
+-}
++import { ChatContextType } from "./types";
+ 
+-export const ChatStateContext = createContext<ChatState | undefined>(undefined);
+-export const ChatActionsContext = createContext<ChatActions | undefined>(
+-  undefined,
+-);
+-export const ChatInputContext = createContext<ChatInput | undefined>(undefined);
++export const ChatContext = createContext<ChatContextType | null>(null);
+diff --git a/src/contexts/ChatContext/Hooks.tsx b/src/contexts/ChatContext/Hooks.tsx
+index 2c5841b..998fef1 100644
+--- a/src/contexts/ChatContext/Hooks.tsx
++++ b/src/contexts/ChatContext/Hooks.tsx
+@@ -1,30 +1,10 @@
+ import { useContext } from "react";
+-import {
+-  ChatStateContext,
+-  ChatActionsContext,
+-  ChatInputContext,
+-} from "./Context";
++import { ChatContext } from "./Context";
+ 
+-export function useChatStateContext() {
+-  const context = useContext(ChatStateContext);
+-  if (context === undefined) {
+-    throw new Error("useChatStateContext must be used within a ChatProvider");
+-  }
+-  return context;
+-}
+-
+-export function useChatActionsContext() {
+-  const context = useContext(ChatActionsContext);
+-  if (context === undefined) {
+-    throw new Error("useChatActionsContext must be used within a ChatProvider");
+-  }
+-  return context;
+-}
+-
+-export function useChatInputContext() {
+-  const context = useContext(ChatInputContext);
+-  if (context === undefined) {
+-    throw new Error("useChatInputContext must be used within a ChatProvider");
++export function useChatContext() {
++  const context = useContext(ChatContext);
++  if (!context) {
++    throw new Error("useChat deve ser usado dentro de um ChatProvider");
+   }
+   return context;
+ }
+diff --git a/src/contexts/ChatContext/Provider.tsx b/src/contexts/ChatContext/Provider.tsx
+index 92220d9..889ea6d 100644
+--- a/src/contexts/ChatContext/Provider.tsx
++++ b/src/contexts/ChatContext/Provider.tsx
+@@ -1,233 +1,123 @@
+ import { useChatMessages } from "@/hooks/useChatMessages";
+-import { useChat, Message } from "@ai-sdk/react"; // Importar Message do ai-sdk/react, não do react-hook-form
++import { useChat } from "@ai-sdk/react";
+ import { useQueryClient } from "@tanstack/react-query";
+-import { usePathname, useRouter } from "next/navigation"; // Usar ambos do next/navigation
+-import {
+-  ReactNode,
+-  useRef,
+-  useState,
+-  useCallback,
+-  useEffect,
+-  useMemo,
+-} from "react";
+-import {
+-  ChatStateContext,
+-  ChatActionsContext,
+-  ChatInputContext,
+-} from "./Context";
+-import { getMoreRecentMessages } from "./getMoreRecentMessages";
+-
+-function hasMessageId(message: unknown): message is Message & { id: string } {
+-  return (
+-    message !== null &&
+-    typeof message === "object" &&
+-    "id" in message &&
+-    typeof (message as { id: unknown }).id === "string"
+-  );
++import { UIMessage, DefaultChatTransport } from "ai";
++import { ReactNode, useCallback, useEffect, useRef } from "react";
++import { ChatContext } from "./Context";
++import { ChatContextType } from "./types";
++
++interface ChatProviderProps {
++  chatId: string | null;
++  children: ReactNode;
+ }
+ 
+-export function ChatProvider({ children }: { children: ReactNode }) {
+-  const router = useRouter();
+-  const pathname = usePathname();
++export function ChatProvider({ chatId, children }: ChatProviderProps) {
+   const queryClient = useQueryClient();
+-
+-  const chatId = pathname.includes("/chat/")
+-    ? (pathname.split("/").pop() ?? null)
+-    : null;
+-  const isNewChat = chatId === "new";
++  const isNewChat = chatId === "new" || !chatId;
+   const newChatIdRef = useRef<string | null>(null);
+-  const [navigateToChatId, setNavigateToChatId] = useState<string | null>(null);
+ 
+   const chatMessagesQuery = useChatMessages();
+ 
+-  const onResponse = useCallback(
+-    async (response: Response) => {
+-      if (!response.ok) {
+-        const errorData = await response.json();
+-        throw new Error(errorData.error || "Ocorreu um erro desconhecido.");
+-      }
++  const onFinish = useCallback(
++    ({ message }: { message: UIMessage }) => {
++      if (!chatId || isNewChat) {
++        const finalChatId = newChatIdRef.current;
++        if (finalChatId) {
++          queryClient.setQueryData(
++            ["chat", `chat_${finalChatId}`],
++            (oldData: UIMessage[] = []) => [...oldData, message],
++          );
+ 
+-      const newChatIdFromHeader = response.headers.get("X-Chat-Id");
+-      if (isNewChat && newChatIdFromHeader) {
+-        newChatIdRef.current = newChatIdFromHeader;
+-        await queryClient.invalidateQueries({ queryKey: ["chats"] });
++          window.dispatchEvent(
++            new CustomEvent("chat-created", {
++              detail: { chatId: finalChatId },
++            }),
++          );
++        }
++        return;
+       }
++
++      queryClient.setQueryData(
++        ["chat", `chat_${chatId}`],
++        (oldData: UIMessage[] = []) => [...oldData, message],
++      );
+     },
+-    [isNewChat, queryClient]
++    [chatId, isNewChat, queryClient],
+   );
+-  const onFinish = useCallback(
+-    (message: Message) => {
+-      const finalChatId = isNewChat ? newChatIdRef.current : chatId;
+-      console.log("Final chatId onFinish:", finalChatId);
+-      if (!finalChatId) {
+-        alert("Final chat não existe!");
+-        return;
+-      }
+ 
+-      queryClient.setQueryData(["chat", `chat_${chatId}`], () => [
+-        ...(chatMessagesQuery.data ?? []),
+-        message,
+-      ]);
++  const onData = useCallback(
++    async (message: { type: `data-${string}`; data: unknown }) => {
++      if (message.type === "data-chat-created") {
++        const data = message.data as { chatId?: string; redirect?: boolean };
+ 
+-      setNavigateToChatId(finalChatId);
++        if (data.chatId) {
++          newChatIdRef.current = data.chatId;
++          console.log("Novo chatId salvo:", data.chatId);
++        }
++      }
+     },
+-    [isNewChat, chatId, queryClient, chatMessagesQuery.data]
++    [],
+   );
+ 
+   const chat = useChat({
+     id: chatId || "new",
++    messages: isNewChat ? [] : chatMessagesQuery.data || [],
+     onFinish,
+-    onResponse,
+-    onError(error) {
++    onData,
++    onError: (error) => {
+       console.error("Chat error:", error);
+     },
+-    initialMessages: isNewChat ? [] : (chatMessagesQuery.data ?? []),
+-    body: {
+-      chatId,
+-    },
++    transport: new DefaultChatTransport({
++      api: "/api/chat",
++      body: { chatId },
++    }),
+   });
+ 
+   useEffect(() => {
+-    const chatMessagesContainer = document.getElementById("chatMessages");
+-
+-    if (chatMessagesContainer) {
+-      const { scrollTop, scrollHeight, clientHeight } = chatMessagesContainer;
+-
+-      console.log("Scroll info:", {
+-        scrollTop,
+-        scrollHeight,
+-        clientHeight,
+-        distanceFromBottom: scrollHeight - (scrollTop + clientHeight),
+-      });
+-
+-      chatMessagesContainer.scrollTo({
+-        top: scrollHeight,
++    const chatContainer = document.getElementById("chatMessages");
++    if (
++      chatContainer &&
++      chat.status !== "streaming" &&
++      chat.messages.length > 0
++    ) {
++      chatContainer.scrollTo({
++        top: chatContainer.scrollHeight,
+         behavior: "smooth",
+       });
+     }
+-  }, [chatId, chat.status, chat.messages, chatMessagesQuery]);
++  }, [chat.messages, chat.status]);
+ 
+   useEffect(() => {
+-    if (navigateToChatId) {
+-      router.push(`/chat/${navigateToChatId}`);
+-      setNavigateToChatId(null);
+-    }
+-  }, [navigateToChatId, router]);
++    const handleNewChatRequested = () => {
++      if (isNewChat) {
++        chat.setMessages([]);
++        newChatIdRef.current = null;
++      }
++    };
+ 
+-  const chatIsReady =
+-    chat.status !== "streaming" && chat.status !== "submitted";
++    window.addEventListener("new-chat-requested", handleNewChatRequested);
+ 
+-  useEffect(() => {
+-    if (!isNewChat && chatIsReady && chatMessagesQuery.data && chatId) {
+-      const cachedMessages = queryClient.getQueryData<Message[]>([
+-        "chat",
+-        `chat_${chatId}`,
+-      ]);
+-
+-      if (cachedMessages && cachedMessages.length > 0) {
+-        const currentMessagesIds = chat.messages
+-          .filter(hasMessageId)
+-          .map((m) => m.id)
+-          .sort();
+-
+-        const cachedMessagesIds = cachedMessages
+-          .filter(hasMessageId)
+-          .map((m) => m.id)
+-          .sort();
+-
+-        const messagesDifferent =
+-          JSON.stringify(currentMessagesIds) !==
+-          JSON.stringify(cachedMessagesIds);
+-
+-        if (messagesDifferent) {
+-          console.log(
+-            "Detectadas diferenças nas mensagens para chatId:",
+-            chatId
+-          );
++    return () => {
++      window.removeEventListener("new-chat-requested", handleNewChatRequested);
++    };
++  }, [isNewChat, chat.setMessages, chat]);
+ 
+-          const moreRecentMessages = getMoreRecentMessages({
+-            messages1: chat.messages,
+-            messages2: cachedMessages,
+-          });
+-
+-          if (
+-            JSON.stringify(moreRecentMessages) ===
+-            JSON.stringify(cachedMessages)
+-          ) {
+-            console.log(
+-              "Sincronizando mensagens do cache para chatId:",
+-              chatId
+-            );
+-            chat.setMessages(cachedMessages);
+-          } else {
+-            console.log(
+-              "Mensagens do chat atual são mais recentes, mantendo estado atual"
+-            );
+-            queryClient.setQueryData(["chat", `chat_${chatId}`], chat.messages);
+-          }
+-        }
+-      }
+-    }
+-  }, [
+-    chat,
+-    chatId,
+-    isNewChat,
+-    chatIsReady,
+-    chatMessagesQuery.data,
+-    chat.messages.length,
+-    queryClient,
+-  ]);
++  const contextValue: ChatContextType = {
++    messages: chat.messages,
++    messagesIsLoading: chatMessagesQuery.isLoading,
++    isLoading: chat.status === "streaming" || chat.status === "submitted",
++    error: chat.error,
+ 
+-  useEffect(() => {
+-    console.log("Verificando se precisa limpar mensagens do chat.");
+-    if (isNewChat && chat.messages.length > 0) {
+-      console.log("Limpando mensagens para novo chat");
+-      chat.setMessages([]);
+-      return;
+-    }
+-  }, [chatId, isNewChat, chat]);
+-
+-  const chatState = useMemo(
+-    () => ({
+-      chatId,
+-      isNewChat,
+-      isLoadingMessages: chatMessagesQuery.isLoading,
+-      messages: chat.messages,
+-      status: chat.status,
+-      error: chat.error,
+-    }),
+-    [
+-      chatId,
+-      isNewChat,
+-      chatMessagesQuery.isLoading,
+-      chat.messages,
+-      chat.status,
+-      chat.error,
+-    ]
+-  );
++    sendMessage: chat.sendMessage,
++    stop: chat.stop,
++    setMessages: chat.setMessages,
++    status: chat.status,
+ 
+-  const chatActions = useMemo(
+-    () => ({
+-      handleSubmit: chat.handleSubmit,
+-      stop: chat.stop,
+-      addToolResult: chat.addToolResult,
+-      setMessages: chat.setMessages,
+-    }),
+-    [chat.handleSubmit, chat.stop, chat.addToolResult, chat.setMessages]
+-  );
+-
+-  const chatInput = {
+-    value: chat.input,
+-    onChange: chat.handleInputChange,
++    chatId,
++    isNewChat,
+   };
+ 
+   return (
+-    <ChatStateContext.Provider value={chatState}>
+-      <ChatActionsContext.Provider value={chatActions}>
+-        <ChatInputContext.Provider value={chatInput}>
+-          {children}
+-        </ChatInputContext.Provider>
+-      </ChatActionsContext.Provider>
+-    </ChatStateContext.Provider>
++    <ChatContext.Provider value={contextValue}>{children}</ChatContext.Provider>
+   );
+ }
+diff --git a/src/contexts/ChatContext/getMoreRecentMessages.ts b/src/contexts/ChatContext/getMoreRecentMessages.ts
+deleted file mode 100644
+index 4a876cd..0000000
+--- a/src/contexts/ChatContext/getMoreRecentMessages.ts
++++ /dev/null
+@@ -1,44 +0,0 @@
+-import { Message } from "ai";
+-
+-export function getMoreRecentMessages({
+-  messages1,
+-  messages2,
+-}: {
+-  messages1: Message[];
+-  messages2: Message[];
+-}) {
+-  if (messages1.length === 0 && messages2.length === 0) return messages1;
+-  const groupWithMoreMessage =
+-    messages1.length > messages2.length ? messages1 : messages2;
+-  if (messages1.length !== messages2.length) return groupWithMoreMessage;
+-
+-  const lastMessage1 = messages1[messages1.length - 1];
+-  const lastMessage2 = messages2[messages2.length - 1];
+-
+-  if (lastMessage1.createdAt && lastMessage2.createdAt) {
+-    const timestamp1 = new Date(lastMessage1.createdAt).getTime();
+-    const timestamp2 = new Date(lastMessage2.createdAt).getTime();
+-
+-    return timestamp1 > timestamp2 ? timestamp1 : timestamp2;
+-  }
+-
+-  if (!lastMessage1.createdAt && !lastMessage2.createdAt)
+-    return groupWithMoreMessage;
+-
+-  if (!lastMessage1.createdAt || !lastMessage2.createdAt)
+-    return lastMessage1.createdAt
+-      ? lastMessage1.createdAt
+-      : lastMessage2.createdAt;
+-
+-  const hasStreamingMessage1 = messages1.some(
+-    (m) => m.role === "assistant" && (!m.content || m.content != ""),
+-  );
+-  const hasStreamingMessage2 = messages2.some(
+-    (m) => m.role === "assistant" && (!m.content || m.content === ""),
+-  );
+-
+-  if (hasStreamingMessage1 && !hasStreamingMessage2) return messages2;
+-  if (!hasStreamingMessage1 && hasStreamingMessage2) return messages1;
+-
+-  return messages1;
+-}
+diff --git a/src/hooks/useChatMessages.ts b/src/hooks/useChatMessages.ts
+index 88aa49c..c28e40f 100644
+--- a/src/hooks/useChatMessages.ts
++++ b/src/hooks/useChatMessages.ts
+@@ -3,9 +3,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
+ import { useParams } from "next/navigation";
+ import { useEffect } from "react";
+ 
+-export function useChatMessages() {
+-  const { chatId } = useParams();
++export function useChatMessages({
++  externalChatId,
++}: {
++  externalChatId?: string;
++} = {}) {
++  const { chatId: chatIdOfParams } = useParams();
+   const queryClient = useQueryClient();
++  const chatId = externalChatId || chatIdOfParams || "new";
+ 
+   useEffect(() => {
+     const isExistingChat =
+diff --git a/src/middleware.ts b/src/middleware.ts
+index 72bb855..bf3cb31 100644
+--- a/src/middleware.ts
++++ b/src/middleware.ts
+@@ -8,17 +8,14 @@ export async function middleware(req: NextRequest) {
+   const url = req.nextUrl.clone();
+   const isAuthenticated = !!session;
+ 
+-  // Se for rota /chat/* e não autenticado, redireciona para /overview
+   if (url.pathname.startsWith("/chat/") && !isAuthenticated) {
+     return NextResponse.redirect(new URL("/overview", url));
+   }
+ 
+-  // Se for /login ou / e estiver autenticado, redireciona para /chat/new
+   if ((url.pathname === "/login" || url.pathname === "/") && isAuthenticated) {
+     return NextResponse.redirect(new URL("/chat/new", url));
+   }
+ 
+-  // Se for / ou /?* e não autenticado, redireciona para /overview
+   if (
+     url.pathname === "/" ||
+     (url.pathname.startsWith("/?") && !isAuthenticated)
+@@ -26,12 +23,10 @@ export async function middleware(req: NextRequest) {
+     return NextResponse.redirect(new URL("/overview", url));
+   }
+ 
+-  // Se for /onboarding e não autenticado, redireciona para /overview
+   if (url.pathname === "/onboarding" && !isAuthenticated) {
+     return NextResponse.redirect(new URL("/overview", url));
+   }
+ 
+-  // Caso não tenha redirecionado, cria response com header x-invoke-path
+   const response = NextResponse.next();
+ 
+   response.headers.set("x-invoke-path", url.pathname);
+@@ -39,7 +34,6 @@ export async function middleware(req: NextRequest) {
+   return response;
+ }
+ 
+-// Configurar onde aplicar (ajuste o matcher conforme seu app)
+ export const config = {
+   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+ };
+diff --git a/src/utils/convertMessageOfDbToAiModel.ts b/src/utils/convertMessageOfDbToAiModel.ts
+index ee31182..3cf8750 100644
+--- a/src/utils/convertMessageOfDbToAiModel.ts
++++ b/src/utils/convertMessageOfDbToAiModel.ts
+@@ -4,22 +4,12 @@ import { StringCompressor } from "@utils/stringCompressor";
+ 
+ type MessageWithSender = Message & { sender?: User | null };
+ 
+-function convertRoleToUIFormat(
+-  role: MessageRole,
+-): "user" | "assistant" | "system" {
+-  switch (role) {
+-    case MessageRole.USER:
+-      return "user";
+-    case MessageRole.ASSISTANT:
+-      return "assistant";
+-    case MessageRole.SYSTEM:
+-      return "system";
+-    case MessageRole.TOOL:
+-      return "assistant";
+-    default:
+-      return "user";
+-  }
+-}
++const roleMap: Record<MessageRole, UIMessage["role"]> = {
++  [MessageRole.USER]: "user",
++  [MessageRole.ASSISTANT]: "assistant",
++  [MessageRole.SYSTEM]: "system",
++  [MessageRole.TOOL]: "assistant",
++};
+ 
+ export async function ConvertMessageOfDatabaseToAiModel(
+   messages: MessageWithSender[],
+@@ -27,36 +17,25 @@ export async function ConvertMessageOfDatabaseToAiModel(
+   const sorted = [...messages].sort(
+     (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+   );
+-  const uiMessages: UIMessage[] = [];
+-
+-  for (const msg of sorted) {
+-    const [contentText, reasoningText] = await Promise.all([
+-      StringCompressor.decompress({
+-        compressedText: msg.content,
+-      }),
+-      StringCompressor.decompress({
+-        compressedText: msg.reasoning || "",
+-      }),
+-    ]);
+-
+-    const parts: UIMessage["parts"] = [{ type: "text", text: contentText }];
+ 
+-    if (msg.reasoning) {
+-      parts.push({
+-        type: "reasoning",
+-        reasoning: reasoningText,
+-        details: [{ type: "text", text: msg.reasoning }],
+-      });
+-    }
+-
+-    uiMessages.push({
+-      id: msg.id,
+-      role: convertRoleToUIFormat(msg.role),
+-      content: contentText,
+-      parts,
+-      createdAt: msg.createdAt,
+-    });
+-  }
+-
+-  return uiMessages;
++  return Promise.all(
++    sorted.map(async (msg) => {
++      const [text, reasoningText] = await Promise.all([
++        StringCompressor.decompress({ compressedText: msg.content }),
++        StringCompressor.decompress({ compressedText: msg.reasoning || "" }),
++      ]);
++
++      const parts: UIMessage["parts"] = [{ type: "text", text }];
++
++      if (msg.reasoning) {
++        parts.push({ type: "reasoning", text: reasoningText });
++      }
++
++      return {
++        id: String(msg.id),
++        role: roleMap[msg.role],
++        parts,
++      };
++    }),
++  );
+ }
+diff --git a/src/utils/generateChatNameWithAi.ts b/src/utils/generateChatNameWithAi.ts
+index 1636268..29cf72b 100644
+--- a/src/utils/generateChatNameWithAi.ts
++++ b/src/utils/generateChatNameWithAi.ts
+@@ -1,5 +1,5 @@
+ import { debug } from "debug";
+-import { generateText, LanguageModelV1 } from "ai";
++import { generateText, LanguageModel } from "ai";
+ const log = debug("app:utils:generateChatName");
+ 
+ let lastCall = 0;
+@@ -10,7 +10,7 @@ export async function generateChatNameWithAi({
+   model,
+ }: {
+   userPrompt: string;
+-  model: LanguageModelV1;
++  model: LanguageModel;
+ }) {
+   const now = Date.now();
+   if (now - lastCall < RATE_LIMIT_MS) {
+@@ -42,7 +42,7 @@ Título:
+     const aiResponse = await generateText({
+       model,
+       prompt,
+-      maxTokens: 10,
++      maxOutputTokens: 10,
+       temperature: 0.5,
+     });
+ 

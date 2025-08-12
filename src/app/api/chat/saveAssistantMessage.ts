@@ -1,41 +1,35 @@
 import { StringCompressor } from "@utils/stringCompressor";
 import { prisma } from "@lib/prisma/client";
-import { FinishReason } from "ai";
+import { LanguageModelUsage, StepResult, ToolSet } from "ai";
 import { debug } from "debug";
 const log = debug("app:api:chat:save-assistant-message");
 
-export interface CompletionResult {
-  text: string;
-  reasoning?: string;
-  finishReason: FinishReason;
-  usage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-}
+export type EventResultType = StepResult<ToolSet> & {
+  readonly steps: StepResult<ToolSet>[];
+  readonly totalUsage: LanguageModelUsage;
+};
 
 export async function saveAssistantMessage({
   chatId,
-  completion,
+  event,
 }: {
   chatId: string;
-  completion: CompletionResult;
+  event: EventResultType;
 }) {
   try {
-    const [compressedMessage, compressedPrompt] = await Promise.all([
+    const [compressedMessage, compressedReasoning] = await Promise.all([
       StringCompressor.compress({
-        text: completion.text.trim(),
+        text: event.text.trim(),
       }),
       StringCompressor.compress({
-        text: completion.reasoning?.trim() || "",
+        text: event.reasoningText?.trim() || "",
       }),
     ]);
 
     await prisma.message.create({
       data: {
         content: compressedMessage,
-        reasoning: compressedPrompt,
+        reasoning: compressedReasoning,
         role: "ASSISTANT",
         chatId,
       },

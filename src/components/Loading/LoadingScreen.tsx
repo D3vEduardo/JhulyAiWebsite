@@ -1,12 +1,12 @@
 "use client";
 
-import { useChatStateContext } from "@/contexts/ChatContext/Hooks";
 import LoadingSpritesAnimation from "./LoadingSpritesAnimation";
+import { useChatMessages } from "@/hooks/useChatMessages";
 
 export default function LoadingScreen() {
-  const { isLoadingMessages } = useChatStateContext();
+  const { isLoading: messagesIsLoading } = useChatMessages();
 
-  if (!isLoadingMessages) return null;
+  if (!messagesIsLoading) return null;
 
   return (
     <div

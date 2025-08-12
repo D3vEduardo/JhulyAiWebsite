@@ -1,5 +1,5 @@
 import { debug } from "debug";
-import { generateText, LanguageModelV1 } from "ai";
+import { generateText, LanguageModel } from "ai";
 const log = debug("app:utils:generateChatName");
 
 let lastCall = 0;
@@ -10,7 +10,7 @@ export async function generateChatNameWithAi({
   model,
 }: {
   userPrompt: string;
-  model: LanguageModelV1;
+  model: LanguageModel;
 }) {
   const now = Date.now();
   if (now - lastCall < RATE_LIMIT_MS) {
@@ -42,7 +42,7 @@ Título:
     const aiResponse = await generateText({
       model,
       prompt,
-      maxTokens: 10,
+      maxOutputTokens: 10,
       temperature: 0.5,
     });
 

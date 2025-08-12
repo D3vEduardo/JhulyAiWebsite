@@ -1,19 +1,16 @@
-import { memo, RefObject } from "react";
-import { useChatInputContext } from "@/contexts/ChatContext/Hooks";
-// import { FocusEvent } from "react";
+import { memo, RefObject } from "react"; // import { FocusEvent } from "react";
 
 interface iProps {
   formRef: RefObject<HTMLFormElement | null>;
+  inputRef: RefObject<HTMLTextAreaElement | null>;
 }
 
-function PromptInput({ formRef }: iProps) {
-  const { value: input, onChange: handleInputChange } = useChatInputContext();
+function PromptInput({ formRef, inputRef }: iProps) {
   console.log("Renderizei PromptInput");
 
   return (
     <textarea
-      onChange={handleInputChange}
-      value={input}
+      ref={inputRef}
       onFocus={() => {
         document.addEventListener("keypress", (e) => {
           if (e.key === "Enter" && !e.shiftKey && formRef.current) {

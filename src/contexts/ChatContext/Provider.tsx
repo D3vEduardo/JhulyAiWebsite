@@ -23,10 +23,9 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
       if (!chatId || isNewChat) {
         const finalChatId = newChatIdRef.current;
         if (finalChatId) {
-          queryClient.setQueryData(
-            ["chat", `chat_${finalChatId}`],
-            (oldData: UIMessage[] = []) => [...oldData, message]
-          );
+          queryClient.invalidateQueries({
+            queryKey: ["chat", `chat_${finalChatId}`],
+          });
 
           window.dispatchEvent(
             new CustomEvent("chat-created", {
@@ -108,16 +107,7 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
     isLoading: chat.status === "streaming" || chat.status === "submitted",
     error: chat.error,
 
-    sendMessage: function (param) {
-      if (newChatIdRef.current && isNewChat) {
-        queryClient.setQueryData(
-          ["chat", `chat_${newChatIdRef.current}`],
-          (oldData: UIMessage[] = []) => [...oldData, param]
-        );
-      }
-      return chat.sendMessage(param);
-    },
-    //chat.sendMessage,
+    sendMessage: chat.sendMessage,
     stop: chat.stop,
     setMessages: chat.setMessages,
     status: chat.status,

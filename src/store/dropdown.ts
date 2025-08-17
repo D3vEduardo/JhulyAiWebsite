@@ -13,6 +13,7 @@ interface DropdownState {
   isOpen: boolean;
   selectedValue: DropdownValue | null;
   onSelect?: (value: string, label: string) => void;
+  persistValue?: boolean;
 }
 
 interface DropdownStore {
@@ -20,13 +21,13 @@ interface DropdownStore {
   createDropdown: (
     id: string,
     defaultValue?: DropdownValue | null,
-    onSelect?: (value: string, label: string) => void,
+    onSelect?: (value: string, label: string) => void
   ) => void;
   selectValue: (
     id: string,
     value: string,
     label: string,
-    icon?: ReactNode,
+    icon?: ReactNode
   ) => void;
   updateSelectedValue: (id: string, selectedValue: DropdownValue) => void;
   toggleOpen: (id: string) => void;
@@ -40,17 +41,24 @@ export const useDropdown = create<DropdownStore>()(
       dropdowns: {},
 
       createDropdown: (id, defaultValue = null, onSelect) => {
-        set((state) => ({
-          dropdowns: {
-            ...state.dropdowns,
-            [id]: {
-              id,
-              isOpen: false,
-              selectedValue: defaultValue,
-              onSelect,
+        set((state) => {
+          const existing = state.dropdowns[id];
+          let selectedValue = defaultValue;
+          if (existing && existing.selectedValue && existing.persistValue) {
+            selectedValue = existing.selectedValue;
+          }
+          return {
+            dropdowns: {
+              ...state.dropdowns,
+              [id]: {
+                id,
+                isOpen: false,
+                selectedValue,
+                onSelect,
+              },
             },
-          },
-        }));
+          };
+        });
       },
 
       selectValue: (id, value, label, icon) => {
@@ -129,24 +137,28 @@ export const useDropdown = create<DropdownStore>()(
       name: "dropdown-storage",
       partialize: (state) => ({
         dropdowns: Object.fromEntries(
-          Object.entries(state.dropdowns).map(([id, dropdown]) => [
-            id,
-            {
-              ...dropdown,
-              isOpen: false,
-              onSelect: undefined,
-              icon: undefined,
-              selectedValue: dropdown.selectedValue
-                ? {
-                    value: dropdown.selectedValue.value,
-                    label: dropdown.selectedValue.label,
-                  }
-                : null,
-            },
-          ]),
+          Object.entries(state.dropdowns).map(([id, dropdown]) =>
+            dropdown.persistValue
+              ? [
+                  id,
+                  {
+                    ...dropdown,
+                    isOpen: false,
+                    onSelect: undefined,
+                    icon: undefined,
+                    selectedValue: dropdown.selectedValue
+                      ? {
+                          value: dropdown.selectedValue.value,
+                          label: dropdown.selectedValue.label,
+                        }
+                      : null,
+                  },
+                ]
+              : []
+          )
         ),
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: (state) => {
         if (state) {
           Object.keys(state.dropdowns).forEach((id) => {
             if (state.dropdowns[id]) {
@@ -155,6 +167,6 @@ export const useDropdown = create<DropdownStore>()(
           });
         }
       },
-    },
-  ),
+    }
+  )
 );

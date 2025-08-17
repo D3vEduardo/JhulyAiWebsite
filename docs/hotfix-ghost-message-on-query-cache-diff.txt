@@ -1,0 +1,336 @@
+diff --git a/src/app/api/chat/route.ts b/src/app/api/chat/route.ts
+index f1b771e..c95aed4 100644
+--- a/src/app/api/chat/route.ts
++++ b/src/app/api/chat/route.ts
+@@ -8,14 +8,29 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
+ import { Chat, Message } from "@prisma/client";
+ import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
+ import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
+-import { convertToModelMessages, createUIMessageStreamResponse } from "ai";
++import {
++  convertToModelMessages,
++  createUIMessageStreamResponse,
++  DataUIPart,
++  TextUIPart,
++  ToolUIPart,
++} from "ai";
+ import { StringCompressor } from "@utils/stringCompressor";
+ import { getCachedSession } from "@data/auth/getCachedSession";
+ import { createCustomUIMessageStream } from "./createCustomUIMessageStream";
+ const log = debug("app:api:chat");
+ 
+ const bodySchema = z.object({
+-  prompt: z.string(),
++  messages: z.array(
++    z.object({
++      parts: z.any(),
++      id: z.string(),
++      role: z
++        .string()
++        .nullable()
++        .refine((val) => (val?.trim() !== "user" ? undefined : val.trim())),
++    })
++  ),
+   id: z.string({ error: "Chat ID is required!" }),
+   reasoning: z.coerce
+     .boolean({
+@@ -43,17 +58,33 @@ export async function POST(req: NextRequest) {
+         {
+           error: bodyParseResult.error.message,
+         },
+-        { status: 400 },
++        { status: 400 }
+       );
+     }
+ 
+     const {
+       id: chatId,
+-      prompt,
++      messages,
+       reasoning: reasoningEnabled,
+       model: selectedModel,
+     } = bodyParseResult.data;
+ 
++    const promptParts = messages.find((msg) => msg.role === "user")?.parts as (
++      | TextUIPart
++      | ToolUIPart
++    )[];
++
++    const prompt = promptParts.find((part) => part.type === "text")?.text || "";
++
++    if (!prompt || prompt.trim() === "") {
++      log("Prompt is empty or invalid:", prompt);
++      return NextResponse.json(
++        {
++          error: "Prompt cannot be empty!",
++        },
++        { status: 400 }
++      );
++    }
+     if (!session?.user.id) {
+       log("User not authenticated! Session:", session);
+ 
+@@ -61,7 +92,7 @@ export async function POST(req: NextRequest) {
+         {
+           error: "Unauthorized! (User not authenticaded)",
+         },
+-        { status: 401 },
++        { status: 401 }
+       );
+     }
+ 
+@@ -86,7 +117,7 @@ export async function POST(req: NextRequest) {
+         {
+           error: "User not found!",
+         },
+-        { status: 404 },
++        { status: 404 }
+       );
+     }
+ 
+@@ -96,7 +127,7 @@ export async function POST(req: NextRequest) {
+         {
+           error: "Unauthorized! (User API Key not found)",
+         },
+-        { status: 401 },
++        { status: 401 }
+       );
+     }
+ 
+@@ -110,7 +141,7 @@ export async function POST(req: NextRequest) {
+         {
+           error: "Unauthorized! (Invalid API Key)",
+         },
+-        { status: 401 },
++        { status: 401 }
+       );
+     }
+ 
+@@ -149,14 +180,14 @@ export async function POST(req: NextRequest) {
+           "Chat not found or access denied! Chat ID:",
+           chatId,
+           "Owner Id:",
+-          databaseUser.id,
++          databaseUser.id
+         );
+ 
+         return NextResponse.json(
+           {
+             error: "Chat not found or access denied!",
+           },
+-          { status: 404 },
++          { status: 404 }
+         );
+       }
+ 
+@@ -238,13 +269,13 @@ export async function POST(req: NextRequest) {
+         : 500;
+       return NextResponse.json(
+         { error: error.message },
+-        { status: statusCode },
++        { status: statusCode }
+       );
+     }
+ 
+     return NextResponse.json(
+       { error: "Internal Server Error" },
+-      { status: 500 },
++      { status: 500 }
+     );
+   }
+ }
+diff --git a/src/components/PromptForm/PromptForm.tsx b/src/components/PromptForm/PromptForm.tsx
+index 9fc856c..957bc17 100644
+--- a/src/components/PromptForm/PromptForm.tsx
++++ b/src/components/PromptForm/PromptForm.tsx
+@@ -10,7 +10,7 @@ import { useDropdown } from "@store/dropdown";
+ import { CustomTooltip } from "../CustomTooltip";
+ 
+ export default function PromptForm() {
+-  const { sendMessage, isLoading } = useChatContext();
++  const { sendMessage, isLoading, chatId } = useChatContext();
+   const inputRef = useRef<HTMLTextAreaElement>(null);
+   const [reasoning, setReasoning] = useState<boolean>(false);
+   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
+@@ -21,22 +21,23 @@ export default function PromptForm() {
+       ref={formRef}
+       onSubmit={async (e) => {
+         e.preventDefault();
++        const prompt = inputRef?.current?.value.trim();
+         console.log(
+           "Enviando mensagem do formulário de prompt. Prompt:",
+-          inputRef?.current?.value
++          prompt
+         );
+ 
+-        if (isLoading || !inputRef?.current?.value.trim()) return;
++        if (isLoading || !prompt) return;
+ 
+         sendMessage(
+           {
+-            text: inputRef.current.value,
++            text: prompt,
+           },
+           {
+             body: {
+-              prompt: inputRef.current.value,
++              prompt,
+               reasoning: reasoning,
+-              // chatId,
++              id: chatId,
+               model: dropdown.selectedValue?.value || "BASIC",
+             },
+           }
+diff --git a/src/contexts/ChatContext/Provider.tsx b/src/contexts/ChatContext/Provider.tsx
+index 700760d..2cf42e0 100644
+--- a/src/contexts/ChatContext/Provider.tsx
++++ b/src/contexts/ChatContext/Provider.tsx
+@@ -23,10 +23,9 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
+       if (!chatId || isNewChat) {
+         const finalChatId = newChatIdRef.current;
+         if (finalChatId) {
+-          queryClient.setQueryData(
+-            ["chat", `chat_${finalChatId}`],
+-            (oldData: UIMessage[] = []) => [...oldData, message]
+-          );
++          queryClient.invalidateQueries({
++            queryKey: ["chat", `chat_${finalChatId}`],
++          });
+ 
+           window.dispatchEvent(
+             new CustomEvent("chat-created", {
+@@ -108,16 +107,7 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
+     isLoading: chat.status === "streaming" || chat.status === "submitted",
+     error: chat.error,
+ 
+-    sendMessage: function (param) {
+-      if (newChatIdRef.current && isNewChat) {
+-        queryClient.setQueryData(
+-          ["chat", `chat_${newChatIdRef.current}`],
+-          (oldData: UIMessage[] = []) => [...oldData, param]
+-        );
+-      }
+-      return chat.sendMessage(param);
+-    },
+-    //chat.sendMessage,
++    sendMessage: chat.sendMessage,
+     stop: chat.stop,
+     setMessages: chat.setMessages,
+     status: chat.status,
+diff --git a/src/store/dropdown.ts b/src/store/dropdown.ts
+index 14d4ab7..836f702 100644
+--- a/src/store/dropdown.ts
++++ b/src/store/dropdown.ts
+@@ -13,6 +13,7 @@ interface DropdownState {
+   isOpen: boolean;
+   selectedValue: DropdownValue | null;
+   onSelect?: (value: string, label: string) => void;
++  persistValue?: boolean;
+ }
+ 
+ interface DropdownStore {
+@@ -20,13 +21,13 @@ interface DropdownStore {
+   createDropdown: (
+     id: string,
+     defaultValue?: DropdownValue | null,
+-    onSelect?: (value: string, label: string) => void,
++    onSelect?: (value: string, label: string) => void
+   ) => void;
+   selectValue: (
+     id: string,
+     value: string,
+     label: string,
+-    icon?: ReactNode,
++    icon?: ReactNode
+   ) => void;
+   updateSelectedValue: (id: string, selectedValue: DropdownValue) => void;
+   toggleOpen: (id: string) => void;
+@@ -40,17 +41,24 @@ export const useDropdown = create<DropdownStore>()(
+       dropdowns: {},
+ 
+       createDropdown: (id, defaultValue = null, onSelect) => {
+-        set((state) => ({
+-          dropdowns: {
+-            ...state.dropdowns,
+-            [id]: {
+-              id,
+-              isOpen: false,
+-              selectedValue: defaultValue,
+-              onSelect,
++        set((state) => {
++          const existing = state.dropdowns[id];
++          let selectedValue = defaultValue;
++          if (existing && existing.selectedValue && existing.persistValue) {
++            selectedValue = existing.selectedValue;
++          }
++          return {
++            dropdowns: {
++              ...state.dropdowns,
++              [id]: {
++                id,
++                isOpen: false,
++                selectedValue,
++                onSelect,
++              },
+             },
+-          },
+-        }));
++          };
++        });
+       },
+ 
+       selectValue: (id, value, label, icon) => {
+@@ -129,24 +137,28 @@ export const useDropdown = create<DropdownStore>()(
+       name: "dropdown-storage",
+       partialize: (state) => ({
+         dropdowns: Object.fromEntries(
+-          Object.entries(state.dropdowns).map(([id, dropdown]) => [
+-            id,
+-            {
+-              ...dropdown,
+-              isOpen: false,
+-              onSelect: undefined,
+-              icon: undefined,
+-              selectedValue: dropdown.selectedValue
+-                ? {
+-                    value: dropdown.selectedValue.value,
+-                    label: dropdown.selectedValue.label,
+-                  }
+-                : null,
+-            },
+-          ]),
++          Object.entries(state.dropdowns).map(([id, dropdown]) =>
++            dropdown.persistValue
++              ? [
++                  id,
++                  {
++                    ...dropdown,
++                    isOpen: false,
++                    onSelect: undefined,
++                    icon: undefined,
++                    selectedValue: dropdown.selectedValue
++                      ? {
++                          value: dropdown.selectedValue.value,
++                          label: dropdown.selectedValue.label,
++                        }
++                      : null,
++                  },
++                ]
++              : []
++          )
+         ),
+       }),
+-      onRehydrateStorage: () => (state) => {
++      onRehydrateStorage: (state) => {
+         if (state) {
+           Object.keys(state.dropdowns).forEach((id) => {
+             if (state.dropdowns[id]) {
+@@ -155,6 +167,6 @@ export const useDropdown = create<DropdownStore>()(
+           });
+         }
+       },
+-    },
+-  ),
++    }
++  )
+ );

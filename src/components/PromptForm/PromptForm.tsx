@@ -10,7 +10,7 @@ import { useDropdown } from "@store/dropdown";
 import { CustomTooltip } from "../CustomTooltip";
 
 export default function PromptForm() {
-  const { sendMessage, isLoading } = useChatContext();
+  const { sendMessage, isLoading, chatId } = useChatContext();
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [reasoning, setReasoning] = useState<boolean>(false);
   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
@@ -21,22 +21,23 @@ export default function PromptForm() {
       ref={formRef}
       onSubmit={async (e) => {
         e.preventDefault();
+        const prompt = inputRef?.current?.value.trim();
         console.log(
           "Enviando mensagem do formulário de prompt. Prompt:",
-          inputRef?.current?.value
+          prompt
         );
 
-        if (isLoading || !inputRef?.current?.value.trim()) return;
+        if (isLoading || !prompt) return;
 
         sendMessage(
           {
-            text: inputRef.current.value,
+            text: prompt,
           },
           {
             body: {
-              prompt: inputRef.current.value,
+              prompt,
               reasoning: reasoning,
-              // chatId,
+              id: chatId,
               model: dropdown.selectedValue?.value || "BASIC",
             },
           }

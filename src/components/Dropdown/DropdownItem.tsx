@@ -1,11 +1,9 @@
-import { useDropdown } from "@store/dropdown";
-import { ReactNode } from "react";
+import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
+import { DropdownValue, useDropdown } from "@store/dropdown";
 
-interface DropdownItemProps {
-  id: string;
-  value: string;
+interface DropdownItemProps extends DropdownValue {
   children: React.ReactNode;
-  icon?: ReactNode;
+  id: string;
 }
 
 export function DropdownItem({ id, value, children, icon }: DropdownItemProps) {
@@ -13,12 +11,21 @@ export function DropdownItem({ id, value, children, icon }: DropdownItemProps) {
 
   return (
     <li
-      onClick={() => selectValue(id, value, String(children), icon)}
+      onClick={() =>
+        selectValue({
+          id,
+          icon,
+          value,
+          label: children?.toString() || "",
+        })
+      }
       className="cursor-pointer px-4 py-2  w-auto"
       tabIndex={0}
     >
       <span className="flex items-center justify-start gap-x-1.5">
-        {icon}
+        {icon?.name && (
+          <Icon icon={icon.name} width={icon.width} height={icon.height} />
+        )}
         {children}
       </span>
     </li>

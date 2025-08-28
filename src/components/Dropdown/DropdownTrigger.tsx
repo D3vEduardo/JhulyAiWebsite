@@ -1,3 +1,4 @@
+import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 import { useDropdown } from "@store/dropdown";
 import { twMerge } from "tailwind-merge";
 
@@ -17,7 +18,7 @@ export function DropdownTrigger({
 
   return (
     <button
-      onClick={() => toggleOpen(id)}
+      onClick={() => toggleOpen({ id })}
       className={twMerge(
         `w-auto max-w-xs text-left border-2 border-apricot bg-watermelon/60
       hover:bg-watermelon/80 transition-colors duration-200
@@ -31,7 +32,13 @@ export function DropdownTrigger({
     >
       <span className="flex items-center justify-start gap-x-1">
         <div className="w-5 h-5 flex items-center justify-center shrink-0">
-          {dropdown?.selectedValue?.icon}
+          {dropdown?.selectedValue?.icon && (
+            <Icon
+              icon={dropdown?.selectedValue?.icon.name}
+              width={dropdown?.selectedValue?.icon.width}
+              height={dropdown?.selectedValue?.icon.height}
+            />
+          )}
         </div>
         {dropdown?.selectedValue?.label ?? placeholder ?? "Selecione..."}
       </span>

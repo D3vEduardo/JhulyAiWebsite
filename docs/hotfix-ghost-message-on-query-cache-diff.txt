@@ -1,336 +1,1396 @@
+diff --git a/docs/hotfix-ghost-message-on-query-cache-diff.txt b/docs/hotfix-ghost-message-on-query-cache-diff.txt
+index 56e0586..e69de29 100644
+--- a/docs/hotfix-ghost-message-on-query-cache-diff.txt
++++ b/docs/hotfix-ghost-message-on-query-cache-diff.txt
+@@ -1,336 +0,0 @@
+-diff --git a/src/app/api/chat/route.ts b/src/app/api/chat/route.ts
+-index f1b771e..c95aed4 100644
+---- a/src/app/api/chat/route.ts
+-+++ b/src/app/api/chat/route.ts
+-@@ -8,14 +8,29 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
+- import { Chat, Message } from "@prisma/client";
+- import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
+- import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
+--import { convertToModelMessages, createUIMessageStreamResponse } from "ai";
+-+import {
+-+  convertToModelMessages,
+-+  createUIMessageStreamResponse,
+-+  DataUIPart,
+-+  TextUIPart,
+-+  ToolUIPart,
+-+} from "ai";
+- import { StringCompressor } from "@utils/stringCompressor";
+- import { getCachedSession } from "@data/auth/getCachedSession";
+- import { createCustomUIMessageStream } from "./createCustomUIMessageStream";
+- const log = debug("app:api:chat");
+- 
+- const bodySchema = z.object({
+--  prompt: z.string(),
+-+  messages: z.array(
+-+    z.object({
+-+      parts: z.any(),
+-+      id: z.string(),
+-+      role: z
+-+        .string()
+-+        .nullable()
+-+        .refine((val) => (val?.trim() !== "user" ? undefined : val.trim())),
+-+    })
+-+  ),
+-   id: z.string({ error: "Chat ID is required!" }),
+-   reasoning: z.coerce
+-     .boolean({
+-@@ -43,17 +58,33 @@ export async function POST(req: NextRequest) {
+-         {
+-           error: bodyParseResult.error.message,
+-         },
+--        { status: 400 },
+-+        { status: 400 }
+-       );
+-     }
+- 
+-     const {
+-       id: chatId,
+--      prompt,
+-+      messages,
+-       reasoning: reasoningEnabled,
+-       model: selectedModel,
+-     } = bodyParseResult.data;
+- 
+-+    const promptParts = messages.find((msg) => msg.role === "user")?.parts as (
+-+      | TextUIPart
+-+      | ToolUIPart
+-+    )[];
+-+
+-+    const prompt = promptParts.find((part) => part.type === "text")?.text || "";
+-+
+-+    if (!prompt || prompt.trim() === "") {
+-+      log("Prompt is empty or invalid:", prompt);
+-+      return NextResponse.json(
+-+        {
+-+          error: "Prompt cannot be empty!",
+-+        },
+-+        { status: 400 }
+-+      );
+-+    }
+-     if (!session?.user.id) {
+-       log("User not authenticated! Session:", session);
+- 
+-@@ -61,7 +92,7 @@ export async function POST(req: NextRequest) {
+-         {
+-           error: "Unauthorized! (User not authenticaded)",
+-         },
+--        { status: 401 },
+-+        { status: 401 }
+-       );
+-     }
+- 
+-@@ -86,7 +117,7 @@ export async function POST(req: NextRequest) {
+-         {
+-           error: "User not found!",
+-         },
+--        { status: 404 },
+-+        { status: 404 }
+-       );
+-     }
+- 
+-@@ -96,7 +127,7 @@ export async function POST(req: NextRequest) {
+-         {
+-           error: "Unauthorized! (User API Key not found)",
+-         },
+--        { status: 401 },
+-+        { status: 401 }
+-       );
+-     }
+- 
+-@@ -110,7 +141,7 @@ export async function POST(req: NextRequest) {
+-         {
+-           error: "Unauthorized! (Invalid API Key)",
+-         },
+--        { status: 401 },
+-+        { status: 401 }
+-       );
+-     }
+- 
+-@@ -149,14 +180,14 @@ export async function POST(req: NextRequest) {
+-           "Chat not found or access denied! Chat ID:",
+-           chatId,
+-           "Owner Id:",
+--          databaseUser.id,
+-+          databaseUser.id
+-         );
+- 
+-         return NextResponse.json(
+-           {
+-             error: "Chat not found or access denied!",
+-           },
+--          { status: 404 },
+-+          { status: 404 }
+-         );
+-       }
+- 
+-@@ -238,13 +269,13 @@ export async function POST(req: NextRequest) {
+-         : 500;
+-       return NextResponse.json(
+-         { error: error.message },
+--        { status: statusCode },
+-+        { status: statusCode }
+-       );
+-     }
+- 
+-     return NextResponse.json(
+-       { error: "Internal Server Error" },
+--      { status: 500 },
+-+      { status: 500 }
+-     );
+-   }
+- }
+-diff --git a/src/components/PromptForm/PromptForm.tsx b/src/components/PromptForm/PromptForm.tsx
+-index 9fc856c..957bc17 100644
+---- a/src/components/PromptForm/PromptForm.tsx
+-+++ b/src/components/PromptForm/PromptForm.tsx
+-@@ -10,7 +10,7 @@ import { useDropdown } from "@store/dropdown";
+- import { CustomTooltip } from "../CustomTooltip";
+- 
+- export default function PromptForm() {
+--  const { sendMessage, isLoading } = useChatContext();
+-+  const { sendMessage, isLoading, chatId } = useChatContext();
+-   const inputRef = useRef<HTMLTextAreaElement>(null);
+-   const [reasoning, setReasoning] = useState<boolean>(false);
+-   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
+-@@ -21,22 +21,23 @@ export default function PromptForm() {
+-       ref={formRef}
+-       onSubmit={async (e) => {
+-         e.preventDefault();
+-+        const prompt = inputRef?.current?.value.trim();
+-         console.log(
+-           "Enviando mensagem do formulário de prompt. Prompt:",
+--          inputRef?.current?.value
+-+          prompt
+-         );
+- 
+--        if (isLoading || !inputRef?.current?.value.trim()) return;
+-+        if (isLoading || !prompt) return;
+- 
+-         sendMessage(
+-           {
+--            text: inputRef.current.value,
+-+            text: prompt,
+-           },
+-           {
+-             body: {
+--              prompt: inputRef.current.value,
+-+              prompt,
+-               reasoning: reasoning,
+--              // chatId,
+-+              id: chatId,
+-               model: dropdown.selectedValue?.value || "BASIC",
+-             },
+-           }
+-diff --git a/src/contexts/ChatContext/Provider.tsx b/src/contexts/ChatContext/Provider.tsx
+-index 700760d..2cf42e0 100644
+---- a/src/contexts/ChatContext/Provider.tsx
+-+++ b/src/contexts/ChatContext/Provider.tsx
+-@@ -23,10 +23,9 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
+-       if (!chatId || isNewChat) {
+-         const finalChatId = newChatIdRef.current;
+-         if (finalChatId) {
+--          queryClient.setQueryData(
+--            ["chat", `chat_${finalChatId}`],
+--            (oldData: UIMessage[] = []) => [...oldData, message]
+--          );
+-+          queryClient.invalidateQueries({
+-+            queryKey: ["chat", `chat_${finalChatId}`],
+-+          });
+- 
+-           window.dispatchEvent(
+-             new CustomEvent("chat-created", {
+-@@ -108,16 +107,7 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
+-     isLoading: chat.status === "streaming" || chat.status === "submitted",
+-     error: chat.error,
+- 
+--    sendMessage: function (param) {
+--      if (newChatIdRef.current && isNewChat) {
+--        queryClient.setQueryData(
+--          ["chat", `chat_${newChatIdRef.current}`],
+--          (oldData: UIMessage[] = []) => [...oldData, param]
+--        );
+--      }
+--      return chat.sendMessage(param);
+--    },
+--    //chat.sendMessage,
+-+    sendMessage: chat.sendMessage,
+-     stop: chat.stop,
+-     setMessages: chat.setMessages,
+-     status: chat.status,
+-diff --git a/src/store/dropdown.ts b/src/store/dropdown.ts
+-index 14d4ab7..836f702 100644
+---- a/src/store/dropdown.ts
+-+++ b/src/store/dropdown.ts
+-@@ -13,6 +13,7 @@ interface DropdownState {
+-   isOpen: boolean;
+-   selectedValue: DropdownValue | null;
+-   onSelect?: (value: string, label: string) => void;
+-+  persistValue?: boolean;
+- }
+- 
+- interface DropdownStore {
+-@@ -20,13 +21,13 @@ interface DropdownStore {
+-   createDropdown: (
+-     id: string,
+-     defaultValue?: DropdownValue | null,
+--    onSelect?: (value: string, label: string) => void,
+-+    onSelect?: (value: string, label: string) => void
+-   ) => void;
+-   selectValue: (
+-     id: string,
+-     value: string,
+-     label: string,
+--    icon?: ReactNode,
+-+    icon?: ReactNode
+-   ) => void;
+-   updateSelectedValue: (id: string, selectedValue: DropdownValue) => void;
+-   toggleOpen: (id: string) => void;
+-@@ -40,17 +41,24 @@ export const useDropdown = create<DropdownStore>()(
+-       dropdowns: {},
+- 
+-       createDropdown: (id, defaultValue = null, onSelect) => {
+--        set((state) => ({
+--          dropdowns: {
+--            ...state.dropdowns,
+--            [id]: {
+--              id,
+--              isOpen: false,
+--              selectedValue: defaultValue,
+--              onSelect,
+-+        set((state) => {
+-+          const existing = state.dropdowns[id];
+-+          let selectedValue = defaultValue;
+-+          if (existing && existing.selectedValue && existing.persistValue) {
+-+            selectedValue = existing.selectedValue;
+-+          }
+-+          return {
+-+            dropdowns: {
+-+              ...state.dropdowns,
+-+              [id]: {
+-+                id,
+-+                isOpen: false,
+-+                selectedValue,
+-+                onSelect,
+-+              },
+-             },
+--          },
+--        }));
+-+          };
+-+        });
+-       },
+- 
+-       selectValue: (id, value, label, icon) => {
+-@@ -129,24 +137,28 @@ export const useDropdown = create<DropdownStore>()(
+-       name: "dropdown-storage",
+-       partialize: (state) => ({
+-         dropdowns: Object.fromEntries(
+--          Object.entries(state.dropdowns).map(([id, dropdown]) => [
+--            id,
+--            {
+--              ...dropdown,
+--              isOpen: false,
+--              onSelect: undefined,
+--              icon: undefined,
+--              selectedValue: dropdown.selectedValue
+--                ? {
+--                    value: dropdown.selectedValue.value,
+--                    label: dropdown.selectedValue.label,
+--                  }
+--                : null,
+--            },
+--          ]),
+-+          Object.entries(state.dropdowns).map(([id, dropdown]) =>
+-+            dropdown.persistValue
+-+              ? [
+-+                  id,
+-+                  {
+-+                    ...dropdown,
+-+                    isOpen: false,
+-+                    onSelect: undefined,
+-+                    icon: undefined,
+-+                    selectedValue: dropdown.selectedValue
+-+                      ? {
+-+                          value: dropdown.selectedValue.value,
+-+                          label: dropdown.selectedValue.label,
+-+                        }
+-+                      : null,
+-+                  },
+-+                ]
+-+              : []
+-+          )
+-         ),
+-       }),
+--      onRehydrateStorage: () => (state) => {
+-+      onRehydrateStorage: (state) => {
+-         if (state) {
+-           Object.keys(state.dropdowns).forEach((id) => {
+-             if (state.dropdowns[id]) {
+-@@ -155,6 +167,6 @@ export const useDropdown = create<DropdownStore>()(
+-           });
+-         }
+-       },
+--    },
+--  ),
+-+    }
+-+  )
+- );
+diff --git a/package.json b/package.json
+index 72bf06b..a1e4064 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "jhuly-website",
+-  "version": "1.6.1",
++  "version": "1.6.2",
+   "private": true,
+   "scripts": {
+     "dev": "next dev --turbopack",
+@@ -9,12 +9,13 @@
+     "start": "next start",
+     "lint": "next lint",
+     "format": "prettier --write 'src/**/*.{js,ts,tsx,json,css,md}'",
+-    "prepare": "pnpm format && pnpm lint",
++    "build:prepare": "pnpm format && pnpm lint",
+     "prisma:push": "dotenv -- pnpm prisma db push"
+   },
+   "dependencies": {
+     "@ai-sdk/google": "^2.0.4",
+     "@ai-sdk/react": "^2.0.10",
++    "@hono/zod-validator": "^0.7.2",
+     "@hookform/resolvers": "^5.1.1",
+     "@openrouter/ai-sdk-provider": "1.1.2",
+     "@prisma/client": "^6.13.0",
+@@ -22,6 +23,7 @@
+     "ai": "^5.0.10",
+     "better-auth": "^1.3.0",
+     "highlight.js": "^11.11.1",
++    "hono": "^4.9.4",
+     "motion": "^12.23.6",
+     "next": "15.4.2",
+     "next-themes": "^0.4.6",
+@@ -41,6 +43,7 @@
+   "devDependencies": {
+     "@eslint/eslintrc": "^3.3.1",
+     "@iconify-icon/react": "^3.0.0",
++    "@next/eslint-plugin-next": "^15.5.0",
+     "@tailwindcss/postcss": "^4.1.11",
+     "@types/debug": "^4.1.12",
+     "@types/node": "^24.0.15",
+@@ -51,6 +54,8 @@
+     "eslint-config-next": "15.4.2",
+     "eslint-config-prettier": "^10.1.8",
+     "eslint-plugin-prettier": "^5.5.3",
++    "eslint-plugin-react": "^7.37.5",
++    "eslint-plugin-react-hooks": "^5.2.0",
+     "prettier": "^3.6.2",
+     "prisma": "^6.13.0",
+     "tailwindcss": "^4.1.11",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index 683877a..ef33917 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -14,6 +14,9 @@ importers:
+       '@ai-sdk/react':
+         specifier: ^2.0.10
+         version: 2.0.10(react@19.1.0)(zod@4.0.5)
++      '@hono/zod-validator':
++        specifier: ^0.7.2
++        version: 0.7.2(hono@4.9.4)(zod@4.0.5)
+       '@hookform/resolvers':
+         specifier: ^5.1.1
+         version: 5.1.1(react-hook-form@7.60.0(react@19.1.0))
+@@ -35,6 +38,9 @@ importers:
+       highlight.js:
+         specifier: ^11.11.1
+         version: 11.11.1
++      hono:
++        specifier: ^4.9.4
++        version: 4.9.4
+       motion:
+         specifier: ^12.23.6
+         version: 12.23.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+@@ -87,6 +93,9 @@ importers:
+       '@iconify-icon/react':
+         specifier: ^3.0.0
+         version: 3.0.0(react@19.1.0)
++      '@next/eslint-plugin-next':
++        specifier: ^15.5.0
++        version: 15.5.0
+       '@tailwindcss/postcss':
+         specifier: ^4.1.11
+         version: 4.1.11
+@@ -117,6 +126,12 @@ importers:
+       eslint-plugin-prettier:
+         specifier: ^5.5.3
+         version: 5.5.3(eslint-config-prettier@10.1.8(eslint@9.31.0(jiti@2.4.2)))(eslint@9.31.0(jiti@2.4.2))(prettier@3.6.2)
++      eslint-plugin-react:
++        specifier: ^7.37.5
++        version: 7.37.5(eslint@9.31.0(jiti@2.4.2))
++      eslint-plugin-react-hooks:
++        specifier: ^5.2.0
++        version: 5.2.0(eslint@9.31.0(jiti@2.4.2))
+       prettier:
+         specifier: ^3.6.2
+         version: 3.6.2
+@@ -245,6 +260,12 @@ packages:
+   '@hexagon/base64@1.1.28':
+     resolution: {integrity: sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw==}
+ 
++  '@hono/zod-validator@0.7.2':
++    resolution: {integrity: sha512-ub5eL/NeZ4eLZawu78JpW/J+dugDAYhwqUIdp9KYScI6PZECij4Hx4UsrthlEUutqDDhPwRI0MscUfNkvn/mqQ==}
++    peerDependencies:
++      hono: '>=3.9.0'
++      zod: ^3.25.0 || ^4.0.0
++
+   '@hookform/resolvers@5.1.1':
+     resolution: {integrity: sha512-J/NVING3LMAEvexJkyTLjruSm7aOFx7QX21pzkiJfMoNG0wl5aFEjLTl7ay7IQb9EWY6AkrBy7tHL2Alijpdcg==}
+     peerDependencies:
+@@ -429,6 +450,9 @@ packages:
+   '@next/eslint-plugin-next@15.4.2':
+     resolution: {integrity: sha512-k0rjdWjXBY6tAOty1ckrMETE6Mx66d85NsgcAIdDp7/cXOsTJ93ywmbg3uUcpxX5TUHFEcCWI5mb8nPhwCe9jg==}
+ 
++  '@next/eslint-plugin-next@15.5.0':
++    resolution: {integrity: sha512-+k83U/fST66eQBjTltX2T9qUYd43ntAe+NZ5qeZVTQyTiFiHvTLtkpLKug4AnZAtuI/lwz5tl/4QDJymjVkybg==}
++
+   '@next/swc-darwin-arm64@15.4.2':
+     resolution: {integrity: sha512-ovqjR8NjCBdBf1U+R/Gvn0RazTtXS9n6wqs84iFaCS1NHbw9ksVE4dfmsYcLoyUVd9BWE0bjkphOWrrz8uz/uw==}
+     engines: {node: '>= 10'}
+@@ -1549,6 +1573,10 @@ packages:
+     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+     engines: {node: '>=12.0.0'}
+ 
++  hono@4.9.4:
++    resolution: {integrity: sha512-61hl6MF6ojTl/8QSRu5ran6GXt+6zsngIUN95KzF5v5UjiX/xnrLR358BNRawwIRO49JwUqJqQe3Rb2v559R8Q==}
++    engines: {node: '>=16.9.0'}
++
+   hosted-git-info@7.0.2:
+     resolution: {integrity: sha512-puUZAUKT5m8Zzvs72XWy3HtvVbTWljRE66cP60bxJzAqf2DgICo7lYTY2IHUmLnNpjYvw5bvmoHvPc0QO2a62w==}
+     engines: {node: ^16.14.0 || >=18.0.0}
+@@ -2850,6 +2878,11 @@ snapshots:
+ 
+   '@hexagon/base64@1.1.28': {}
+ 
++  '@hono/zod-validator@0.7.2(hono@4.9.4)(zod@4.0.5)':
++    dependencies:
++      hono: 4.9.4
++      zod: 4.0.5
++
+   '@hookform/resolvers@5.1.1(react-hook-form@7.60.0(react@19.1.0))':
+     dependencies:
+       '@standard-schema/utils': 0.3.0
+@@ -2994,6 +3027,10 @@ snapshots:
+     dependencies:
+       fast-glob: 3.3.1
+ 
++  '@next/eslint-plugin-next@15.5.0':
++    dependencies:
++      fast-glob: 3.3.1
++
+   '@next/swc-darwin-arm64@15.4.2':
+     optional: true
+ 
+@@ -4286,6 +4323,8 @@ snapshots:
+ 
+   highlight.js@11.11.1: {}
+ 
++  hono@4.9.4: {}
++
+   hosted-git-info@7.0.2:
+     dependencies:
+       lru-cache: 10.4.3
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 3bf676d..1ceca6e 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -8,7 +8,7 @@ datasource db {
+ }
+ 
+ model User {
+-  id            String    @id @unique @default(uuid())
++  id            String    @id @default(uuid())
+   name          String?
+   email         String?   @unique
+   emailVerified Boolean   @default(false)
+@@ -21,13 +21,12 @@ model User {
+   sessions      Session[]
+   accounts      Account[]
+ 
+-  @@index([email])
+-  @@index([createdAt])
++  @@index([createdAt]) // ⚠️ só mantenha se usa paginação/ordenação por data
+   @@map("user")
+ }
+ 
+ model Message {
+-  id        String      @id @unique @default(uuid())
++  id        String      @id @default(uuid())
+   sender    User?       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+   senderId  String?
+   role      MessageRole
+@@ -39,14 +38,14 @@ model Message {
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+ 
+-  @@index([chatId, createdAt])
+-  @@index([senderId])
+-  @@index([role])
++  @@index([chatId, createdAt]) // ótimo para ORDER BY + paginação
++  @@index([senderId]) // útil se busca mensagens por usuário
++  // @@index([role])           // só adicione se realmente busca muito por role
+   @@map("message")
+ }
+ 
+ model Chat {
+-  id       String    @id @unique @default(uuid())
++  id       String    @id @default(uuid())
+   name     String
+   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+   ownerId  String
+@@ -55,8 +54,8 @@ model Chat {
+   createdAt DateTime @default(now())
+   updatedAt DateTime @updatedAt
+ 
+-  @@index([ownerId, createdAt])
+-  @@index([ownerId, updatedAt])
++  @@index([ownerId, createdAt]) // manter se usa em listagens
++  @@index([ownerId, updatedAt]) // idem, revise se dá pra consolidar
+   @@map("chat")
+ }
+ 
+@@ -72,7 +71,7 @@ model Session {
+   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+   @@index([userId])
+-  @@index([expiresAt])
++  @@index([expiresAt]) // bom para expiração/cleanup
+   @@map("session")
+ }
+ 
+@@ -93,7 +92,7 @@ model Account {
+   updatedAt             DateTime  @updatedAt
+ 
+   @@index([userId])
+-  @@index([providerId, accountId])
++  @@index([providerId, accountId]) // login rápido
+   @@map("account")
+ }
+ 
+@@ -106,12 +105,12 @@ model Verification {
+   updatedAt  DateTime? @updatedAt
+ 
+   @@index([identifier])
+-  @@index([expiresAt])
++  @@index([expiresAt]) // cleanup de tokens
+   @@map("verification")
+ }
+ 
+ model ApiKey {
+-  id        String    @id @unique @default(uuid())
++  id        String    @id @default(uuid())
+   userId    String    @unique
+   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+   key       String
+@@ -120,8 +119,8 @@ model ApiKey {
+   createdAt DateTime  @default(now())
+   updatedAt DateTime  @updatedAt
+ 
+-  @@index([key])
+-  @@index([userId, isActive])
++  @@index([key]) // lookup por chave
++  @@index([userId, isActive]) // manter se busca chave ativa do user
+   @@map("api_key")
+ }
+ 
+diff --git a/src/app/(private)/onboarding/actions.ts b/src/app/(private)/onboarding/actions.ts
+index dafbb45..31bda03 100644
+--- a/src/app/(private)/onboarding/actions.ts
++++ b/src/app/(private)/onboarding/actions.ts
+@@ -22,7 +22,6 @@ export async function OboardingAction(
+   const parsedForm = onboardingFormSchema.safeParse(formData);
+   log("Parsed Onboarding Form Data:", parsedForm);
+ 
+-  // ✅ Captura TODOS os erros de validação do Zod
+   if (!parsedForm.success) {
+     const fieldErrors: Record<string, string> = {};
+ 
+@@ -43,7 +42,6 @@ export async function OboardingAction(
+   const { apiKey, email, name } = parsedForm.data;
+ 
+   try {
+-    // Validação da API Key
+     const apiKeyIsValid = await validateApiKeyWithCache({ apiKey });
+     if (!apiKeyIsValid) {
+       return {
+@@ -65,7 +63,6 @@ export async function OboardingAction(
+       };
+     }
+ 
+-    // Busca usuário no banco
+     const databaseUser = await prisma.user.findUnique({
+       where: {
+         id: session.user.id,
+diff --git a/src/app/api/chat/createCustomUIMessageStream.ts b/src/app/api/chat/createCustomUIMessageStream.ts
+index 720444f..3a451ad 100644
+--- a/src/app/api/chat/createCustomUIMessageStream.ts
++++ b/src/app/api/chat/createCustomUIMessageStream.ts
+@@ -1,8 +1,9 @@
+ import {
++  convertToModelMessages,
+   createUIMessageStream,
+   LanguageModel,
+-  ModelMessage,
+   streamText,
++  UIMessage,
+ } from "ai";
+ import "server-only";
+ import { saveAssistantMessage } from "./saveAssistantMessage";
+@@ -14,7 +15,7 @@ type ParamsType = {
+   chatId: string;
+   redirect: boolean;
+   model: LanguageModel;
+-  messages: ModelMessage[];
++  messages: UIMessage[];
+ };
+ 
+ export function createCustomUIMessageStream({
+@@ -27,12 +28,12 @@ export function createCustomUIMessageStream({
+     execute: async ({ writer }) => {
+       writer.write({
+         type: "data-chat-created",
+-        data: { chatId, redirect },
++        data: { chatId, redirect, messages },
+       });
+ 
+       const llmStream = streamText({
+         model,
+-        messages,
++        messages: convertToModelMessages(messages),
+         system: getSystemPrompt("pt-BR"),
+         async onFinish(event) {
+           log("AI response received:", event.text);
 diff --git a/src/app/api/chat/route.ts b/src/app/api/chat/route.ts
-index f1b771e..c95aed4 100644
+index c95aed4..e6078e9 100644
 --- a/src/app/api/chat/route.ts
 +++ b/src/app/api/chat/route.ts
-@@ -8,14 +8,29 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
+@@ -8,13 +8,7 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
  import { Chat, Message } from "@prisma/client";
  import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
  import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
--import { convertToModelMessages, createUIMessageStreamResponse } from "ai";
-+import {
-+  convertToModelMessages,
-+  createUIMessageStreamResponse,
-+  DataUIPart,
-+  TextUIPart,
-+  ToolUIPart,
-+} from "ai";
+-import {
+-  convertToModelMessages,
+-  createUIMessageStreamResponse,
+-  DataUIPart,
+-  TextUIPart,
+-  ToolUIPart,
+-} from "ai";
++import { createUIMessageStreamResponse, TextUIPart, ToolUIPart } from "ai";
  import { StringCompressor } from "@utils/stringCompressor";
  import { getCachedSession } from "@data/auth/getCachedSession";
  import { createCustomUIMessageStream } from "./createCustomUIMessageStream";
- const log = debug("app:api:chat");
- 
- const bodySchema = z.object({
--  prompt: z.string(),
-+  messages: z.array(
-+    z.object({
-+      parts: z.any(),
-+      id: z.string(),
-+      role: z
-+        .string()
-+        .nullable()
-+        .refine((val) => (val?.trim() !== "user" ? undefined : val.trim())),
-+    })
-+  ),
+@@ -29,7 +23,7 @@ const bodySchema = z.object({
+         .string()
+         .nullable()
+         .refine((val) => (val?.trim() !== "user" ? undefined : val.trim())),
+-    })
++    }),
+   ),
    id: z.string({ error: "Chat ID is required!" }),
    reasoning: z.coerce
-     .boolean({
-@@ -43,17 +58,33 @@ export async function POST(req: NextRequest) {
+@@ -58,7 +52,7 @@ export async function POST(req: NextRequest) {
          {
            error: bodyParseResult.error.message,
          },
--        { status: 400 },
-+        { status: 400 }
+-        { status: 400 }
++        { status: 400 },
        );
      }
  
-     const {
-       id: chatId,
--      prompt,
-+      messages,
-       reasoning: reasoningEnabled,
-       model: selectedModel,
-     } = bodyParseResult.data;
- 
-+    const promptParts = messages.find((msg) => msg.role === "user")?.parts as (
-+      | TextUIPart
-+      | ToolUIPart
-+    )[];
-+
-+    const prompt = promptParts.find((part) => part.type === "text")?.text || "";
-+
-+    if (!prompt || prompt.trim() === "") {
-+      log("Prompt is empty or invalid:", prompt);
-+      return NextResponse.json(
-+        {
-+          error: "Prompt cannot be empty!",
-+        },
-+        { status: 400 }
-+      );
-+    }
+@@ -82,7 +76,7 @@ export async function POST(req: NextRequest) {
+         {
+           error: "Prompt cannot be empty!",
+         },
+-        { status: 400 }
++        { status: 400 },
+       );
+     }
      if (!session?.user.id) {
-       log("User not authenticated! Session:", session);
- 
-@@ -61,7 +92,7 @@ export async function POST(req: NextRequest) {
+@@ -92,7 +86,7 @@ export async function POST(req: NextRequest) {
          {
            error: "Unauthorized! (User not authenticaded)",
          },
--        { status: 401 },
-+        { status: 401 }
+-        { status: 401 }
++        { status: 401 },
        );
      }
  
-@@ -86,7 +117,7 @@ export async function POST(req: NextRequest) {
+@@ -117,7 +111,7 @@ export async function POST(req: NextRequest) {
          {
            error: "User not found!",
          },
--        { status: 404 },
-+        { status: 404 }
+-        { status: 404 }
++        { status: 404 },
        );
      }
  
-@@ -96,7 +127,7 @@ export async function POST(req: NextRequest) {
+@@ -127,7 +121,7 @@ export async function POST(req: NextRequest) {
          {
            error: "Unauthorized! (User API Key not found)",
          },
--        { status: 401 },
-+        { status: 401 }
+-        { status: 401 }
++        { status: 401 },
        );
      }
  
-@@ -110,7 +141,7 @@ export async function POST(req: NextRequest) {
+@@ -141,7 +135,7 @@ export async function POST(req: NextRequest) {
          {
            error: "Unauthorized! (Invalid API Key)",
          },
--        { status: 401 },
-+        { status: 401 }
+-        { status: 401 }
++        { status: 401 },
        );
      }
  
-@@ -149,14 +180,14 @@ export async function POST(req: NextRequest) {
+@@ -180,14 +174,14 @@ export async function POST(req: NextRequest) {
            "Chat not found or access denied! Chat ID:",
            chatId,
            "Owner Id:",
--          databaseUser.id,
-+          databaseUser.id
+-          databaseUser.id
++          databaseUser.id,
          );
  
          return NextResponse.json(
            {
              error: "Chat not found or access denied!",
            },
--          { status: 404 },
-+          { status: 404 }
+-          { status: 404 }
++          { status: 404 },
          );
        }
  
-@@ -238,13 +269,13 @@ export async function POST(req: NextRequest) {
+@@ -246,7 +240,7 @@ export async function POST(req: NextRequest) {
+     log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
+     const stream = createCustomUIMessageStream({
+       chatId: chat.id,
+-      messages: convertToModelMessages(aiMessages),
++      messages: aiMessages,
+       model,
+       redirect: !isExistingChat,
+     });
+@@ -269,13 +263,13 @@ export async function POST(req: NextRequest) {
          : 500;
        return NextResponse.json(
          { error: error.message },
--        { status: statusCode },
-+        { status: statusCode }
+-        { status: statusCode }
++        { status: statusCode },
        );
      }
  
      return NextResponse.json(
        { error: "Internal Server Error" },
--      { status: 500 },
-+      { status: 500 }
+-      { status: 500 }
++      { status: 500 },
      );
    }
  }
+diff --git a/src/components/ChatNavbar/SelectModelMenu.tsx b/src/components/ChatNavbar/SelectModelMenu.tsx
+index dafc28d..5a518be 100644
+--- a/src/components/ChatNavbar/SelectModelMenu.tsx
++++ b/src/components/ChatNavbar/SelectModelMenu.tsx
+@@ -1,32 +1,36 @@
++import { DropdownValue } from "@/store/dropdown";
+ import {
+   Dropdown,
+   DropdownContent,
+   DropdownItem,
+   DropdownTrigger,
+ } from "@components/Dropdown/index";
+-import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
+ 
+-const options = [
++const options: DropdownValue[] = [
+   {
+     value: "HIGH",
+     label: "High",
+-    icon: <Icon icon="solar:rocket-bold-duotone" width="20" height="20" />,
++    icon: { name: "solar:rocket-bold-duotone", width: "20", height: "20" },
+   },
+   {
+     value: "BASIC",
+     label: "Basic",
+-    icon: <Icon icon="ph:gear-duotone" width="20" height="20" />,
++    icon: {
++      height: 20,
++      width: 20,
++      name: "ph:gear-duotone",
++    },
+   },
+   {
+     value: "LITE",
+     label: "Lite",
+-    icon: <Icon icon="pepicons-print:leaf" width="20" height="20" />,
++    icon: { name: "pepicons-print:leaf", width: "20", height: "20" },
+   },
+ ];
+ 
+ export default function SelectModelMenu() {
+-  const handleSelect = (value: string, label: string) => {
+-    console.log("Selecionou:", value, label);
++  const handleSelect = (p: { value: string; label: string }) => {
++    console.log("Selecionou:", p.value, p.label);
+   };
+ 
+   return (
+@@ -34,6 +38,7 @@ export default function SelectModelMenu() {
+       id="modelDropdown"
+       defaultValue={options[1]}
+       onSelect={handleSelect}
++      persistValue
+     >
+       <DropdownTrigger
+         className="scale-[0.9]"
+@@ -47,6 +52,7 @@ export default function SelectModelMenu() {
+             id="modelDropdown"
+             value={value}
+             icon={icon}
++            label={label}
+           >
+             {label}
+           </DropdownItem>
+diff --git a/src/components/Dropdown/Dropdown.tsx b/src/components/Dropdown/Dropdown.tsx
+index 4a386f4..44f41c7 100644
+--- a/src/components/Dropdown/Dropdown.tsx
++++ b/src/components/Dropdown/Dropdown.tsx
+@@ -1,11 +1,16 @@
+-import { useDropdown } from "@/store/dropdown";
++import { DropdownItemIcon, OnSelectType, useDropdown } from "@/store/dropdown";
+ import { ReactNode, useEffect } from "react";
+ import { twMerge } from "tailwind-merge";
+ 
+ interface DropdownProps {
+   id: string;
+-  defaultValue?: { value: string; label: string } | null;
+-  onSelect?: (value: string, label: string) => void;
++  defaultValue?: {
++    value: string;
++    label: string;
++    icon: DropdownItemIcon;
++  } | null;
++  persistValue?: boolean;
++  onSelect?: OnSelectType;
+   children: ReactNode;
+   className?: string;
+ }
+@@ -14,14 +19,15 @@ export function Dropdown({
+   id,
+   defaultValue = null,
+   onSelect,
++  persistValue = false,
+   children,
+   className,
+ }: DropdownProps) {
+   const createDropdown = useDropdown((state) => state.createDropdown);
+ 
+   useEffect(() => {
+-    createDropdown(id, defaultValue, onSelect);
+-  }, [id, defaultValue, onSelect, createDropdown]);
++    createDropdown({ id, defaultValue, onSelect, persistValue });
++  }, [id, defaultValue, onSelect, createDropdown, persistValue]);
+ 
+   return (
+     <div className={twMerge("inline-block w-auto max-w-xs p-1", className)}>
+diff --git a/src/components/Dropdown/DropdownItem.tsx b/src/components/Dropdown/DropdownItem.tsx
+index fe7471b..ca2fac4 100644
+--- a/src/components/Dropdown/DropdownItem.tsx
++++ b/src/components/Dropdown/DropdownItem.tsx
+@@ -1,11 +1,9 @@
+-import { useDropdown } from "@store/dropdown";
+-import { ReactNode } from "react";
++import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
++import { DropdownValue, useDropdown } from "@store/dropdown";
+ 
+-interface DropdownItemProps {
+-  id: string;
+-  value: string;
++interface DropdownItemProps extends DropdownValue {
+   children: React.ReactNode;
+-  icon?: ReactNode;
++  id: string;
+ }
+ 
+ export function DropdownItem({ id, value, children, icon }: DropdownItemProps) {
+@@ -13,12 +11,21 @@ export function DropdownItem({ id, value, children, icon }: DropdownItemProps) {
+ 
+   return (
+     <li
+-      onClick={() => selectValue(id, value, String(children), icon)}
++      onClick={() =>
++        selectValue({
++          id,
++          icon,
++          value,
++          label: children?.toString() || "",
++        })
++      }
+       className="cursor-pointer px-4 py-2  w-auto"
+       tabIndex={0}
+     >
+       <span className="flex items-center justify-start gap-x-1.5">
+-        {icon}
++        {icon?.name && (
++          <Icon icon={icon.name} width={icon.width} height={icon.height} />
++        )}
+         {children}
+       </span>
+     </li>
+diff --git a/src/components/Dropdown/DropdownTrigger.tsx b/src/components/Dropdown/DropdownTrigger.tsx
+index 5cb3aca..b3c622a 100644
+--- a/src/components/Dropdown/DropdownTrigger.tsx
++++ b/src/components/Dropdown/DropdownTrigger.tsx
+@@ -1,3 +1,4 @@
++import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
+ import { useDropdown } from "@store/dropdown";
+ import { twMerge } from "tailwind-merge";
+ 
+@@ -17,7 +18,7 @@ export function DropdownTrigger({
+ 
+   return (
+     <button
+-      onClick={() => toggleOpen(id)}
++      onClick={() => toggleOpen({ id })}
+       className={twMerge(
+         `w-auto max-w-xs text-left border-2 border-apricot bg-watermelon/60
+       hover:bg-watermelon/80 transition-colors duration-200
+@@ -31,7 +32,13 @@ export function DropdownTrigger({
+     >
+       <span className="flex items-center justify-start gap-x-1">
+         <div className="w-5 h-5 flex items-center justify-center shrink-0">
+-          {dropdown?.selectedValue?.icon}
++          {dropdown?.selectedValue?.icon && (
++            <Icon
++              icon={dropdown?.selectedValue?.icon.name}
++              width={dropdown?.selectedValue?.icon.width}
++              height={dropdown?.selectedValue?.icon.height}
++            />
++          )}
+         </div>
+         {dropdown?.selectedValue?.label ?? placeholder ?? "Selecione..."}
+       </span>
+diff --git a/src/components/OverviewNavbar/LoginOrGoToChatItem.tsx b/src/components/OverviewNavbar/LoginOrGoToChatItem.tsx
+index 77b482c..dccbacd 100644
+--- a/src/components/OverviewNavbar/LoginOrGoToChatItem.tsx
++++ b/src/components/OverviewNavbar/LoginOrGoToChatItem.tsx
+@@ -1,4 +1,4 @@
+-import { authClient } from "@/lib/betterAuth/auth-client";
++import { authClient } from "@lib/betterAuth/auth-client";
+ import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
+ import OverviewNavbarItem from "./OverviewNavbarItem";
+ 
 diff --git a/src/components/PromptForm/PromptForm.tsx b/src/components/PromptForm/PromptForm.tsx
-index 9fc856c..957bc17 100644
+index 957bc17..ccbbcd8 100644
 --- a/src/components/PromptForm/PromptForm.tsx
 +++ b/src/components/PromptForm/PromptForm.tsx
-@@ -10,7 +10,7 @@ import { useDropdown } from "@store/dropdown";
- import { CustomTooltip } from "../CustomTooltip";
- 
- export default function PromptForm() {
--  const { sendMessage, isLoading } = useChatContext();
-+  const { sendMessage, isLoading, chatId } = useChatContext();
-   const inputRef = useRef<HTMLTextAreaElement>(null);
-   const [reasoning, setReasoning] = useState<boolean>(false);
-   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
-@@ -21,22 +21,23 @@ export default function PromptForm() {
-       ref={formRef}
-       onSubmit={async (e) => {
-         e.preventDefault();
-+        const prompt = inputRef?.current?.value.trim();
-         console.log(
-           "Enviando mensagem do formulário de prompt. Prompt:",
--          inputRef?.current?.value
-+          prompt
+@@ -27,7 +27,7 @@ export default function PromptForm() {
+           prompt
          );
  
--        if (isLoading || !inputRef?.current?.value.trim()) return;
-+        if (isLoading || !prompt) return;
+-        if (isLoading || !prompt) return;
++        if (isLoading || !prompt || !inputRef.current) return;
  
          sendMessage(
            {
--            text: inputRef.current.value,
-+            text: prompt,
-           },
-           {
-             body: {
--              prompt: inputRef.current.value,
-+              prompt,
-               reasoning: reasoning,
--              // chatId,
-+              id: chatId,
-               model: dropdown.selectedValue?.value || "BASIC",
+@@ -42,6 +42,8 @@ export default function PromptForm() {
              },
            }
+         );
++
++        inputRef.current.value = "";
+       }}
+       layout={true}
+       transition={{ type: "spring", stiffness: 80 }}
+diff --git a/src/components/PromptForm/PromptInput.tsx b/src/components/PromptForm/PromptInput.tsx
+index 11b05fd..c7015b7 100644
+--- a/src/components/PromptForm/PromptInput.tsx
++++ b/src/components/PromptForm/PromptInput.tsx
+@@ -1,4 +1,4 @@
+-import { memo, RefObject } from "react"; // import { FocusEvent } from "react";
++import { memo, RefObject, useEffect } from "react"; // import { FocusEvent } from "react";
+ 
+ interface iProps {
+   formRef: RefObject<HTMLFormElement | null>;
 diff --git a/src/contexts/ChatContext/Provider.tsx b/src/contexts/ChatContext/Provider.tsx
-index 700760d..2cf42e0 100644
+index 2cf42e0..1367b15 100644
 --- a/src/contexts/ChatContext/Provider.tsx
 +++ b/src/contexts/ChatContext/Provider.tsx
-@@ -23,10 +23,9 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
+@@ -23,14 +23,14 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
        if (!chatId || isNewChat) {
          const finalChatId = newChatIdRef.current;
          if (finalChatId) {
--          queryClient.setQueryData(
--            ["chat", `chat_${finalChatId}`],
--            (oldData: UIMessage[] = []) => [...oldData, message]
--          );
-+          queryClient.invalidateQueries({
-+            queryKey: ["chat", `chat_${finalChatId}`],
-+          });
- 
+-          queryClient.invalidateQueries({
+-            queryKey: ["chat", `chat_${finalChatId}`],
+-          });
+-
++          queryClient.setQueryData(
++            ["chat", `chat_${finalChatId}`],
++            (oldData: UIMessage[] = []) => [...oldData, message],
++          );
            window.dispatchEvent(
              new CustomEvent("chat-created", {
-@@ -108,16 +107,7 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
-     isLoading: chat.status === "streaming" || chat.status === "submitted",
-     error: chat.error,
+               detail: { chatId: finalChatId },
+-            })
++            }),
+           );
+         }
+         return;
+@@ -38,24 +38,32 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
  
--    sendMessage: function (param) {
--      if (newChatIdRef.current && isNewChat) {
--        queryClient.setQueryData(
--          ["chat", `chat_${newChatIdRef.current}`],
--          (oldData: UIMessage[] = []) => [...oldData, param]
--        );
--      }
--      return chat.sendMessage(param);
--    },
--    //chat.sendMessage,
-+    sendMessage: chat.sendMessage,
-     stop: chat.stop,
-     setMessages: chat.setMessages,
-     status: chat.status,
-diff --git a/src/store/dropdown.ts b/src/store/dropdown.ts
-index 14d4ab7..836f702 100644
---- a/src/store/dropdown.ts
-+++ b/src/store/dropdown.ts
-@@ -13,6 +13,7 @@ interface DropdownState {
-   isOpen: boolean;
-   selectedValue: DropdownValue | null;
-   onSelect?: (value: string, label: string) => void;
-+  persistValue?: boolean;
+       queryClient.setQueryData(
+         ["chat", `chat_${chatId}`],
+-        (oldData: UIMessage[] = []) => [...oldData, message]
++        (oldData: UIMessage[] = []) => [...oldData, message],
+       );
+     },
+-    [chatId, isNewChat, queryClient]
++    [chatId, isNewChat, queryClient],
+   );
+ 
+   const onData = useCallback(
+     async (message: { type: `data-${string}`; data: unknown }) => {
+       if (message.type === "data-chat-created") {
+-        const data = message.data as { chatId?: string; redirect?: boolean };
++        const data = message.data as {
++          chatId?: string;
++          redirect?: boolean;
++          messages: UIMessage[];
++        };
+ 
+         if (data.chatId) {
++          queryClient.setQueryData(
++            ["chat", `chat_${data.chatId}`],
++            data.messages,
++          );
+           newChatIdRef.current = data.chatId;
+           console.log("Novo chatId salvo:", data.chatId);
+         }
+       }
+     },
+-    []
++    [queryClient],
+   );
+ 
+   const chat = useChat({
+diff --git a/src/env.ts b/src/env.ts
+index 5714eee..3fa5577 100644
+--- a/src/env.ts
++++ b/src/env.ts
+@@ -12,7 +12,7 @@ const {
+   BETTER_AUTH_SECRET,
+   BETTER_AUTH_URL,
+   NEXT_PUBLIC_BETTER_AUTH_URL,
+-  GOOGLE_RECAPTCHA_KEY,
++  NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
+   GOOGLE_RECAPTCHA_SECRET_KEY,
+ } = process.env;
+ 
+@@ -25,18 +25,17 @@ const envSchema = z.object({
+     .string()
+     .min(1, "DISCORD_CLIENT_SECRET é obrigatório"),
+   GITHUB_CLIENT_ID: z.string().min(1, "GITHUB_CLIENT_ID é obrigatório"),
+-  GITHUB_CLIENT_SECRET: z
+-    .string()
+-    .min(1, "DGITHUB_CLIENT_SECRET é obrigatório"),
++  GITHUB_CLIENT_SECRET: z.string().min(1, "GITHUB_CLIENT_SECRET é obrigatório"),
+   OPENROUTER_API_KEY: z.string().min(1, "OPENROUTER_API_KEY é obrigatório"),
+   GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY é obrigatório"),
+   DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatório"),
+   BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET é obrigatório"),
+-  BETTER_AUTH_URL: z.url("BETTER_AUTH_URL deve ser uma URL válida"),
++  BETTER_AUTH_URL: z.string().url("BETTER_AUTH_URL deve ser uma URL válida"),
+   NEXT_PUBLIC_BETTER_AUTH_URL: z
++    .string()
+     .url("NEXT_PUBLIC_BETTER_AUTH_URL deve ser uma URL válida")
+     .optional(),
+-  GOOGLE_RECAPTCHA_KEY: z
++  NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY: z
+     .string("GOOGLE_RECAPTCHA_KEY deve ser uma string!")
+     .min(1, "GOOGLE_RECAPTCHA_KEY deve existir!"),
+   GOOGLE_RECAPTCHA_SECRET_KEY: z
+@@ -56,16 +55,28 @@ const parsed = envSchema.safeParse({
+   BETTER_AUTH_SECRET,
+   BETTER_AUTH_URL,
+   NEXT_PUBLIC_BETTER_AUTH_URL,
+-  GOOGLE_RECAPTCHA_KEY,
++  NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
+   GOOGLE_RECAPTCHA_SECRET_KEY,
+ });
+ 
+ if (!parsed.success) {
+-  console.error("Erro de validação das variáveis de ambiente:", parsed.error);
+-  throw new Error(
+-    "Variáveis de ambiente inválidas ou ausentes. Corrija o arquivo .env.local antes de iniciar a aplicação.",
+-    parsed.error,
+-  );
++  const error = parsed.error; // tipo: ZodError<...>
++
++  const formattedErrors = error.issues
++    .map((issue) => {
++      const path = issue.path.join(".") || "(root)";
++      return `❌ ${path}: ${issue.message}`;
++    })
++    .join("\n");
++
++  const errorMessage = `
++Erro de validação das variáveis de ambiente:
++${formattedErrors}
++
++Corrija o arquivo .env.local antes de iniciar a aplicação.
++  `.trim();
++
++  throw new Error(errorMessage);
  }
  
- interface DropdownStore {
-@@ -20,13 +21,13 @@ interface DropdownStore {
-   createDropdown: (
-     id: string,
-     defaultValue?: DropdownValue | null,
--    onSelect?: (value: string, label: string) => void,
-+    onSelect?: (value: string, label: string) => void
-   ) => void;
+-export const env = parsed.data;
++export { parsed as env };
+diff --git a/src/lib/zod/uiPartsSchema.ts b/src/lib/zod/uiPartsSchema.ts
+index 34a193b..e248d86 100644
+--- a/src/lib/zod/uiPartsSchema.ts
++++ b/src/lib/zod/uiPartsSchema.ts
+@@ -1,16 +1,16 @@
+-import z from "zod";
++// import z from "zod";
+ 
+-export const textUiPartSchema = z.object({
+-  type: z.literal("text"),
+-  text: z.string(),
+-  state: z.literal("streaming").or(z.literal("done")).optional(),
+-});
++// export const textUiPartSchema = z.object({
++//   type: z.literal("text"),
++//   text: z.string(),
++//   state: z.literal("streaming").or(z.literal("done")).optional(),
++// });
+ 
+-const reasoningUiPartSchema = z.object({
+-  type: z.literal("reasoning"),
+-  text: z.string(),
+-  state: z.literal("streaming").or(z.literal("done")).optional(),
+-  providerMetadata: z.record(z.string(),z.any()).optional(),
+-})
++// const reasoningUiPartSchema = z.object({
++//   type: z.literal("reasoning"),
++//   text: z.string(),
++//   state: z.literal("streaming").or(z.literal("done")).optional(),
++//   providerMetadata: z.record(z.string(), z.any()).optional(),
++// });
+ 
+-/*
++// // ARQUIVO IRÁ SER UTILIZADO FUTURAMENTE!!!
+diff --git a/src/store/dropdown.ts b/src/store/dropdown.ts
+index 836f702..da78784 100644
+--- a/src/store/dropdown.ts
++++ b/src/store/dropdown.ts
+@@ -1,38 +1,53 @@
+-import { ReactNode } from "react";
++import { IconifyIcon } from "@iconify-icon/react/dist/iconify.mjs";
+ import { create } from "zustand";
+ import { persist } from "zustand/middleware";
+ 
+-interface DropdownValue {
++export type OnSelectType = (p: {
+   value: string;
+   label: string;
+-  icon?: ReactNode;
++  icon: DropdownItemIcon;
++}) => void;
++
++export interface DropdownItemIcon {
++  width: number | string;
++  height: number | string;
++  name: string | IconifyIcon;
++}
++
++export interface DropdownValue {
++  value: string;
++  label: string;
++  icon: DropdownItemIcon;
+ }
+ 
+-interface DropdownState {
++export interface DropdownState {
+   id: string;
+   isOpen: boolean;
+   selectedValue: DropdownValue | null;
+-  onSelect?: (value: string, label: string) => void;
++  onSelect?: OnSelectType;
+   persistValue?: boolean;
+ }
+ 
+-interface DropdownStore {
++export interface DropdownStore {
+   dropdowns: Record<string, DropdownState>;
+-  createDropdown: (
+-    id: string,
+-    defaultValue?: DropdownValue | null,
+-    onSelect?: (value: string, label: string) => void
+-  ) => void;
++  createDropdown: (p: {
++    id: string;
++    defaultValue?: DropdownValue | null;
++    onSelect?: OnSelectType;
++    persistValue: boolean;
++  }) => void;
    selectValue: (
-     id: string,
-     value: string,
-     label: string,
--    icon?: ReactNode,
-+    icon?: ReactNode
+-    id: string,
+-    value: string,
+-    label: string,
+-    icon?: ReactNode
++    p: {
++      id: string;
++    } & DropdownValue,
    ) => void;
-   updateSelectedValue: (id: string, selectedValue: DropdownValue) => void;
-   toggleOpen: (id: string) => void;
-@@ -40,17 +41,24 @@ export const useDropdown = create<DropdownStore>()(
+-  updateSelectedValue: (id: string, selectedValue: DropdownValue) => void;
+-  toggleOpen: (id: string) => void;
+-  resetDropdown: (id: string) => void;
+-  removeDropdown: (id: string) => void;
++  updateSelectedValue: (p: {
++    id: string;
++    selectedValue: DropdownValue;
++  }) => void;
++  toggleOpen: (p: { id: string }) => void;
++  resetDropdown: (p: { id: string }) => void;
++  removeDropdown: (p: { id: string }) => void;
+ }
+ 
+ export const useDropdown = create<DropdownStore>()(
+@@ -40,7 +55,12 @@ export const useDropdown = create<DropdownStore>()(
+     (set, get) => ({
        dropdowns: {},
  
-       createDropdown: (id, defaultValue = null, onSelect) => {
--        set((state) => ({
--          dropdowns: {
--            ...state.dropdowns,
--            [id]: {
--              id,
--              isOpen: false,
--              selectedValue: defaultValue,
--              onSelect,
-+        set((state) => {
-+          const existing = state.dropdowns[id];
-+          let selectedValue = defaultValue;
-+          if (existing && existing.selectedValue && existing.persistValue) {
-+            selectedValue = existing.selectedValue;
-+          }
-+          return {
-+            dropdowns: {
-+              ...state.dropdowns,
-+              [id]: {
-+                id,
-+                isOpen: false,
-+                selectedValue,
-+                onSelect,
-+              },
+-      createDropdown: (id, defaultValue = null, onSelect) => {
++      createDropdown: ({
++        id,
++        defaultValue = null,
++        onSelect,
++        persistValue = false,
++      }) => {
+         set((state) => {
+           const existing = state.dropdowns[id];
+           let selectedValue = defaultValue;
+@@ -55,19 +75,16 @@ export const useDropdown = create<DropdownStore>()(
+                 isOpen: false,
+                 selectedValue,
+                 onSelect,
++                persistValue,
+               },
              },
--          },
--        }));
-+          };
+           };
+         });
+       },
+ 
+-      selectValue: (id, value, label, icon) => {
++      selectValue: ({ id, value, label, icon }) => {
+         const dropdown = get().dropdowns[id];
+-        const selectedValue: DropdownValue = { value, label };
+-
+-        if (icon !== undefined) {
+-          selectedValue.icon = icon;
+-        }
++        const selectedValue: DropdownValue = { value, label, icon };
+ 
+         set((state) => ({
+           dropdowns: {
+@@ -80,10 +97,10 @@ export const useDropdown = create<DropdownStore>()(
+           },
+         }));
+ 
+-        dropdown?.onSelect?.(value, label);
++        dropdown?.onSelect?.({ value, label, icon });
+       },
+ 
+-      updateSelectedValue: (id, selectedValue) => {
++      updateSelectedValue: ({ id, selectedValue }) => {
+         const dropdown = get().dropdowns[id];
+ 
+         set((state) => ({
+@@ -97,10 +114,14 @@ export const useDropdown = create<DropdownStore>()(
+           },
+         }));
+ 
+-        dropdown?.onSelect?.(selectedValue.value, selectedValue.label);
++        dropdown?.onSelect?.({
++          value: selectedValue.value,
++          label: selectedValue.label,
++          icon: selectedValue.icon,
 +        });
        },
  
-       selectValue: (id, value, label, icon) => {
-@@ -129,24 +137,28 @@ export const useDropdown = create<DropdownStore>()(
-       name: "dropdown-storage",
-       partialize: (state) => ({
-         dropdowns: Object.fromEntries(
--          Object.entries(state.dropdowns).map(([id, dropdown]) => [
--            id,
--            {
--              ...dropdown,
--              isOpen: false,
--              onSelect: undefined,
--              icon: undefined,
--              selectedValue: dropdown.selectedValue
--                ? {
--                    value: dropdown.selectedValue.value,
--                    label: dropdown.selectedValue.label,
--                  }
--                : null,
--            },
--          ]),
-+          Object.entries(state.dropdowns).map(([id, dropdown]) =>
-+            dropdown.persistValue
-+              ? [
-+                  id,
-+                  {
-+                    ...dropdown,
-+                    isOpen: false,
-+                    onSelect: undefined,
-+                    icon: undefined,
-+                    selectedValue: dropdown.selectedValue
-+                      ? {
-+                          value: dropdown.selectedValue.value,
-+                          label: dropdown.selectedValue.label,
-+                        }
-+                      : null,
-+                  },
-+                ]
-+              : []
-+          )
+-      toggleOpen: (id) => {
++      toggleOpen: ({ id }) => {
+         set((state) => ({
+           dropdowns: {
+             ...state.dropdowns,
+@@ -112,7 +133,7 @@ export const useDropdown = create<DropdownStore>()(
+         }));
+       },
+ 
+-      resetDropdown: (id) => {
++      resetDropdown: ({ id }) => {
+         set((state) => ({
+           dropdowns: {
+             ...state.dropdowns,
+@@ -125,7 +146,7 @@ export const useDropdown = create<DropdownStore>()(
+         }));
+       },
+ 
+-      removeDropdown: (id) => {
++      removeDropdown: ({ id }) => {
+         set((state) => {
+           const rest = { ...state.dropdowns };
+           delete rest[id];
+@@ -145,17 +166,17 @@ export const useDropdown = create<DropdownStore>()(
+                     ...dropdown,
+                     isOpen: false,
+                     onSelect: undefined,
+-                    icon: undefined,
+                     selectedValue: dropdown.selectedValue
+                       ? {
+                           value: dropdown.selectedValue.value,
+                           label: dropdown.selectedValue.label,
++                          icon: dropdown.selectedValue.icon,
+                         }
+                       : null,
+                   },
+                 ]
+-              : []
+-          )
++              : [],
++          ),
          ),
        }),
--      onRehydrateStorage: () => (state) => {
-+      onRehydrateStorage: (state) => {
-         if (state) {
-           Object.keys(state.dropdowns).forEach((id) => {
-             if (state.dropdowns[id]) {
-@@ -155,6 +167,6 @@ export const useDropdown = create<DropdownStore>()(
+       onRehydrateStorage: (state) => {
+@@ -167,6 +188,6 @@ export const useDropdown = create<DropdownStore>()(
            });
          }
        },
--    },
--  ),
-+    }
-+  )
+-    }
+-  )
++    },
++  ),
  );
+diff --git a/tsconfig.json b/tsconfig.json
+index 854f944..7d7f5f7 100644
+--- a/tsconfig.json
++++ b/tsconfig.json
+@@ -21,6 +21,7 @@
+     "baseUrl": "./",
+     "paths": {
+       "@/*": ["./src/*"],
++      "@api/*": ["./src/api/*"],
+       "@components/*": ["./src/components/*"],
+       "@public/*": ["./public/*"],
+       "@env": ["./src/env.ts"],

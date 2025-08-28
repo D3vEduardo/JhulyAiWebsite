@@ -30,9 +30,8 @@ const envSchema = z.object({
   GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY é obrigatório"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatório"),
   BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET é obrigatório"),
-  BETTER_AUTH_URL: z.string().url("BETTER_AUTH_URL deve ser uma URL válida"),
+  BETTER_AUTH_URL: z.url("BETTER_AUTH_URL deve ser uma URL válida"),
   NEXT_PUBLIC_BETTER_AUTH_URL: z
-    .string()
     .url("NEXT_PUBLIC_BETTER_AUTH_URL deve ser uma URL válida")
     .optional(),
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY: z

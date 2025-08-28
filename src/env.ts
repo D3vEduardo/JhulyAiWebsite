@@ -35,8 +35,8 @@ const envSchema = z.object({
     .url("NEXT_PUBLIC_BETTER_AUTH_URL deve ser uma URL válida")
     .optional(),
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY: z
-    .string("GOOGLE_RECAPTCHA_KEY deve ser uma string!")
-    .min(1, "GOOGLE_RECAPTCHA_KEY deve existir!"),
+    .string("NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY deve ser uma string!")
+    .min(1, "NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY deve existir!"),
   GOOGLE_RECAPTCHA_SECRET_KEY: z
     .string("GOOGLE_RECAPTCHA_SECRET_KEY deve ser uma string!")
     .min(1, "GOOGLE_RECAPTCHA_SECRET_KEY deve existir!"),

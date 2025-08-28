@@ -24,7 +24,7 @@ export default function PromptForm() {
         const prompt = inputRef?.current?.value.trim();
         console.log(
           "Enviando mensagem do formulário de prompt. Prompt:",
-          prompt
+          prompt,
         );
 
         if (isLoading || !prompt || !inputRef.current) return;
@@ -40,7 +40,7 @@ export default function PromptForm() {
               id: chatId,
               model: dropdown.selectedValue?.value || "BASIC",
             },
-          }
+          },
         );
 
         inputRef.current.value = "";

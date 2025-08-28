@@ -78,4 +78,5 @@ Corrija o arquivo .env.local antes de iniciar a aplicação.
   throw new Error(errorMessage);
 }
 
-export { parsed as env };
+const env = parsed.data;
+export { env };

@@ -27,7 +27,7 @@ export default function PromptForm() {
           prompt
         );
 
-        if (isLoading || !prompt) return;
+        if (isLoading || !prompt || !inputRef.current) return;
 
         sendMessage(
           {
@@ -42,6 +42,8 @@ export default function PromptForm() {
             },
           }
         );
+
+        inputRef.current.value = "";
       }}
       layout={true}
       transition={{ type: "spring", stiffness: 80 }}

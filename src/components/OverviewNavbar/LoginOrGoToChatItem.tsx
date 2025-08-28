@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/betterAuth/auth-client";
+import { authClient } from "@lib/betterAuth/auth-client";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 import OverviewNavbarItem from "./OverviewNavbarItem";
 

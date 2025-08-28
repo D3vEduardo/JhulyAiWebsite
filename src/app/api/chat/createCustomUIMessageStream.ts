@@ -1,8 +1,9 @@
 import {
+  convertToModelMessages,
   createUIMessageStream,
   LanguageModel,
-  ModelMessage,
   streamText,
+  UIMessage,
 } from "ai";
 import "server-only";
 import { saveAssistantMessage } from "./saveAssistantMessage";
@@ -14,7 +15,7 @@ type ParamsType = {
   chatId: string;
   redirect: boolean;
   model: LanguageModel;
-  messages: ModelMessage[];
+  messages: UIMessage[];
 };
 
 export function createCustomUIMessageStream({
@@ -27,12 +28,12 @@ export function createCustomUIMessageStream({
     execute: async ({ writer }) => {
       writer.write({
         type: "data-chat-created",
-        data: { chatId, redirect },
+        data: { chatId, redirect, messages },
       });
 
       const llmStream = streamText({
         model,
-        messages,
+        messages: convertToModelMessages(messages),
         system: getSystemPrompt("pt-BR"),
         async onFinish(event) {
           log("AI response received:", event.text);

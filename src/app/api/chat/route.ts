@@ -8,13 +8,7 @@ import { createModelProvider, ModelsType } from "./createModelProvider";
 import { Chat, Message } from "@prisma/client";
 import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
 import { ConvertMessageOfDatabaseToAiModel } from "@utils/convertMessageOfDbToAiModel";
-import {
-  convertToModelMessages,
-  createUIMessageStreamResponse,
-  DataUIPart,
-  TextUIPart,
-  ToolUIPart,
-} from "ai";
+import { createUIMessageStreamResponse, TextUIPart, ToolUIPart } from "ai";
 import { StringCompressor } from "@utils/stringCompressor";
 import { getCachedSession } from "@data/auth/getCachedSession";
 import { createCustomUIMessageStream } from "./createCustomUIMessageStream";
@@ -29,7 +23,7 @@ const bodySchema = z.object({
         .string()
         .nullable()
         .refine((val) => (val?.trim() !== "user" ? undefined : val.trim())),
-    })
+    }),
   ),
   id: z.string({ error: "Chat ID is required!" }),
   reasoning: z.coerce
@@ -58,7 +52,7 @@ export async function POST(req: NextRequest) {
         {
           error: bodyParseResult.error.message,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -82,7 +76,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Prompt cannot be empty!",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!session?.user.id) {
@@ -92,7 +86,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Unauthorized! (User not authenticaded)",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -117,7 +111,7 @@ export async function POST(req: NextRequest) {
         {
           error: "User not found!",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -127,7 +121,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Unauthorized! (User API Key not found)",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -141,7 +135,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Unauthorized! (Invalid API Key)",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -180,14 +174,14 @@ export async function POST(req: NextRequest) {
           "Chat not found or access denied! Chat ID:",
           chatId,
           "Owner Id:",
-          databaseUser.id
+          databaseUser.id,
         );
 
         return NextResponse.json(
           {
             error: "Chat not found or access denied!",
           },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -246,7 +240,7 @@ export async function POST(req: NextRequest) {
     log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
     const stream = createCustomUIMessageStream({
       chatId: chat.id,
-      messages: convertToModelMessages(aiMessages),
+      messages: aiMessages,
       model,
       redirect: !isExistingChat,
     });
@@ -269,13 +263,13 @@ export async function POST(req: NextRequest) {
         : 500;
       return NextResponse.json(
         { error: error.message },
-        { status: statusCode }
+        { status: statusCode },
       );
     }
 
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -22,7 +22,6 @@ export async function OboardingAction(
   const parsedForm = onboardingFormSchema.safeParse(formData);
   log("Parsed Onboarding Form Data:", parsedForm);
 
-  // ✅ Captura TODOS os erros de validação do Zod
   if (!parsedForm.success) {
     const fieldErrors: Record<string, string> = {};
 
@@ -43,7 +42,6 @@ export async function OboardingAction(
   const { apiKey, email, name } = parsedForm.data;
 
   try {
-    // Validação da API Key
     const apiKeyIsValid = await validateApiKeyWithCache({ apiKey });
     if (!apiKeyIsValid) {
       return {
@@ -65,7 +63,6 @@ export async function OboardingAction(
       };
     }
 
-    // Busca usuário no banco
     const databaseUser = await prisma.user.findUnique({
       where: {
         id: session.user.id,

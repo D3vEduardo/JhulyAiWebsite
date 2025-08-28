@@ -23,14 +23,14 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
       if (!chatId || isNewChat) {
         const finalChatId = newChatIdRef.current;
         if (finalChatId) {
-          queryClient.invalidateQueries({
-            queryKey: ["chat", `chat_${finalChatId}`],
-          });
-
+          queryClient.setQueryData(
+            ["chat", `chat_${finalChatId}`],
+            (oldData: UIMessage[] = []) => [...oldData, message],
+          );
           window.dispatchEvent(
             new CustomEvent("chat-created", {
               detail: { chatId: finalChatId },
-            })
+            }),
           );
         }
         return;
@@ -38,24 +38,32 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
 
       queryClient.setQueryData(
         ["chat", `chat_${chatId}`],
-        (oldData: UIMessage[] = []) => [...oldData, message]
+        (oldData: UIMessage[] = []) => [...oldData, message],
       );
     },
-    [chatId, isNewChat, queryClient]
+    [chatId, isNewChat, queryClient],
   );
 
   const onData = useCallback(
     async (message: { type: `data-${string}`; data: unknown }) => {
       if (message.type === "data-chat-created") {
-        const data = message.data as { chatId?: string; redirect?: boolean };
+        const data = message.data as {
+          chatId?: string;
+          redirect?: boolean;
+          messages: UIMessage[];
+        };
 
         if (data.chatId) {
+          queryClient.setQueryData(
+            ["chat", `chat_${data.chatId}`],
+            data.messages,
+          );
           newChatIdRef.current = data.chatId;
           console.log("Novo chatId salvo:", data.chatId);
         }
       }
     },
-    []
+    [queryClient],
   );
 
   const chat = useChat({

@@ -1,32 +1,36 @@
+import { DropdownValue } from "@/store/dropdown";
 import {
   Dropdown,
   DropdownContent,
   DropdownItem,
   DropdownTrigger,
 } from "@components/Dropdown/index";
-import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
 
-const options = [
+const options: DropdownValue[] = [
   {
     value: "HIGH",
     label: "High",
-    icon: <Icon icon="solar:rocket-bold-duotone" width="20" height="20" />,
+    icon: { name: "solar:rocket-bold-duotone", width: "20", height: "20" },
   },
   {
     value: "BASIC",
     label: "Basic",
-    icon: <Icon icon="ph:gear-duotone" width="20" height="20" />,
+    icon: {
+      height: 20,
+      width: 20,
+      name: "ph:gear-duotone",
+    },
   },
   {
     value: "LITE",
     label: "Lite",
-    icon: <Icon icon="pepicons-print:leaf" width="20" height="20" />,
+    icon: { name: "pepicons-print:leaf", width: "20", height: "20" },
   },
 ];
 
 export default function SelectModelMenu() {
-  const handleSelect = (value: string, label: string) => {
-    console.log("Selecionou:", value, label);
+  const handleSelect = (p: { value: string; label: string }) => {
+    console.log("Selecionou:", p.value, p.label);
   };
 
   return (
@@ -34,6 +38,7 @@ export default function SelectModelMenu() {
       id="modelDropdown"
       defaultValue={options[1]}
       onSelect={handleSelect}
+      persistValue
     >
       <DropdownTrigger
         className="scale-[0.9]"
@@ -47,6 +52,7 @@ export default function SelectModelMenu() {
             id="modelDropdown"
             value={value}
             icon={icon}
+            label={label}
           >
             {label}
           </DropdownItem>

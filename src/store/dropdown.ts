@@ -1,38 +1,53 @@
-import { ReactNode } from "react";
+import { IconifyIcon } from "@iconify-icon/react/dist/iconify.mjs";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-interface DropdownValue {
+export type OnSelectType = (p: {
   value: string;
   label: string;
-  icon?: ReactNode;
+  icon: DropdownItemIcon;
+}) => void;
+
+export interface DropdownItemIcon {
+  width: number | string;
+  height: number | string;
+  name: string | IconifyIcon;
 }
 
-interface DropdownState {
+export interface DropdownValue {
+  value: string;
+  label: string;
+  icon: DropdownItemIcon;
+}
+
+export interface DropdownState {
   id: string;
   isOpen: boolean;
   selectedValue: DropdownValue | null;
-  onSelect?: (value: string, label: string) => void;
+  onSelect?: OnSelectType;
   persistValue?: boolean;
 }
 
-interface DropdownStore {
+export interface DropdownStore {
   dropdowns: Record<string, DropdownState>;
-  createDropdown: (
-    id: string,
-    defaultValue?: DropdownValue | null,
-    onSelect?: (value: string, label: string) => void
-  ) => void;
+  createDropdown: (p: {
+    id: string;
+    defaultValue?: DropdownValue | null;
+    onSelect?: OnSelectType;
+    persistValue: boolean;
+  }) => void;
   selectValue: (
-    id: string,
-    value: string,
-    label: string,
-    icon?: ReactNode
+    p: {
+      id: string;
+    } & DropdownValue,
   ) => void;
-  updateSelectedValue: (id: string, selectedValue: DropdownValue) => void;
-  toggleOpen: (id: string) => void;
-  resetDropdown: (id: string) => void;
-  removeDropdown: (id: string) => void;
+  updateSelectedValue: (p: {
+    id: string;
+    selectedValue: DropdownValue;
+  }) => void;
+  toggleOpen: (p: { id: string }) => void;
+  resetDropdown: (p: { id: string }) => void;
+  removeDropdown: (p: { id: string }) => void;
 }
 
 export const useDropdown = create<DropdownStore>()(
@@ -40,7 +55,12 @@ export const useDropdown = create<DropdownStore>()(
     (set, get) => ({
       dropdowns: {},
 
-      createDropdown: (id, defaultValue = null, onSelect) => {
+      createDropdown: ({
+        id,
+        defaultValue = null,
+        onSelect,
+        persistValue = false,
+      }) => {
         set((state) => {
           const existing = state.dropdowns[id];
           let selectedValue = defaultValue;
@@ -55,19 +75,16 @@ export const useDropdown = create<DropdownStore>()(
                 isOpen: false,
                 selectedValue,
                 onSelect,
+                persistValue,
               },
             },
           };
         });
       },
 
-      selectValue: (id, value, label, icon) => {
+      selectValue: ({ id, value, label, icon }) => {
         const dropdown = get().dropdowns[id];
-        const selectedValue: DropdownValue = { value, label };
-
-        if (icon !== undefined) {
-          selectedValue.icon = icon;
-        }
+        const selectedValue: DropdownValue = { value, label, icon };
 
         set((state) => ({
           dropdowns: {
@@ -80,10 +97,10 @@ export const useDropdown = create<DropdownStore>()(
           },
         }));
 
-        dropdown?.onSelect?.(value, label);
+        dropdown?.onSelect?.({ value, label, icon });
       },
 
-      updateSelectedValue: (id, selectedValue) => {
+      updateSelectedValue: ({ id, selectedValue }) => {
         const dropdown = get().dropdowns[id];
 
         set((state) => ({
@@ -97,10 +114,14 @@ export const useDropdown = create<DropdownStore>()(
           },
         }));
 
-        dropdown?.onSelect?.(selectedValue.value, selectedValue.label);
+        dropdown?.onSelect?.({
+          value: selectedValue.value,
+          label: selectedValue.label,
+          icon: selectedValue.icon,
+        });
       },
 
-      toggleOpen: (id) => {
+      toggleOpen: ({ id }) => {
         set((state) => ({
           dropdowns: {
             ...state.dropdowns,
@@ -112,7 +133,7 @@ export const useDropdown = create<DropdownStore>()(
         }));
       },
 
-      resetDropdown: (id) => {
+      resetDropdown: ({ id }) => {
         set((state) => ({
           dropdowns: {
             ...state.dropdowns,
@@ -125,7 +146,7 @@ export const useDropdown = create<DropdownStore>()(
         }));
       },
 
-      removeDropdown: (id) => {
+      removeDropdown: ({ id }) => {
         set((state) => {
           const rest = { ...state.dropdowns };
           delete rest[id];
@@ -145,17 +166,17 @@ export const useDropdown = create<DropdownStore>()(
                     ...dropdown,
                     isOpen: false,
                     onSelect: undefined,
-                    icon: undefined,
                     selectedValue: dropdown.selectedValue
                       ? {
                           value: dropdown.selectedValue.value,
                           label: dropdown.selectedValue.label,
+                          icon: dropdown.selectedValue.icon,
                         }
                       : null,
                   },
                 ]
-              : []
-          )
+              : [],
+          ),
         ),
       }),
       onRehydrateStorage: (state) => {
@@ -167,6 +188,6 @@ export const useDropdown = create<DropdownStore>()(
           });
         }
       },
-    }
-  )
+    },
+  ),
 );

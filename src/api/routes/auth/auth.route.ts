@@ -13,7 +13,7 @@ export const authRoute = new Hono()
       exposeHeaders: ["Content-Length"],
       maxAge: 600,
       credentials: true,
-    })
+    }),
   )
   .on(["POST", "GET"], "/*", async (c) => {
     return auth.handler(c.req.raw);

@@ -22,7 +22,7 @@ export const honoApp = new Hono()
           "default"
         );
       },
-    })
+    }),
   )
   .get("/health", async (c) => {
     return c.json({

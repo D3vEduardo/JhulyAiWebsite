@@ -19,11 +19,8 @@ const bodySchema = z.object({
     z.object({
       parts: z.any(),
       id: z.string(),
-      role: z
-        .string()
-        .nullable()
-        .refine((val) => (val?.trim() !== "user" ? undefined : val.trim())),
-    }),
+      role: z.enum(["user", "assistant", "system"]).nullable(),
+    })
   ),
   id: z.string({ error: "Chat ID is required!" }),
   reasoning: z.coerce
@@ -47,12 +44,36 @@ export async function POST(req: NextRequest) {
     log("Received body:", body);
 
     if (!bodyParseResult.success) {
-      log("Invalid request body:", body);
+      // Log detalhado dos erros de validação
+      const validationErrors = bodyParseResult.error.issues.map((issue) => ({
+        field: issue.path.join(".") || "root",
+        message: issue.message,
+        code: issue.code,
+        input: "input" in issue ? issue.input : undefined,
+      }));
+
+      log("❌ Validation failed for request body:");
+      log("📝 Received body:", JSON.stringify(body, null, 2));
+      log("🔍 Validation errors:", validationErrors);
+      log("📋 Expected schema structure:", {
+        messages: "Array<{ parts: any, id: string, role: string | null }>",
+        id: "string (Chat ID)",
+        reasoning: "boolean (default: false)",
+        model: `enum [${Object.values(ModelsType).join(", ")}] (default: ${ModelsType.BASIC})`,
+      });
+
+      // Resposta de erro estruturada
+      const formattedErrors = validationErrors
+        .map((err) => `${err.field}: ${err.message}`)
+        .join(", ");
+
       return NextResponse.json(
         {
-          error: bodyParseResult.error.message,
+          error: "Request body validation failed",
+          details: formattedErrors,
+          validationErrors,
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -63,12 +84,32 @@ export async function POST(req: NextRequest) {
       model: selectedModel,
     } = bodyParseResult.data;
 
-    const promptParts = messages.find((msg) => msg.role === "user")?.parts as (
-      | TextUIPart
-      | ToolUIPart
-    )[];
+    log("Modelo de IA selecionado: ", selectedModel);
+
+    // Buscar a ÚLTIMA mensagem do usuário (mais recente)
+    const userMessages = messages.filter((msg) => msg.role === "user");
+    const lastUserMessage = userMessages[userMessages.length - 1];
+
+    if (!lastUserMessage) {
+      log("❌ No user message found in messages array:", messages);
+      return NextResponse.json(
+        {
+          error: "No user message found in request!",
+        },
+        { status: 400 }
+      );
+    }
+
+    const promptParts = lastUserMessage.parts as (TextUIPart | ToolUIPart)[];
 
     const prompt = promptParts.find((part) => part.type === "text")?.text || "";
+
+    log("📤 Current prompt extracted from last user message:", {
+      messageId: lastUserMessage.id,
+      prompt: prompt,
+      totalUserMessages: userMessages.length,
+      totalMessages: messages.length,
+    });
 
     if (!prompt || prompt.trim() === "") {
       log("Prompt is empty or invalid:", prompt);
@@ -76,7 +117,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Prompt cannot be empty!",
         },
-        { status: 400 },
+        { status: 400 }
       );
     }
     if (!session?.user.id) {
@@ -86,7 +127,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Unauthorized! (User not authenticaded)",
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -111,7 +152,7 @@ export async function POST(req: NextRequest) {
         {
           error: "User not found!",
         },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -121,7 +162,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Unauthorized! (User API Key not found)",
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -135,7 +176,7 @@ export async function POST(req: NextRequest) {
         {
           error: "Unauthorized! (Invalid API Key)",
         },
-        { status: 401 },
+        { status: 401 }
       );
     }
 
@@ -174,14 +215,14 @@ export async function POST(req: NextRequest) {
           "Chat not found or access denied! Chat ID:",
           chatId,
           "Owner Id:",
-          databaseUser.id,
+          databaseUser.id
         );
 
         return NextResponse.json(
           {
             error: "Chat not found or access denied!",
           },
-          { status: 404 },
+          { status: 404 }
         );
       }
 
@@ -237,7 +278,10 @@ export async function POST(req: NextRequest) {
     }
 
     const aiMessages = await ConvertMessageOfDatabaseToAiModel(chat.messages);
-    log(`Chat ${chatId} messages converted to AI model:`, aiMessages);
+    log(
+      `Chat ${chatId} messages converted to AI model:`,
+      JSON.stringify(aiMessages, null, 2)
+    );
     const stream = createCustomUIMessageStream({
       chatId: chat.id,
       messages: aiMessages,
@@ -263,13 +307,13 @@ export async function POST(req: NextRequest) {
         : 500;
       return NextResponse.json(
         { error: error.message },
-        { status: statusCode },
+        { status: statusCode }
       );
     }
 
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

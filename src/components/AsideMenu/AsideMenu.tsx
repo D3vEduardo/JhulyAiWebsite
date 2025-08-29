@@ -24,7 +24,7 @@ export default function AsideMenu() {
       x: asideIsOpen ? 0 : "-100%",
       opacity: asideIsOpen ? 1 : 0,
     }),
-    [asideIsOpen],
+    [asideIsOpen]
   );
 
   const router = useRouter();

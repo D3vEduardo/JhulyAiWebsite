@@ -27,8 +27,8 @@ export function createModelProvider({
     modelType === ModelsType.HIGH
       ? "deepseek/deepseek-r1-0528:free"
       : modelType === ModelsType.LITE
-        ? "qwen/qwen3-coder:free"
-        : "deepseek/deepseek-chat-v3-0324:free";
+        ? "openai/gpt-oss-20b:free"
+        : "z-ai/glm-4.5-air:free";
 
   log("AI model name:", modelName);
   log("Reasoning is activated?", reasoning && modelType !== ModelsType.LITE);

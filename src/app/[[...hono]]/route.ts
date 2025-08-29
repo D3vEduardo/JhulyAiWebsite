@@ -6,3 +6,4 @@ export const POST = handle(honoApp);
 export const PUT = handle(honoApp);
 export const DELETE = handle(honoApp);
 export const PATCH = handle(honoApp);
+export const OPTIONS = handle(honoApp);

@@ -14,6 +14,7 @@ const {
   NEXT_PUBLIC_BETTER_AUTH_URL,
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
   GOOGLE_RECAPTCHA_SECRET_KEY,
+  NEXT_PUBLIC_APP_URL,
 } = process.env;
 
 const envSchema = z.object({
@@ -40,6 +41,7 @@ const envSchema = z.object({
   GOOGLE_RECAPTCHA_SECRET_KEY: z
     .string("GOOGLE_RECAPTCHA_SECRET_KEY deve ser uma string!")
     .min(1, "GOOGLE_RECAPTCHA_SECRET_KEY deve existir!"),
+  NEXT_PUBLIC_APP_URL: z.string("NEXT_PUBLIC_APP_URL deve ser uma URL válida"),
 });
 
 const parsed = envSchema.safeParse({
@@ -56,6 +58,7 @@ const parsed = envSchema.safeParse({
   NEXT_PUBLIC_BETTER_AUTH_URL,
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
   GOOGLE_RECAPTCHA_SECRET_KEY,
+  NEXT_PUBLIC_APP_URL,
 });
 
 if (!parsed.success) {
@@ -78,4 +81,5 @@ Corrija o arquivo .env.local antes de iniciar a aplicação.
   throw new Error(errorMessage);
 }
 
-export { parsed as env };
+const env = parsed.data;
+export { env };

@@ -2,6 +2,7 @@ import { IconifyIcon } from "@iconify-icon/react/dist/iconify.mjs";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+// ==== TYPE DEFINITIONS ====
 export type OnSelectType = (p: {
   value: string;
   label: string;
@@ -28,28 +29,58 @@ export interface DropdownState {
   persistValue?: boolean;
 }
 
-export interface DropdownStore {
-  dropdowns: Record<string, DropdownState>;
-  createDropdown: (p: {
-    id: string;
-    defaultValue?: DropdownValue | null;
-    onSelect?: OnSelectType;
-    persistValue: boolean;
-  }) => void;
-  selectValue: (
-    p: {
-      id: string;
-    } & DropdownValue,
-  ) => void;
-  updateSelectedValue: (p: {
-    id: string;
-    selectedValue: DropdownValue;
-  }) => void;
-  toggleOpen: (p: { id: string }) => void;
-  resetDropdown: (p: { id: string }) => void;
-  removeDropdown: (p: { id: string }) => void;
+// ==== PARAMETER INTERFACES ====
+interface CreateDropdownParams {
+  id: string;
+  defaultValue?: DropdownValue | null;
+  onSelect?: OnSelectType;
+  persistValue?: boolean;
 }
 
+interface SelectValueParams extends DropdownValue {
+  id: string;
+}
+
+interface UpdateSelectedValueParams {
+  id: string;
+  selectedValue: DropdownValue;
+}
+
+interface DropdownIdParam {
+  id: string;
+}
+
+// ==== STORE INTERFACE ====
+export interface DropdownStore {
+  dropdowns: Record<string, DropdownState>;
+  createDropdown: (params: CreateDropdownParams) => void;
+  selectValue: (params: SelectValueParams) => void;
+  updateSelectedValue: (params: UpdateSelectedValueParams) => void;
+  toggleOpen: (params: DropdownIdParam) => void;
+  resetDropdown: (params: DropdownIdParam) => void;
+  removeDropdown: (params: DropdownIdParam) => void;
+}
+
+// ==== HELPER FUNCTIONS ====
+/**
+ * Creates a persistable dropdown state by removing functions and ensuring isOpen is false
+ */
+const createPersistableDropdownState = (
+  dropdown: DropdownState,
+): DropdownState => ({
+  ...dropdown,
+  isOpen: false,
+  onSelect: undefined,
+  selectedValue: dropdown.selectedValue
+    ? {
+        value: dropdown.selectedValue.value,
+        label: dropdown.selectedValue.label,
+        icon: dropdown.selectedValue.icon,
+      }
+    : null,
+});
+
+// ==== STORE IMPLEMENTATION ====
 export const useDropdown = create<DropdownStore>()(
   persist(
     (set, get) => ({
@@ -64,9 +95,12 @@ export const useDropdown = create<DropdownStore>()(
         set((state) => {
           const existing = state.dropdowns[id];
           let selectedValue = defaultValue;
-          if (existing && existing.selectedValue && existing.persistValue) {
+
+          // Preserve existing selected value if it should be persisted
+          if (existing?.selectedValue && existing.persistValue) {
             selectedValue = existing.selectedValue;
           }
+
           return {
             dropdowns: {
               ...state.dropdowns,
@@ -97,6 +131,7 @@ export const useDropdown = create<DropdownStore>()(
           },
         }));
 
+        // Call the onSelect callback if it exists
         dropdown?.onSelect?.({ value, label, icon });
       },
 
@@ -114,6 +149,7 @@ export const useDropdown = create<DropdownStore>()(
           },
         }));
 
+        // Call the onSelect callback if it exists
         dropdown?.onSelect?.({
           value: selectedValue.value,
           label: selectedValue.label,
@@ -148,37 +184,32 @@ export const useDropdown = create<DropdownStore>()(
 
       removeDropdown: ({ id }) => {
         set((state) => {
-          const rest = { ...state.dropdowns };
-          delete rest[id];
+          const { [id]: _, ...rest } = state.dropdowns;
           return { dropdowns: rest };
         });
       },
     }),
     {
       name: "dropdown-storage",
+
+      /**
+       * Only persist dropdowns that have persistValue set to true
+       * Remove functions and ensure isOpen is false for persisted state
+       */
       partialize: (state) => ({
         dropdowns: Object.fromEntries(
-          Object.entries(state.dropdowns).map(([id, dropdown]) =>
-            dropdown.persistValue
-              ? [
-                  id,
-                  {
-                    ...dropdown,
-                    isOpen: false,
-                    onSelect: undefined,
-                    selectedValue: dropdown.selectedValue
-                      ? {
-                          value: dropdown.selectedValue.value,
-                          label: dropdown.selectedValue.label,
-                          icon: dropdown.selectedValue.icon,
-                        }
-                      : null,
-                  },
-                ]
-              : [],
-          ),
+          Object.entries(state.dropdowns)
+            .filter(([_id, dropdown]) => dropdown.persistValue)
+            .map(([id, dropdown]) => [
+              id,
+              createPersistableDropdownState(dropdown),
+            ]),
         ),
       }),
+
+      /**
+       * Ensure all dropdowns are closed when rehydrating from storage
+       */
       onRehydrateStorage: (state) => {
         if (state) {
           Object.keys(state.dropdowns).forEach((id) => {

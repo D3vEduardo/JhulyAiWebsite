@@ -1,3 +1,4 @@
+import { aiStreamRoute } from "@api/routes/ai/stream/stream.route";
 import { authRoute } from "@api/routes/auth/auth.route";
 import { Hono } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
@@ -22,11 +23,12 @@ export const honoApp = new Hono()
           "default"
         );
       },
-    }),
+    })
   )
   .get("/health", async (c) => {
     return c.json({
       status: "Ok!",
     });
   })
-  .route("/auth", authRoute);
+  .route("/auth", authRoute)
+  .route("/ai/stream", aiStreamRoute);

@@ -1,5 +1,6 @@
 import { aiStreamRoute } from "@api/routes/ai/stream/stream.route";
 import { authRoute } from "@api/routes/auth/auth.route";
+import { usersRoute } from "@api/routes/users/users.route";
 import { Hono } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
 
@@ -31,4 +32,5 @@ export const honoApp = new Hono()
     });
   })
   .route("/auth", authRoute)
-  .route("/ai/stream", aiStreamRoute);
+  .route("/ai/stream", aiStreamRoute)
+  .route("/users", usersRoute);

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { authMiddleware } from "../../middlewares/auth/auth.middleware";
+import { authMiddleware } from "../../../middlewares/auth/auth.middleware";
 import {
   createModelProvider,
   ModelsType,
@@ -40,7 +40,10 @@ export const aiStreamRoute = new Hono()
   .post("/", zValidator("json", bodySchema), async (c) => {
     try {
       log("Initiating AI flow...");
-      const session = await getCachedSession(c.req.raw.headers);
+      const session = {
+        session: c.get("session"),
+        user: c.get("user"),
+      };
       const {
         id: chatId,
         messages,

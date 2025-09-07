@@ -27,7 +27,7 @@ export function createModelProvider({
     modelType === ModelsType.HIGH
       ? "deepseek/deepseek-r1-0528:free"
       : modelType === ModelsType.LITE
-        ? "openai/gpt-oss-20b:free"
+        ? "qwen/qwen3-coder:free"
         : "z-ai/glm-4.5-air:free";
 
   log("AI model name:", modelName);

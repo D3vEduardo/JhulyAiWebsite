@@ -6,7 +6,7 @@ import { debug } from "debug";
 import { headers } from "next/headers";
 import { z } from "zod";
 import { getCachedSession } from "@/app/data/auth/getCachedSession";
-import { validateApiKeyWithCache } from "@/app/api/chat/validateApiKeyWithCache";
+import { validateApiKeyWithCache } from "@/api/utils/validateApiKeyWithCache";
 
 const log = debug("app:onboarding:actions");
 
@@ -17,7 +17,7 @@ interface ActionResponse {
 }
 
 export async function OboardingAction(
-  formData: z.infer<typeof onboardingFormSchema>,
+  formData: z.infer<typeof onboardingFormSchema>
 ): Promise<ActionResponse> {
   const parsedForm = onboardingFormSchema.safeParse(formData);
   log("Parsed Onboarding Form Data:", parsedForm);

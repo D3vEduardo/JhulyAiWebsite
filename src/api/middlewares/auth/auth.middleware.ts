@@ -1,13 +1,13 @@
 import { auth } from "@/lib/betterAuth/auth";
 import { MiddlewareHandler } from "hono";
 
-export type authMiddlewareVariables = {
+export type AuthMiddlewareVariables = {
   user: typeof auth.$Infer.Session.user;
   session: typeof auth.$Infer.Session.session;
 };
 
 export const authMiddleware: MiddlewareHandler<{
-  Variables: authMiddlewareVariables;
+  Variables: AuthMiddlewareVariables;
 }> = async (c, next) => {
   const authData = await auth.api.getSession({
     headers: c.req.raw.headers,
@@ -23,5 +23,5 @@ export const authMiddleware: MiddlewareHandler<{
   c.set("user", authData.user);
   c.set("session", authData.session);
 
-  return next();
+  return await next();
 };

@@ -9,7 +9,7 @@ import { debug } from "debug";
 const log = debug("app:auth");
 
 export const auth = betterAuth({
-  baseURL: env.BETTER_AUTH_URL,
+  baseURL: env.NEXT_PUBLIC_APP_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),

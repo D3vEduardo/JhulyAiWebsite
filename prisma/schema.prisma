@@ -12,6 +12,7 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified Boolean   @default(false)
+  role          UserRole  @default(USER)
   apiKey        ApiKey?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -21,7 +22,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  @@index([createdAt]) // ⚠️ só mantenha se usa paginação/ordenação por data
+  @@index([createdAt])
   @@map("user")
 }
 
@@ -131,4 +132,11 @@ enum MessageRole {
   TOOL
 
   @@map("message_role")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+
+  @@map("user_role")
 }

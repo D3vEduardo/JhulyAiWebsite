@@ -10,8 +10,6 @@ const {
   GOOGLE_API_KEY,
   DATABASE_URL,
   BETTER_AUTH_SECRET,
-  BETTER_AUTH_URL,
-  NEXT_PUBLIC_BETTER_AUTH_URL,
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
   GOOGLE_RECAPTCHA_SECRET_KEY,
   NEXT_PUBLIC_APP_URL,
@@ -31,10 +29,6 @@ const envSchema = z.object({
   GOOGLE_API_KEY: z.string().min(1, "GOOGLE_API_KEY é obrigatório"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatório"),
   BETTER_AUTH_SECRET: z.string().min(1, "BETTER_AUTH_SECRET é obrigatório"),
-  BETTER_AUTH_URL: z.url("BETTER_AUTH_URL deve ser uma URL válida"),
-  NEXT_PUBLIC_BETTER_AUTH_URL: z
-    .url("NEXT_PUBLIC_BETTER_AUTH_URL deve ser uma URL válida")
-    .optional(),
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY: z
     .string("NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY deve ser uma string!")
     .min(1, "NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY deve existir!"),
@@ -54,15 +48,13 @@ const parsed = envSchema.safeParse({
   GOOGLE_API_KEY,
   DATABASE_URL,
   BETTER_AUTH_SECRET,
-  BETTER_AUTH_URL,
-  NEXT_PUBLIC_BETTER_AUTH_URL,
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
   GOOGLE_RECAPTCHA_SECRET_KEY,
   NEXT_PUBLIC_APP_URL,
 });
 
 if (!parsed.success) {
-  const error = parsed.error; // tipo: ZodError<...>
+  const error = parsed.error;
 
   const formattedErrors = error.issues
     .map((issue) => {

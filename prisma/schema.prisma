@@ -12,7 +12,6 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified Boolean   @default(false)
-  role          UserRole  @default(USER)
   apiKey        ApiKey?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -25,6 +24,8 @@ model User {
   banned     Boolean?  @default(false)
   banReason  String?
   banExpires DateTime?
+
+  role UserRole?
 
   @@index([createdAt])
   @@map("user")

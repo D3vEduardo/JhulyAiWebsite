@@ -5,6 +5,7 @@ import { betterAuth } from "better-auth";
 import { env } from "@env";
 import { prisma } from "../prisma/client";
 import { debug } from "debug";
+import { UserRole } from "@prisma/client";
 
 const log = debug("app:auth");
 
@@ -34,7 +35,10 @@ export const auth = betterAuth({
         log("Request:", request);
       },
     }),
-    admin(),
+    admin({
+      adminRoles: UserRole.ADMIN,
+      defaultRole: UserRole.USER,
+    }),
     nextCookies(),
   ],
   logger: {

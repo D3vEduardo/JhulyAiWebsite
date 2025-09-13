@@ -1,14 +1,15 @@
 import { aiStreamRoute } from "@api/routes/ai/stream/stream.route";
 import { authRoute } from "@api/routes/auth/auth.route";
-import { usersRoute } from "@api/routes/users/users.route";
+import { usersRoute } from "@api/routes/users/(userId)/users.route";
 import { Hono } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
+import { adminUsersRoute } from "@api/routes/admin/users/adminUsers.route";
 
 export const honoApp = new Hono()
   .basePath("/api")
   .use(
     rateLimiter({
-      windowMs: 60 * 1000,
+      windowMs: 60 * 1_000,
       limit: 100,
       message: "Too many requests, please try again later.",
       standardHeaders: "draft-6",
@@ -24,7 +25,7 @@ export const honoApp = new Hono()
           "default"
         );
       },
-    })
+    }),
   )
   .get("/health", async (c) => {
     return c.json({
@@ -33,4 +34,9 @@ export const honoApp = new Hono()
   })
   .route("/auth", authRoute)
   .route("/ai/stream", aiStreamRoute)
-  .route("/users", usersRoute);
+
+  // Users routes
+  .route("/users", usersRoute)
+
+  // Admin routes
+  .route("/admin/users", adminUsersRoute);

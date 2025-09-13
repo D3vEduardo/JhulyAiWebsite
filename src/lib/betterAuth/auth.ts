@@ -1,5 +1,5 @@
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { magicLink } from "better-auth/plugins";
+import { admin, magicLink } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { betterAuth } from "better-auth";
 import { env } from "@env";
@@ -34,6 +34,7 @@ export const auth = betterAuth({
         log("Request:", request);
       },
     }),
+    admin(),
     nextCookies(),
   ],
   logger: {

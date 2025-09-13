@@ -98,7 +98,7 @@ export default async function RootLayout({
   log(
     "✅ Sessão válida confirmada no banco:",
     session.user.id,
-    session.user.email
+    session.user.email,
   );
 
   const userDatabase = await getCachedUser(session.user.id, session.user.email);

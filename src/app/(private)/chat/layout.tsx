@@ -1,5 +1,3 @@
-"use server";
-
 import { ReactNode } from "react";
 import LoadingScreen from "@components/Loading/LoadingScreen";
 

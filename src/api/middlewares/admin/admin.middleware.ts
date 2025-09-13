@@ -10,16 +10,8 @@ export type AdminMiddlewareVariables = {
 export const adminMiddleware: MiddlewareHandler<{
   Variables: AdminMiddlewareVariables & AuthMiddlewareVariables;
 }> = async (c, next) => {
-  const user = c.get("user");
-  const authenticadedUserRole = await prisma.user.findUnique({
-    where: {
-      id: user.id,
-    },
-    select: {
-      role: true,
-    },
-  });
+  const { role: authenticadedUserRole } = c.get("user");
 
-  c.set("userIsAdmin", authenticadedUserRole?.role === UserRole.ADMIN);
+  c.set("userIsAdmin", authenticadedUserRole === UserRole.ADMIN);
   return await next();
 };

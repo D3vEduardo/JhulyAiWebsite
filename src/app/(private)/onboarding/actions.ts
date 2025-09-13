@@ -17,7 +17,7 @@ interface ActionResponse {
 }
 
 export async function OboardingAction(
-  formData: z.infer<typeof onboardingFormSchema>
+  formData: z.infer<typeof onboardingFormSchema>,
 ): Promise<ActionResponse> {
   const parsedForm = onboardingFormSchema.safeParse(formData);
   log("Parsed Onboarding Form Data:", parsedForm);

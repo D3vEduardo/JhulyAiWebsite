@@ -5,12 +5,11 @@ import { prisma } from "@lib/prisma/client";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import z from "zod";
-import { UserRole } from "@prisma/client";
 import { debug } from "debug";
 import { userSelectQuerySchema } from "@api/schemas/userQuery.schema";
 const log = debug("app:api:usersRoute");
 
-export const usersRoute = new Hono()
+export const adminUsersRoute = new Hono()
   .use("*", authMiddleware)
   .use("*", adminMiddleware)
   .get(
@@ -19,7 +18,7 @@ export const usersRoute = new Hono()
       "json",
       z.object({
         select: userSelectQuerySchema,
-      })
+      }),
     ),
     zValidator(
       "query",
@@ -30,7 +29,7 @@ export const usersRoute = new Hono()
             error: "O role deve ser um dos seguintes valores: USER, ADMIN.",
           })
           .optional(),
-      })
+      }),
     ),
     async (c) => {
       try {
@@ -39,42 +38,45 @@ export const usersRoute = new Hono()
         const isAdmin = c.get("userIsAdmin");
 
         if (!isAdmin) {
-          log("[GET] /api/users - Unauthorized");
+          log("[GET] /api/admin/users - Unauthorized");
           return c.json(
             {
               message: "Unauthorized",
             },
-            401
+            401,
           );
         }
 
         const finalSelect = Object.fromEntries(
-          Object.entries(body.select).filter(([, value]) => value === true)
+          Object.entries(body.select).filter(([, value]) => value === true),
         );
 
         const users = await prisma.user.findMany({
           where: {
             createdAt: {
-              gte: new Date(query.pagination.lastItemTimestamp || 0),
+              gte: new Date(query.pagination.cursor || 0),
             },
             role: query.onlyRole ? query.onlyRole : undefined,
+          },
+          orderBy: {
+            createdAt: "asc",
           },
           select: Object.keys(finalSelect).length > 0 ? finalSelect : undefined,
         });
 
-        log("[GET] /api/users - Users fetched successfully");
+        log("[GET] /api/admin/users - Users fetched successfully");
         return c.json({
           message: "Users fetched successfully",
           data: users || [],
         });
       } catch (e) {
-        log("[GET] /api/users - ERROR - Detalhes:", e);
+        log("[GET] /api/admin/users - ERROR - Detalhes:", e);
         return c.json(
           {
             message: "Internal server error",
           },
-          500
+          500,
         );
       }
-    }
+    },
   );

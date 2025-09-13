@@ -25,12 +25,12 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
         if (finalChatId) {
           queryClient.setQueryData(
             ["chat", `chat_${finalChatId}`],
-            (oldData: UIMessage[] = []) => [...oldData, message]
+            (oldData: UIMessage[] = []) => [...oldData, message],
           );
           window.dispatchEvent(
             new CustomEvent("chat-created", {
               detail: { chatId: finalChatId },
-            })
+            }),
           );
         }
         return;
@@ -38,10 +38,10 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
 
       queryClient.setQueryData(
         ["chat", `chat_${chatId}`],
-        (oldData: UIMessage[] = []) => [...oldData, message]
+        (oldData: UIMessage[] = []) => [...oldData, message],
       );
     },
-    [chatId, isNewChat, queryClient]
+    [chatId, isNewChat, queryClient],
   );
 
   const onData = useCallback(
@@ -56,14 +56,14 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
         if (data.chatId) {
           queryClient.setQueryData(
             ["chat", `chat_${data.chatId}`],
-            data.messages
+            data.messages,
           );
           newChatIdRef.current = data.chatId;
           console.log("Novo chatId salvo:", data.chatId);
         }
       }
     },
-    [queryClient]
+    [queryClient],
   );
 
   const chat = useChat({

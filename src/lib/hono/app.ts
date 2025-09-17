@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
 import { adminUsersRoute } from "@api/routes/admin/users/adminUsers.route";
 import { usersMeChatRoute } from "@api/routes/users/me/chats/userMeChats.route";
+import { usersMeChatByIdRoute } from "@/api/routes/users/me/chats/(chatId)/userMeChatById.route";
 
 export const honoApp = new Hono()
   .basePath("/api")
@@ -46,6 +47,7 @@ export const honoApp = new Hono()
   // Users routes - ordem ajustada para que /users/me seja processado antes de /users/:userId
   .route("/users/me", usersMeRoute)
   .route("/users/me/chats", usersMeChatRoute)
+  .route("/users/me/chats/:chatId", usersMeChatByIdRoute)
   .route("/users/:userId", usersRoute)
 
   // Admin routes

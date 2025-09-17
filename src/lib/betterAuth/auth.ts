@@ -26,6 +26,7 @@ export const auth = betterAuth({
     },
   },
   appName: "jhuly-website",
+
   plugins: [
     magicLink({
       sendMagicLink({ email, token, url }, request) {

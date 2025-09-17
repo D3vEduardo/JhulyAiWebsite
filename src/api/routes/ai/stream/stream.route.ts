@@ -11,9 +11,9 @@ import { debug } from "debug";
 import { createCustomUIMessageStream } from "@api/utils/createCustomUIMessageStream";
 import { validateApiKeyWithCache } from "@api/utils/validateApiKeyWithCache";
 import { prisma } from "@lib/prisma/client";
-import { ConvertMessageOfDatabaseToAiModel } from "@/utils/convertMessageOfDbToAiModel";
-import { generateChatNameWithAi } from "@utils/generateChatNameWithAi";
-import { StringCompressor } from "@utils/stringCompressor";
+import { ConvertMessageOfDatabaseToAiModel } from "@/util/convertMessageOfDbToAiModel";
+import { generateChatNameWithAi } from "@/util/generateChatNameWithAi";
+import { StringCompressor } from "@/util/stringCompressor";
 import { Chat, Message } from "@prisma/client";
 import { TextUIPart, ToolUIPart, createUIMessageStreamResponse } from "ai";
 const log = debug("app:api:ai:stream");
@@ -24,7 +24,7 @@ const bodySchema = z.object({
       parts: z.any(),
       id: z.string(),
       role: z.enum(["user", "assistant", "system"]).nullable(),
-    }),
+    })
   ),
   id: z.string({ error: "Chat ID is required!" }),
   reasoning: z.coerce
@@ -62,7 +62,7 @@ export const aiStreamRoute = new Hono()
           {
             error: "No user message found in request!",
           },
-          { status: 400 },
+          { status: 400 }
         );
       }
 
@@ -84,7 +84,7 @@ export const aiStreamRoute = new Hono()
           {
             error: "Prompt cannot be empty!",
           },
-          { status: 400 },
+          { status: 400 }
         );
       }
       if (!session?.user.id) {
@@ -94,7 +94,7 @@ export const aiStreamRoute = new Hono()
           {
             error: "Unauthorized! (User not authenticaded)",
           },
-          { status: 401 },
+          { status: 401 }
         );
       }
 
@@ -119,7 +119,7 @@ export const aiStreamRoute = new Hono()
           {
             error: "User not found!",
           },
-          { status: 404 },
+          { status: 404 }
         );
       }
 
@@ -129,7 +129,7 @@ export const aiStreamRoute = new Hono()
           {
             error: "Unauthorized! (User API Key not found)",
           },
-          { status: 401 },
+          { status: 401 }
         );
       }
 
@@ -143,7 +143,7 @@ export const aiStreamRoute = new Hono()
           {
             error: "Unauthorized! (Invalid API Key)",
           },
-          { status: 401 },
+          { status: 401 }
         );
       }
 
@@ -182,14 +182,14 @@ export const aiStreamRoute = new Hono()
             "Chat not found or access denied! Chat ID:",
             chatId,
             "Owner Id:",
-            databaseUser.id,
+            databaseUser.id
           );
 
           return c.json(
             {
               error: "Chat not found or access denied!",
             },
-            { status: 404 },
+            { status: 404 }
           );
         }
 
@@ -247,7 +247,7 @@ export const aiStreamRoute = new Hono()
       const aiMessages = await ConvertMessageOfDatabaseToAiModel(chat.messages);
       log(
         `Chat ${chatId} messages converted to AI model:`,
-        JSON.stringify(aiMessages, null, 2),
+        JSON.stringify(aiMessages, null, 2)
       );
       const stream = createCustomUIMessageStream({
         chatId: chat.id,

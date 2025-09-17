@@ -25,9 +25,9 @@
       "@components/*": ["./src/components/*"],
       "@public/*": ["./public/*"],
       "@env": ["./src/env.ts"],
-      "@lib/*": ["src/lib/*"],
+      "@lib/*": ["./src/lib/*"],
+      "@util/*": ["./src/util/*"],
       "@store/*": ["./src/store/*"],
-      "@utils/*": ["./src/utils/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@data/*": ["./src/app/data/*"]
     }

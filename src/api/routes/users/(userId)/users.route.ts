@@ -4,38 +4,35 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import z from "zod";
 import { debug } from "debug";
-import { userSelectQuerySchema } from "@api/schemas/userQuery.schema";
-const log = debug("app:api:usersRoute");
+import { userSelectQuerySchema } from "@/api/schemas/userSelectQuery.schema";
+const log = debug("app:api:usersRoute:userId");
 
 export const usersRoute = new Hono().use("*", authMiddleware).get(
-  "/:userId",
+  "/",
   zValidator(
     "param",
     z.object({
       userId: z.coerce.string({
         error: "Invalid userId!",
       }),
-    }),
+    })
   ),
   zValidator(
-    "json",
-    z
-      .object({
-        select: userSelectQuerySchema.pick({
-          name: true,
-          image: true,
-          id: true,
-          createdAt: true,
-        }),
+    "query",
+    userSelectQuerySchema
+      .pick({
+        name: true,
+        image: true,
+        createdAt: true,
       })
-      .strict(),
+      .strict()
   ),
   async (c) => {
     const param = c.req.valid("param");
-    const body = c.req.valid("json");
+    const select = c.req.valid("query");
     try {
       const finalSelect = Object.fromEntries(
-        Object.entries(body.select).filter(([, value]) => value === true),
+        Object.entries(select).filter(([, value]) => value === true)
       );
 
       const user = await prisma.user.findUnique({
@@ -44,6 +41,16 @@ export const usersRoute = new Hono().use("*", authMiddleware).get(
         },
         select: Object.keys(finalSelect).length > 0 ? finalSelect : undefined,
       });
+
+      if (!user) {
+        log(`[GET] /api/users/${param.userId} - User not found`);
+        return c.json(
+          {
+            message: "User not found",
+          },
+          404
+        );
+      }
 
       log(`[GET] /api/users/${param.userId} - User fetched successfully`);
       return c.json({
@@ -56,8 +63,8 @@ export const usersRoute = new Hono().use("*", authMiddleware).get(
         {
           message: "Internal server error",
         },
-        500,
+        500
       );
     }
-  },
+  }
 );

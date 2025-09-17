@@ -1,4 +1,4 @@
-import { StringCompressor } from "@utils/stringCompressor";
+import { StringCompressor } from "@/util/stringCompressor";
 import { prisma } from "@lib/prisma/client";
 import { LanguageModelUsage, StepResult, ToolSet } from "ai";
 import { debug } from "debug";

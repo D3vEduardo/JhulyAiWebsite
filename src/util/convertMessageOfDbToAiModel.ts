@@ -1,6 +1,6 @@
 import { UIMessage } from "ai";
 import { Message, MessageRole, User } from "@prisma/client";
-import { StringCompressor } from "@utils/stringCompressor";
+import { StringCompressor } from "@/util/stringCompressor";
 
 type MessageWithSender = Message & { sender?: User | null };
 
@@ -12,10 +12,10 @@ const roleMap: Record<MessageRole, UIMessage["role"]> = {
 };
 
 export async function ConvertMessageOfDatabaseToAiModel(
-  messages: MessageWithSender[],
+  messages: MessageWithSender[]
 ): Promise<UIMessage[]> {
   const sorted = [...messages].sort(
-    (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
   );
 
   return Promise.all(
@@ -36,6 +36,6 @@ export async function ConvertMessageOfDatabaseToAiModel(
         role: roleMap[msg.role],
         parts,
       };
-    }),
+    })
   );
 }

@@ -1,12 +1,20 @@
 import { aiStreamRoute } from "@api/routes/ai/stream/stream.route";
 import { authRoute } from "@api/routes/auth/auth.route";
 import { usersRoute } from "@api/routes/users/(userId)/users.route";
+import { usersMeRoute } from "@api/routes/users/me/usersMe.route";
 import { Hono } from "hono";
 import { rateLimiter } from "hono-rate-limiter";
 import { adminUsersRoute } from "@api/routes/admin/users/adminUsers.route";
+import { usersMeChatRoute } from "@api/routes/users/me/chats/userMeChats.route";
 
 export const honoApp = new Hono()
   .basePath("/api")
+  .use("*", async (ctx, next) => {
+    console.log(
+      `Hono API Request: [${ctx.req.method.toUpperCase()}] ${ctx.req.url}`
+    );
+    await next();
+  })
   .use(
     rateLimiter({
       windowMs: 60 * 1_000,
@@ -25,7 +33,7 @@ export const honoApp = new Hono()
           "default"
         );
       },
-    }),
+    })
   )
   .get("/health", async (c) => {
     return c.json({
@@ -35,8 +43,10 @@ export const honoApp = new Hono()
   .route("/auth", authRoute)
   .route("/ai/stream", aiStreamRoute)
 
-  // Users routes
-  .route("/users", usersRoute)
+  // Users routes - ordem ajustada para que /users/me seja processado antes de /users/:userId
+  .route("/users/me", usersMeRoute)
+  .route("/users/me/chats", usersMeChatRoute)
+  .route("/users/:userId", usersRoute)
 
   // Admin routes
   .route("/admin/users", adminUsersRoute);

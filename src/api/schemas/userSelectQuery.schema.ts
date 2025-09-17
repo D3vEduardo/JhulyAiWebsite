@@ -1,4 +1,3 @@
-import { imageConfigDefault } from "next/dist/shared/lib/image-config";
 import z from "zod";
 
 export const userSelectQuerySchema = z
@@ -33,18 +32,18 @@ export const userSelectQuerySchema = z
       })
       .optional()
       .default(false),
-    chats: z.coerce
-      .boolean({
-        error: "Chats deve ser um booleano válido.",
-      })
-      .optional()
-      .default(false),
-    messages: z.coerce
-      .boolean({
-        error: "Messages deve ser um booleano válido.",
-      })
-      .optional()
-      .default(false),
+    // chats: z.coerce
+    //   .boolean({
+    //     error: "Chats deve ser um booleano válido.",
+    //   })
+    //   .optional()
+    //   .default(false),
+    // messages: z.coerce
+    //   .boolean({
+    //     error: "Messages deve ser um booleano válido.",
+    //   })
+    //   .optional()
+    //   .default(false),
     role: z
       .boolean({
         error: "Role deve ser um booleano válido.",

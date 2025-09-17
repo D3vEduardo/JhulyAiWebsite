@@ -10,6 +10,7 @@ import { usersMeChatByIdRoute } from "@/api/routes/users/me/chats/(chatId)/userM
 import { usersMeMessagesRoute } from "@/api/routes/users/me/messages/userMeMessages.route";
 import { usersMeMessageByIdRoute } from "@/api/routes/users/me/messages/(messageId)/userMeMessageById.route";
 import { usersMeChatMessagesRoute } from "@/api/routes/users/me/chats/(chatId)/messages/userMeChatMessages.route";
+import { usersMeChatMessageByIdRoute } from "@/api/routes/users/me/chats/(chatId)/messages/(messageId)/userMeChatMessageById.route";
 
 export const honoApp = new Hono()
   .basePath("/api")
@@ -52,6 +53,7 @@ export const honoApp = new Hono()
   .route("/users/me/chats", usersMeChatRoute)
   .route("/users/me/chats/:chatId", usersMeChatByIdRoute)
   .route("/users/me/chats/:chatId/messages", usersMeChatMessagesRoute)
+  .route("/users/me/chats/:chatId/messages/:messageId", usersMeChatMessageByIdRoute)
   .route("/users/me/messages", usersMeMessagesRoute)
   .route("/users/me/messages/:messageId", usersMeMessageByIdRoute)
   .route("/users/:userId", usersRoute)

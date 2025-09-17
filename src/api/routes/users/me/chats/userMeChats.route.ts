@@ -15,7 +15,7 @@ export const usersMeChatRoute = new Hono().use("*", authMiddleware).get(
     "query",
     z.object({
       pagination: paginationSchema,
-      select: chatSelectQuerySchema,
+      select: chatSelectQuerySchema.optional(),
     })
   ),
   async (c) => {

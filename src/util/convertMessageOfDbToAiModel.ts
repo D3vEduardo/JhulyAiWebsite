@@ -1,41 +1,15 @@
-import { UIMessage } from "ai";
-import { Message, MessageRole, User } from "@prisma/client";
-import { StringCompressor } from "@/util/stringCompressor";
+import type { Message } from "@prisma/client";
+import type { UIMessage, UIMessagePart, UIDataTypes, UITools } from "ai";
 
-type MessageWithSender = Message & { sender?: User | null };
-
-const roleMap: Record<MessageRole, UIMessage["role"]> = {
-  [MessageRole.USER]: "user",
-  [MessageRole.ASSISTANT]: "assistant",
-  [MessageRole.SYSTEM]: "system",
-  [MessageRole.TOOL]: "assistant",
-};
-
-export async function ConvertMessageOfDatabaseToAiModel(
-  messages: MessageWithSender[]
-): Promise<UIMessage[]> {
-  const sorted = [...messages].sort(
-    (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-  );
-
-  return Promise.all(
-    sorted.map(async (msg) => {
-      const [text, reasoningText] = await Promise.all([
-        StringCompressor.decompress({ compressedText: msg.content }),
-        StringCompressor.decompress({ compressedText: msg.reasoning || "" }),
-      ]);
-
-      const parts: UIMessage["parts"] = [{ type: "text", text }];
-
-      if (msg.reasoning) {
-        parts.push({ type: "reasoning", text: reasoningText });
-      }
-
-      return {
-        id: String(msg.id),
-        role: roleMap[msg.role],
-        parts,
-      };
-    })
-  );
+// Função para converter mensagens do banco para o modelo da UI
+export function convertMessageOfDbToAiModel(
+  dbMessages: Message[]
+): UIMessage<unknown, UIDataTypes, UITools>[] {
+  return dbMessages.map((m) => ({
+    id: m.id,
+    role: m.role.toLowerCase() as UIMessage["role"],
+    createdAt: m.createdAt,
+    updatedAt: m.updatedAt,
+    parts: m.parts as unknown as UIMessagePart<UIDataTypes, UITools>[],
+  }));
 }

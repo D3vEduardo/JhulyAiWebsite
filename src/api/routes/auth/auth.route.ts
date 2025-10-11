@@ -1,7 +1,7 @@
 import { auth } from "@/lib/betterAuth/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { env } from "@env";
+import { clientEnv as env } from "@client.env";
 
 export const authRoute = new Hono()
   .use(

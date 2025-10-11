@@ -18,13 +18,14 @@
         "name": "next"
       }
     ],
-    "baseUrl": "./",
+    "rootDir": "./",
     "paths": {
       "@/*": ["./src/*"],
       "@api/*": ["./src/api/*"],
       "@components/*": ["./src/components/*"],
       "@public/*": ["./public/*"],
-      "@env": ["./src/env.ts"],
+      "@client.env": ["./src/client.env.ts"],
+      "@server.env": ["./src/server.env.ts"],
       "@lib/*": ["./src/lib/*"],
       "@util/*": ["./src/util/*"],
       "@store/*": ["./src/store/*"],

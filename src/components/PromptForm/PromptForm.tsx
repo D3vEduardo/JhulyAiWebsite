@@ -22,7 +22,8 @@ export default function PromptForm() {
       onSubmit={async (e) => {
         e.preventDefault();
         const prompt = inputRef?.current?.value.trim();
-        console.log(
+        console.debug(
+          "[src/components/PromptForm/PromptForm.tsx:PromptForm]",
           "Enviando mensagem do formulário de prompt. Prompt:",
           prompt,
         );

@@ -12,7 +12,7 @@ export default function ZoopText({
   speed = 2000,
   className,
 }: PropsType) {
-  console.log("Renderizei ZoopText");
+  console.debug("[src/components/ZoopText.tsx:ZoopText]", "Renderizei ZoopText");
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {

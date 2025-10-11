@@ -2,7 +2,8 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin, magicLink } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { betterAuth } from "better-auth";
-import { env } from "@env";
+import { serverEnv as env } from "@server.env";
+import { clientEnv as clientEnv } from "@client.env";
 import { prisma } from "../prisma/client";
 import { debug } from "debug";
 import { UserRole } from "@prisma/client";
@@ -10,7 +11,7 @@ import { UserRole } from "@prisma/client";
 const log = debug("app:auth");
 
 export const auth = betterAuth({
-  baseURL: env.NEXT_PUBLIC_APP_URL,
+  baseURL: clientEnv.NEXT_PUBLIC_APP_URL,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),

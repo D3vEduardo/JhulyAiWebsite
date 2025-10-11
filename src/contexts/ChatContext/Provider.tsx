@@ -25,23 +25,26 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
         if (finalChatId) {
           queryClient.setQueryData(
             ["chat", `chat_${finalChatId}`],
-            (oldData: UIMessage[] = []) => [...oldData, message],
+            (oldData) => {
+              const prev = (oldData as UIMessage[]) ?? [];
+              return [...prev, message];
+            }
           );
           window.dispatchEvent(
             new CustomEvent("chat-created", {
               detail: { chatId: finalChatId },
-            }),
+            })
           );
         }
         return;
       }
 
-      queryClient.setQueryData(
-        ["chat", `chat_${chatId}`],
-        (oldData: UIMessage[] = []) => [...oldData, message],
-      );
+      queryClient.setQueryData(["chat", `chat_${chatId}`], (oldData) => {
+        const prev = (oldData as UIMessage[]) ?? [];
+        return [...prev, message];
+      });
     },
-    [chatId, isNewChat, queryClient],
+    [chatId, isNewChat, queryClient]
   );
 
   const onData = useCallback(
@@ -56,23 +59,31 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
         if (data.chatId) {
           queryClient.setQueryData(
             ["chat", `chat_${data.chatId}`],
-            data.messages,
+            data.messages
           );
           newChatIdRef.current = data.chatId;
-          console.log("Novo chatId salvo:", data.chatId);
+          console.debug(
+            "[src/contexts/ChatContext/Provider.tsx:ChatProvider]",
+            "Novo chatId salvo:",
+            data.chatId
+          );
         }
       }
     },
-    [queryClient],
+    [queryClient]
   );
 
   const chat = useChat({
     id: chatId || "new",
-    messages: isNewChat ? [] : chatMessagesQuery.data || [],
+    messages: [],
     onFinish,
     onData,
     onError: (error) => {
-      console.error("Chat error:", error);
+      console.debug(
+        "[src/contexts/ChatContext/Provider.tsx:ChatProvider]",
+        "Chat error:",
+        error
+      );
     },
     transport: new DefaultChatTransport({
       api: "/api/ai/stream",
@@ -108,6 +119,35 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
       window.removeEventListener("new-chat-requested", handleNewChatRequested);
     };
   }, [isNewChat, chat.setMessages, chat]);
+
+  useEffect(() => {
+    if (
+      chatId &&
+      !isNewChat &&
+      chat.status === "ready" &&
+      !chatMessagesQuery.isLoading
+    ) {
+      const acctualChatMessagesJson = JSON.stringify(chat.messages);
+      const cachedChatMessagesJson = JSON.stringify(
+        chatMessagesQuery.data || []
+      );
+
+      if (acctualChatMessagesJson !== cachedChatMessagesJson) {
+        console.debug(
+          `[src/contexts/ChatContext/Provider.tsx:ChatProvider] Sincronizando mensagens do chat ${chatId} com cache`
+        );
+
+        chat.setMessages(chatMessagesQuery.data as UIMessage[]);
+      }
+    }
+  }, [
+    chat,
+    chatMessagesQuery.data,
+    chatMessagesQuery.isLoading,
+    chatId,
+    isNewChat,
+    chat.status,
+  ]);
 
   const contextValue: ChatContextType = {
     messages: chat.messages,

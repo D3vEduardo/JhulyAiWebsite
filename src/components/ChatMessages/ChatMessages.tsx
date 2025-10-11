@@ -20,8 +20,8 @@ export default function ChatMessages() {
     );
   }
 
-  console.log("Renderizei ChatMessages");
-  console.log(`Received messagens on ChatMessages component:`, messages);
+  console.debug("[src/components/ChatMessages/ChatMessages.tsx:ChatMessages]", "Renderizei ChatMessages");
+  console.debug("[src/components/ChatMessages/ChatMessages.tsx:ChatMessages]", `Received messagens on ChatMessages component:`, messages);
   return (
     <main
       className="w-full h-[calc(100%-7vh)] pt-2 overflow-y-auto overflow-x-hidden pb-[175px]"

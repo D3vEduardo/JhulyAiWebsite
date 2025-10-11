@@ -1,4 +1,3 @@
-import { messageSelectQuerySchema } from "@/api/schemas/messageSelectQuery.schema";
 import { paginationSchema } from "@/api/schemas/pagination.schema";
 import { prisma } from "@/lib/prisma/client";
 import { authMiddleware } from "@api/middlewares/auth/auth.middleware";
@@ -6,6 +5,8 @@ import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import z from "zod";
 import { debug } from "debug";
+import { safeValidateUIMessages } from "ai";
+import type { UIMessage } from "ai";
 
 const log = debug("app:api:users:me:chats:chatId:messages");
 
@@ -19,13 +20,7 @@ export const usersMeChatMessagesRoute = new Hono().use("*", authMiddleware).get(
       }),
     })
   ),
-  zValidator(
-    "query",
-    z.object({
-      pagination: paginationSchema,
-      select: messageSelectQuerySchema.optional(),
-    })
-  ),
+  zValidator("query", paginationSchema),
   async (c) => {
     const user = c.get("user");
     const param = c.req.valid("param");
@@ -55,25 +50,88 @@ export const usersMeChatMessagesRoute = new Hono().use("*", authMiddleware).get(
       // Construir where condition dinamicamente
       const whereCondition = {
         chatId: param.chatId,
-        ...(query.pagination.cursor && {
+        ...(query.cursor && {
           createdAt: {
-            lt: new Date(query.pagination.cursor), // Para ordenação DESC
+            lt: new Date(query.cursor),
           },
         }),
       };
 
       const messages = await prisma.message.findMany({
         where: whereCondition,
-        take: query.pagination.limit + 1, // +1 para detectar se há mais páginas
-        select: query.select,
+        take: query.limit + 1,
+        select: {
+          chatId: true,
+          parts: true,
+          createdAt: true,
+          id: true,
+          role: true,
+          updatedAt: true,
+          senderId: true,
+        },
         orderBy: {
-          createdAt: "desc", // Mais recente primeiro
+          createdAt: "desc",
         },
       });
 
       // Verificar se há próxima página
-      const hasNextPage = messages.length > query.pagination.limit;
+      const hasNextPage = messages.length > query.limit;
       const result = hasNextPage ? messages.slice(0, -1) : messages;
+
+      // Transformar mensagens do Prisma para o formato UIMessage
+      const transformedMessages = result.map((msg) => {
+        // Normalizar o role para lowercase
+        const normalizedRole = msg.role.toLowerCase() as
+          | "user"
+          | "assistant"
+          | "system";
+
+        // Garantir que parts seja um array
+        let partsArray: unknown[];
+        if (Array.isArray(msg.parts)) {
+          partsArray = msg.parts;
+        } else if (typeof msg.parts === "object" && msg.parts !== null) {
+          // Se parts for um objeto (como no seu caso), extrair o conteúdo
+          const partsObj = msg.parts as Record<string, unknown>;
+          if (partsObj.content && Array.isArray(partsObj.content)) {
+            partsArray = partsObj.content;
+          } else {
+            // Fallback: colocar o objeto inteiro como um elemento do array
+            partsArray = [partsObj];
+          }
+        } else {
+          partsArray = [];
+        }
+
+        return {
+          id: msg.id,
+          role: normalizedRole,
+          parts: partsArray,
+          createdAt: msg.createdAt,
+        };
+      });
+
+      const uiMessageResult = await safeValidateUIMessages({
+        // parts shape comes from the DB and may not exactly match the
+        // library's UIMessagePart type. Cast here so the runtime validation
+        // still runs via safeValidateUIMessages while keeping TypeScript happy.
+        messages: transformedMessages as unknown as UIMessage[],
+      });
+
+      if (!uiMessageResult.success) {
+        log(
+          `[GET] /api/users/me/chats/${param.chatId}/messages: Validation error for user ${user.id}:`,
+          uiMessageResult.error
+        );
+        return c.json(
+          {
+            error: "Validation failed",
+            message: "One or more messages failed validation",
+            details: uiMessageResult.error,
+          },
+          500
+        );
+      }
 
       // Calcular próximo cursor
       const nextCursor =
@@ -87,11 +145,11 @@ export const usersMeChatMessagesRoute = new Hono().use("*", authMiddleware).get(
 
       return c.json({
         message: "Success on get chat messages!",
-        data: result,
+        data: uiMessageResult.data,
         pagination: {
           nextCursor,
           hasNextPage,
-          limit: query.pagination.limit,
+          limit: query.limit,
         },
       });
     } catch (e) {

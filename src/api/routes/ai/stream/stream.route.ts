@@ -6,14 +6,12 @@ import {
 } from "@api/utils/createModelProvider";
 import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
-import { getCachedSession } from "@data/auth/getCachedSession";
 import { debug } from "debug";
 import { createCustomUIMessageStream } from "@api/utils/createCustomUIMessageStream";
 import { validateApiKeyWithCache } from "@api/utils/validateApiKeyWithCache";
 import { prisma } from "@lib/prisma/client";
-import { ConvertMessageOfDatabaseToAiModel } from "@/util/convertMessageOfDbToAiModel";
+import { convertMessageOfDbToAiModel } from "@/util/convertMessageOfDbToAiModel";
 import { generateChatNameWithAi } from "@/util/generateChatNameWithAi";
-import { StringCompressor } from "@/util/stringCompressor";
 import { Chat, Message } from "@prisma/client";
 import { TextUIPart, ToolUIPart, createUIMessageStreamResponse } from "ai";
 const log = debug("app:api:ai:stream");
@@ -157,10 +155,6 @@ export const aiStreamRoute = new Hono()
       const isExistingChat =
         chatId !== "new" && chatId !== "null" && chatId !== "undefined";
 
-      const compressedPrompt = await StringCompressor.compress({
-        text: prompt.trim(),
-      });
-
       if (isExistingChat) {
         log("Processing existing chat with ID:", chatId);
 
@@ -195,7 +189,7 @@ export const aiStreamRoute = new Hono()
 
         const newMessage = await prisma.message.create({
           data: {
-            content: compressedPrompt,
+            parts: [{ type: "text", text: prompt }] as TextUIPart[],
             role: "USER",
             chatId,
             senderId: databaseUser.id,
@@ -226,7 +220,7 @@ export const aiStreamRoute = new Hono()
             ownerId: databaseUser.id,
             messages: {
               create: {
-                content: compressedPrompt,
+                parts: [{ type: "text", text: prompt }] as TextUIPart[],
                 role: "USER",
                 senderId: databaseUser.id,
               },
@@ -244,7 +238,7 @@ export const aiStreamRoute = new Hono()
         log("New chat created with ID:", chat.id);
       }
 
-      const aiMessages = await ConvertMessageOfDatabaseToAiModel(chat.messages);
+      const aiMessages = convertMessageOfDbToAiModel(chat.messages);
       log(
         `Chat ${chatId} messages converted to AI model:`,
         JSON.stringify(aiMessages, null, 2)

@@ -13,15 +13,15 @@ export async function middleware(req: NextRequest) {
     "🛡️ Middleware executando para:",
     url.pathname,
     "| Autenticado:",
-    isAuthenticated,
+    isAuthenticated
   );
 
-  const publicRoutes = ["/login", "/overview", "/"];
-  const isPublicRoute = publicRoutes.includes(url.pathname);
+  // const publicRoutes = ["/login", "/overview", "/"];
+  // const isPublicRoute = publicRoutes.includes(url.pathname);
 
   const protectedRoutes = ["/chat", "/onboarding"];
   const isProtectedRoute = protectedRoutes.some((route) =>
-    url.pathname.startsWith(route),
+    url.pathname.startsWith(route)
   );
   if (isProtectedRoute && !isAuthenticated) {
     log("⛔ Rota protegida sem auth, redirecionando para /overview");
@@ -29,7 +29,7 @@ export async function middleware(req: NextRequest) {
   }
   if ((url.pathname === "/login" || url.pathname === "/") && isAuthenticated) {
     log(
-      "✅ Usuário autenticado acessando rota pública, redirecionando para /chat/new",
+      "✅ Usuário autenticado acessando rota pública, redirecionando para /chat/new"
     );
     return NextResponse.redirect(new URL("/chat/new", url));
   }
@@ -46,7 +46,7 @@ export async function middleware(req: NextRequest) {
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
     "Strict-Transport-Security",
-    "max-age=31536000; includeSubDomains; preload",
+    "max-age=31536000; includeSubDomains; preload"
   );
 
   log("✅ Middleware processado com sucesso", { pathname: url.pathname });

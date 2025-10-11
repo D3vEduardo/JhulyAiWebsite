@@ -40,7 +40,7 @@ export default function ChatContainer() {
     return () => {
       window.removeEventListener(
         "chat-created",
-        handleChatCreated as EventListener,
+        handleChatCreated as EventListener
       );
     };
   }, [router]);
@@ -48,10 +48,7 @@ export default function ChatContainer() {
   if (!chatId) {
     return (
       <motion.div
-        initial={{
-          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
-          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
-        }}
+        initial={false}
         animate={{
           marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
           width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",

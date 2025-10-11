@@ -11,11 +11,13 @@ import { usersMeMessagesRoute } from "@/api/routes/users/me/messages/userMeMessa
 import { usersMeMessageByIdRoute } from "@/api/routes/users/me/messages/(messageId)/userMeMessageById.route";
 import { usersMeChatMessagesRoute } from "@/api/routes/users/me/chats/(chatId)/messages/userMeChatMessages.route";
 import { usersMeChatMessageByIdRoute } from "@/api/routes/users/me/chats/(chatId)/messages/(messageId)/userMeChatMessageById.route";
+import { onboardingRoute } from "@/api/routes/users/me/onboarding/onboarding.route";
 
 export const honoApp = new Hono()
   .basePath("/api")
   .use("*", async (ctx, next) => {
-    console.log(
+    console.debug(
+      "[src/lib/hono/app.ts:honoApp]",
       `Hono API Request: [${ctx.req.method.toUpperCase()}] ${ctx.req.url}`
     );
     await next();
@@ -53,10 +55,16 @@ export const honoApp = new Hono()
   .route("/users/me/chats", usersMeChatRoute)
   .route("/users/me/chats/:chatId", usersMeChatByIdRoute)
   .route("/users/me/chats/:chatId/messages", usersMeChatMessagesRoute)
-  .route("/users/me/chats/:chatId/messages/:messageId", usersMeChatMessageByIdRoute)
+  .route(
+    "/users/me/chats/:chatId/messages/:messageId",
+    usersMeChatMessageByIdRoute
+  )
   .route("/users/me/messages", usersMeMessagesRoute)
   .route("/users/me/messages/:messageId", usersMeMessageByIdRoute)
   .route("/users/:userId", usersRoute)
+
+  // Onboarding routes
+  .route("/users/me/onboarding", onboardingRoute)
 
   // Admin routes
   .route("/admin/users", adminUsersRoute);

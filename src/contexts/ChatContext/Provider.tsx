@@ -39,6 +39,8 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
         return;
       }
 
+      queryClient.invalidateQueries({ queryKey: ["chats"] });
+
       queryClient.setQueryData(["chat", `chat_${chatId}`], (oldData) => {
         const prev = (oldData as UIMessage[]) ?? [];
         return [...prev, message];

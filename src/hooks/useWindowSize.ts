@@ -9,11 +9,25 @@ export function useWindowSize(): number {
     const handleResize = () => {
       const w = window.innerWidth;
       // Only update state if the width actually changed to avoid an unnecessary re-render
-      setInnerWidth((prev) => (prev === w ? prev : w));
+      setInnerWidth((prev) => {
+        console.debug(
+          "[src/hooks/useWindowSize.ts:useWindowSize] handleResize",
+          "prev=",
+          prev,
+          "new=",
+          w
+        );
+        return prev === w ? prev : w;
+      });
     };
 
     // Ensure state matches the real window width on mount, but avoid an extra setState
     if (typeof window !== "undefined") {
+      console.debug(
+        "[src/hooks/useWindowSize.ts:useWindowSize] mount setInnerWidth",
+        "window.innerWidth=",
+        window.innerWidth
+      );
       setInnerWidth((prev) =>
         prev === window.innerWidth ? prev : window.innerWidth
       );

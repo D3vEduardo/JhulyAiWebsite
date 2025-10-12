@@ -10,11 +10,18 @@ import { DESKTOP_BREAKPOINT, useAside } from "@store/asideMenu";
 export default function AsideMenuChats() {
   const widthOfScreen = useWindowSize();
   const { asideIsOpen, toggleAside } = useAside();
-  console.debug("[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]", "Renderizei AsideMenuChats");
+  console.debug(
+    "[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]",
+    "Renderizei AsideMenuChats"
+  );
   const router = useRouter();
   const queryClient = useQueryClient();
   const { chatId } = useParams();
-  console.debug("[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]", "DEBUG - Current chatId in Aside:", chatId);
+  console.debug(
+    "[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]",
+    "DEBUG - Current chatId in Aside:",
+    chatId
+  );
   const { data: chats, isPending: getChatsIsPending } = useQuery<
     {
       id: string;
@@ -26,16 +33,26 @@ export default function AsideMenuChats() {
   >({
     queryKey: ["chats"],
     queryFn: async () => {
-      console.debug("[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]", "Getting user chats...");
+      console.debug(
+        "[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]",
+        "Getting user chats..."
+      );
       const apiResponse = await honoRPC.api.users.me.chats.$get();
       if (!apiResponse.ok) {
-        console.debug("[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]", "Error fetching user chats:", apiResponse.statusText);
+        console.debug(
+          "[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]",
+          "Error fetching user chats:",
+          apiResponse.statusText
+        );
         return [];
       }
 
       const apiResponseData = await apiResponse.json();
       const userChats = apiResponseData.data;
-      console.debug("[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]", "Get user chats is completed!");
+      console.debug(
+        "[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]",
+        "Get user chats is completed!"
+      );
       return userChats || [];
     },
     staleTime: 60 * 1000,
@@ -57,7 +74,9 @@ export default function AsideMenuChats() {
           return [];
         }
 
-        console.debug(`[src/components/AsideMenu/AsideMenuChats.tsx:prefetchMessages] Fazendo prefetch de mensagens do chat '${chatId}'...`);
+        console.debug(
+          `[src/components/AsideMenu/AsideMenuChats.tsx:prefetchMessages] Fazendo prefetch de mensagens do chat '${chatId}'...`
+        );
         const apiResponse = await honoRPC.api.users.me.chats[
           ":chatId"
         ].messages.$get({
@@ -85,7 +104,9 @@ export default function AsideMenuChats() {
 
         const apiResponseData = await apiResponse.json();
         const data = apiResponseData.data;
-        console.debug(`[src/components/AsideMenu/AsideMenuChats.tsx:prefetchMessages] Prefetch do chat '${chatId}' concluído!`);
+        console.debug(
+          `[src/components/AsideMenu/AsideMenuChats.tsx:prefetchMessages] Prefetch do chat '${chatId}' concluído!`
+        );
         return data;
       },
       staleTime: 1000 * 60 * 1.5,
@@ -97,13 +118,21 @@ export default function AsideMenuChats() {
       {!getChatsIsPending ? (
         <>
           {chats?.map((chat, index) => {
-            console.debug(`[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats] DEBUG - Rendering chat: ${chat.id} (${chat.name})`);
+            console.debug(
+              `[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats] DEBUG - Rendering chat: ${chat.id} (${chat.name})`
+            );
             return (
               <Button
                 className="py-2 justify-start text-start items-start w-full min-h-11 !overflow-hidden"
                 key={index}
                 onMouseEnter={() => prefetchMessages(chat.id)}
                 onClick={() => {
+                  console.debug(
+                    `[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats] click chat -> router.replace`,
+                    chat.id,
+                    "currentChatId=",
+                    chatId
+                  );
                   router.replace(`/chat/${chat.id}`, { scroll: false });
                   if (widthOfScreen < DESKTOP_BREAKPOINT && asideIsOpen)
                     toggleAside();

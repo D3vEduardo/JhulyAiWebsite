@@ -14,7 +14,10 @@ export async function generateChatNameWithAi({
 }) {
   const now = Date.now();
   if (now - lastCall < RATE_LIMIT_MS) {
-    console.debug("[src/util/generateChatNameWithAi.ts:generateChatNameWithAi]", "Cooldown ativo");
+    console.debug(
+      "[src/util/generateChatNameWithAi.ts:generateChatNameWithAi]",
+      "Cooldown ativo"
+    );
     return "Novo Chat 🤖";
   }
   lastCall = now;

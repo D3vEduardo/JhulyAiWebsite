@@ -18,7 +18,7 @@ export const usersMeChatRoute = new Hono()
       const whereCondition = {
         ownerId: user.id,
         ...(query.cursor && {
-          createdAt: {
+          updatedAt: {
             lt: new Date(query.cursor), // Para ordenação DESC
           },
         }),
@@ -35,7 +35,7 @@ export const usersMeChatRoute = new Hono()
           ownerId: true,
         },
         orderBy: {
-          createdAt: "desc", // Mais recente primeiro
+          updatedAt: "desc", // Mais recente primeiro
         },
       });
 

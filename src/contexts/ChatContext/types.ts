@@ -31,7 +31,7 @@ type SendMessageType = (
         messageId?: string;
       }
     | undefined,
-  options?: ChatRequestOptions,
+  options?: ChatRequestOptions
 ) => Promise<void>;
 
 export interface ChatContextType {

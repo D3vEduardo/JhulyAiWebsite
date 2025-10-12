@@ -66,7 +66,7 @@ export interface DropdownStore {
  * Creates a persistable dropdown state by removing functions and ensuring isOpen is false
  */
 const createPersistableDropdownState = (
-  dropdown: DropdownState,
+  dropdown: DropdownState
 ): DropdownState => ({
   ...dropdown,
   isOpen: false,
@@ -203,7 +203,7 @@ export const useDropdown = create<DropdownStore>()(
             .map(([id, dropdown]) => [
               id,
               createPersistableDropdownState(dropdown),
-            ]),
+            ])
         ),
       }),
 
@@ -219,6 +219,6 @@ export const useDropdown = create<DropdownStore>()(
           });
         }
       },
-    },
-  ),
+    }
+  )
 );

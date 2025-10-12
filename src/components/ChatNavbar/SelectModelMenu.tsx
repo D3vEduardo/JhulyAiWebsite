@@ -30,7 +30,12 @@ const options: DropdownValue[] = [
 
 export default function SelectModelMenu() {
   const handleSelect = (p: { value: string; label: string }) => {
-    console.debug("[src/components/ChatNavbar/SelectModelMenu.tsx:SelectModelMenu]", "Selecionou:", p.value, p.label);
+    console.debug(
+      "[src/components/ChatNavbar/SelectModelMenu.tsx:SelectModelMenu]",
+      "Selecionou:",
+      p.value,
+      p.label
+    );
   };
 
   return (

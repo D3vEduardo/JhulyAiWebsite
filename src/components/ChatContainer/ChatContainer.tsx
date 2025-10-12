@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { useWindowSize } from "@hooks/useWindowSize";
 import { useIsClient } from "@hooks/useIsClient";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, useRef, useLayoutEffect } from "react";
 
 import ChatMessages from "../ChatMessages/ChatMessages";
 import PromptForm from "../PromptForm/PromptForm";
@@ -14,18 +14,58 @@ import { ChatProvider } from "@/contexts/ChatContext/Provider";
 
 export default function ChatContainer() {
   const { asideIsOpen } = useAside();
-  const innerWidth = useWindowSize();
+  useWindowSize();
   const isClient = useIsClient();
+  const { isDesktop } = useAside();
   const pathname = usePathname();
   const router = useRouter();
+
+  const [hydrated, setHydrated] = useState(false);
+  useLayoutEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const chatId = pathname.includes("/chat/")
     ? (pathname.split("/").pop() ?? null)
     : null;
 
+  console.debug(
+    "[src/components/ChatContainer/ChatContainer.tsx:ChatContainer] render",
+    "chatId=",
+    chatId,
+    "asideIsOpen=",
+    asideIsOpen,
+    "isDesktop=",
+    isDesktop
+  );
+
   const shouldShowSidebar = useMemo(() => {
-    return asideIsOpen && innerWidth > 768;
-  }, [asideIsOpen, innerWidth]);
+    return asideIsOpen && isDesktop;
+  }, [asideIsOpen, isDesktop]);
+
+  const [appliedSidebar, setAppliedSidebar] =
+    useState<boolean>(shouldShowSidebar);
+  const appliedSidebarRef = useRef<boolean>(shouldShowSidebar);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (appliedSidebarRef.current !== shouldShowSidebar) {
+        appliedSidebarRef.current = shouldShowSidebar;
+        setAppliedSidebar(shouldShowSidebar);
+        console.debug(
+          "[src/components/ChatContainer/ChatContainer.tsx:ChatContainer] appliedSidebar changed",
+          shouldShowSidebar
+        );
+      }
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [shouldShowSidebar]);
+
+  const initialMountRef = useRef(true);
+  useLayoutEffect(() => {
+    initialMountRef.current = false;
+  }, []);
 
   useEffect(() => {
     const handleChatCreated = (event: CustomEvent) => {
@@ -37,6 +77,10 @@ export default function ChatContainer() {
 
     window.addEventListener("chat-created", handleChatCreated as EventListener);
 
+    console.debug(
+      "[src/components/ChatContainer/ChatContainer.tsx:ChatContainer] added chat-created listener"
+    );
+
     return () => {
       window.removeEventListener(
         "chat-created",
@@ -45,16 +89,47 @@ export default function ChatContainer() {
     };
   }, [router]);
 
+  const animateStyles = useMemo(
+    () => ({
+      transform: appliedSidebar ? "translateX(280px)" : "translateX(0)",
+      width: appliedSidebar ? "calc(100% - 280px)" : "100%",
+    }),
+    [appliedSidebar]
+  );
+
+  console.debug(
+    "[src/components/ChatContainer/ChatContainer.tsx:ChatContainer] animateStyles computed",
+    "appliedSidebar=",
+    appliedSidebar,
+    "transform=",
+    animateStyles.transform
+  );
+
+  if (isClient) {
+    const absTranslateX = appliedSidebar ? 280 : 0;
+    const absWidthPx = Math.max(0, window.innerWidth);
+    console.debug(
+      "[src/components/ChatContainer/ChatContainer.tsx:ChatContainer] animateStyles px",
+      "absTranslateX=",
+      absTranslateX,
+      "absWidthPx=",
+      absWidthPx
+    );
+  }
+
+  if (!hydrated) return null;
+
   if (!chatId) {
     return (
       <motion.div
         initial={false}
-        animate={{
-          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
-          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
-        }}
+        animate={animateStyles}
         layout={true}
-        transition={{ type: "spring", stiffness: 80 }}
+        transition={
+          initialMountRef.current
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 80 }
+        }
         className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative flex items-center justify-center"
       >
         <div>Selecione um chat ou crie um novo</div>
@@ -65,16 +140,14 @@ export default function ChatContainer() {
   return (
     <ChatProvider chatId={chatId}>
       <motion.div
-        initial={{
-          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
-          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
-        }}
-        animate={{
-          marginLeft: isClient && shouldShowSidebar ? "280px" : undefined,
-          width: isClient && shouldShowSidebar ? `calc(100% - 280px)` : "100%",
-        }}
+        initial={false}
+        animate={animateStyles}
         layout={true}
-        transition={{ type: "spring", stiffness: 80 }}
+        transition={
+          initialMountRef.current
+            ? { duration: 0 }
+            : { type: "spring", stiffness: 80 }
+        }
         className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative"
       >
         <ChatNavBar />

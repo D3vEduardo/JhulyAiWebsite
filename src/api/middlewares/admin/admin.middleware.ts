@@ -1,6 +1,5 @@
 import { MiddlewareHandler } from "hono";
 import { AuthMiddlewareVariables } from "../auth/auth.middleware";
-import { prisma } from "@/lib/prisma/client";
 import { UserRole } from "@prisma/client";
 
 export type AdminMiddlewareVariables = {

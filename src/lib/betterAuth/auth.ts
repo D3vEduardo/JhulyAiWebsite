@@ -3,7 +3,7 @@ import { admin, magicLink } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 import { betterAuth } from "better-auth";
 import { serverEnv as env } from "@server.env";
-import { clientEnv as clientEnv } from "@client.env";
+import { clientEnv } from "@client.env";
 import { prisma } from "../prisma/client";
 import { debug } from "debug";
 import { UserRole } from "@prisma/client";
@@ -20,10 +20,12 @@ export const auth = betterAuth({
       clientId: env.GITHUB_CLIENT_ID,
       clientSecret: env.GITHUB_CLIENT_SECRET,
       scope: ["user:email"],
+      redirectURI: clientEnv.NEXT_PUBLIC_APP_URL + "/api/auth/callback/github",
     },
     discord: {
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+      redirectURI: clientEnv.NEXT_PUBLIC_APP_URL + "/api/auth/callback/discord",
     },
   },
   appName: "jhuly-website",

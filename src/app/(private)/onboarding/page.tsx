@@ -8,7 +8,6 @@ import { ReactNode } from "react";
 import { useEffect } from "react";
 import Button from "@components/Button";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
-import { updateUserData } from "@/hooks/useOnboardingActions";
 import { onboardingFormSchema } from "@lib/zod/onboardingFormSchema";
 import { ApiKey, User } from "@prisma/client";
 import { RegisterType } from "./types";
@@ -63,13 +62,36 @@ export default function Onboarding() {
         apiResponseBody
       );
 
-      if (apiResponseBody.data.hasCompletedOnboarding) return [];
+      const data = apiResponseBody.data;
+      if (data.hasCompletedOnboarding) return [];
 
-      setValue("name", apiResponseBody.data.defaultValues.name);
-      setValue("email", apiResponseBody.data.defaultValues.email);
-      setValue("apiKey", apiResponseBody.data.defaultValues.apiKey);
+      // Some API responses include `defaultValues` when onboarding is not
+      // completed. Use the `in` operator so TypeScript can narrow the union
+      // and allow safe access to `defaultValues`.
+      if ("defaultValues" in data && data.defaultValues) {
+        // Hono/RPC typing may be too loose here. Narrow the defaults shape
+        // so TypeScript understands the expected properties exist.
+        const defaults = data.defaultValues as {
+          name?: string;
+          email?: string;
+          apiKey?: string;
+        };
 
-      return apiResponseBody.data.uncompletedFields || [];
+        // Provide safe fallbacks to keep setValue happy (expecting strings).
+        setValue("name", defaults.name ?? "");
+        setValue("email", defaults.email ?? "");
+        setValue("apiKey", defaults.apiKey ?? "");
+      }
+
+      // Narrow the union before accessing `uncompletedFields` so TS knows it exists
+      if (
+        "uncompletedFields" in data &&
+        Array.isArray(data.uncompletedFields)
+      ) {
+        return data.uncompletedFields || [];
+      }
+
+      return [];
     },
   });
   const router = useRouter();

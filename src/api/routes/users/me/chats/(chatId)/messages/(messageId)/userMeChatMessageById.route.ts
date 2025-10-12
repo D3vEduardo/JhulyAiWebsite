@@ -156,7 +156,8 @@ export const usersMeChatMessageByIdRoute = new Hono()
         return c.json(
           {
             error: "Internal server error",
-            message: "An unexpected error occurred while retrieving the message",
+            message:
+              "An unexpected error occurred while retrieving the message",
           },
           500
         );

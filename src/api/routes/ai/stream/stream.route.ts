@@ -187,17 +187,27 @@ export const aiStreamRoute = new Hono()
           );
         }
 
-        const newMessage = await prisma.message.create({
-          data: {
-            parts: [{ type: "text", text: prompt }] as TextUIPart[],
-            role: "USER",
-            chatId,
-            senderId: databaseUser.id,
-          },
-        });
+        const [newMessage, updatedChat] = await Promise.all([
+          prisma.message.create({
+            data: {
+              parts: [{ type: "text", text: prompt }] as TextUIPart[],
+              role: "USER",
+              chatId,
+              senderId: databaseUser.id,
+            },
+          }),
+          prisma.chat.update({
+            where: { id: chatId },
+            data: {
+              updatedAt: new Date(),
+            },
+          }),
+        ]);
 
-        chat = chatExists;
-        chat.messages.push(newMessage);
+        chat = {
+          ...updatedChat,
+          messages: [...chatExists.messages, newMessage],
+        };
       } else {
         log(`Creating new chat (chatId:"${chatId}")`);
 

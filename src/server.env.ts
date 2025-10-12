@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const serverEnvSchema = z.object({
-  PRIVATE_OPENROUTER_API_KEY: z
+  OPENROUTER_API_KEY_TESTS: z
     .string()
     .min(1, "PRIVATE_OPENROUTER_API_KEY é obrigatório"),
   DISCORD_CLIENT_ID: z.string().min(1, "DISCORD_CLIENT_ID é obrigatório"),

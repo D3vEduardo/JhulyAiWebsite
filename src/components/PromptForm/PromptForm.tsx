@@ -25,7 +25,7 @@ export default function PromptForm() {
         console.debug(
           "[src/components/PromptForm/PromptForm.tsx:PromptForm]",
           "Enviando mensagem do formulário de prompt. Prompt:",
-          prompt,
+          prompt
         );
 
         if (isLoading || !prompt || !inputRef.current) return;
@@ -41,7 +41,7 @@ export default function PromptForm() {
               id: chatId,
               model: dropdown.selectedValue?.value || "BASIC",
             },
-          },
+          }
         );
 
         inputRef.current.value = "";

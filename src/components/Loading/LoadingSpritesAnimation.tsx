@@ -15,7 +15,7 @@ export default function LoadingSpritesAnimation({
 }) {
   const [currentSprite, setCurrentSprite] = useState<number>(0);
   const [_imagesLoaded, setImagesLoaded] = useState<boolean[]>(
-    new Array(sprites.length).fill(false),
+    new Array(sprites.length).fill(false)
   );
 
   const handleImageLoad = useCallback((index: number) => {

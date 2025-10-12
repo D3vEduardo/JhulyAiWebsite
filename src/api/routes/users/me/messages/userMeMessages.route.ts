@@ -1,24 +1,15 @@
-import { messageSelectQuerySchema } from "@/api/schemas/messageSelectQuery.schema";
 import { paginationSchema } from "@/api/schemas/pagination.schema";
 import { prisma } from "@/lib/prisma/client";
 import { authMiddleware } from "@api/middlewares/auth/auth.middleware";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import z from "zod";
 import { debug } from "debug";
 
 const log = debug("app:api:users:me:messages");
 
-export const usersMeMessagesRoute = new Hono().use("*", authMiddleware).get(
-  "/",
-  zValidator(
-    "query",
-    z.object({
-      pagination: paginationSchema,
-      select: messageSelectQuerySchema.optional(),
-    })
-  ),
-  async (c) => {
+export const usersMeMessagesRoute = new Hono()
+  .use("*", authMiddleware)
+  .get("/", zValidator("query", paginationSchema), async (c) => {
     const user = c.get("user");
     const query = c.req.valid("query");
 
@@ -26,24 +17,32 @@ export const usersMeMessagesRoute = new Hono().use("*", authMiddleware).get(
       // Construir where condition dinamicamente
       const whereCondition = {
         senderId: user.id,
-        ...(query.pagination.cursor && {
+        ...(query.cursor && {
           createdAt: {
-            lt: new Date(query.pagination.cursor), // Para ordenação DESC
+            lt: new Date(query.cursor), // Para ordenação DESC
           },
         }),
       };
 
       const messages = await prisma.message.findMany({
         where: whereCondition,
-        take: query.pagination.limit + 1, // +1 para detectar se há mais páginas
-        select: query.select,
+        take: query.limit + 1, // +1 para detectar se há mais páginas
+        select: {
+          createdAt: true,
+          id: true,
+          parts: true,
+          role: true,
+          chatId: true,
+          senderId: true,
+          updatedAt: true,
+        },
         orderBy: {
-          createdAt: "desc", // Mais recente primeiro
+          createdAt: "asc", // Mais recente primeiro
         },
       });
 
       // Verificar se há próxima página
-      const hasNextPage = messages.length > query.pagination.limit;
+      const hasNextPage = messages.length > query.limit;
       const result = hasNextPage ? messages.slice(0, -1) : messages;
 
       // Calcular próximo cursor
@@ -62,7 +61,7 @@ export const usersMeMessagesRoute = new Hono().use("*", authMiddleware).get(
         pagination: {
           nextCursor,
           hasNextPage,
-          limit: query.pagination.limit,
+          limit: query.limit,
         },
       });
     } catch (e) {
@@ -141,5 +140,4 @@ export const usersMeMessagesRoute = new Hono().use("*", authMiddleware).get(
         500
       );
     }
-  }
-);
+  });

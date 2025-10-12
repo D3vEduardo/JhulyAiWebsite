@@ -7,9 +7,9 @@ interface InfiniteScrollSentinelProps {
   className?: string;
 }
 
-export default function InfiniteScrollSentinel({ 
-  onSentinelEnter, 
-  className = "" 
+export default function InfiniteScrollSentinel({
+  onSentinelEnter,
+  className = "",
 }: InfiniteScrollSentinelProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
 

@@ -70,7 +70,7 @@ export const usersMeChatMessagesRoute = new Hono().use("*", authMiddleware).get(
           senderId: true,
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: "asc",
         },
       });
 
@@ -86,7 +86,6 @@ export const usersMeChatMessagesRoute = new Hono().use("*", authMiddleware).get(
           | "assistant"
           | "system";
 
-        // Garantir que parts seja um array
         let partsArray: unknown[];
         if (Array.isArray(msg.parts)) {
           partsArray = msg.parts;

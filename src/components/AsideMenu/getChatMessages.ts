@@ -4,7 +4,7 @@ import { prisma } from "@lib/prisma/client";
 import { headers } from "next/headers";
 import { debug } from "debug";
 import { getCachedSession } from "@data/auth/getCachedSession";
-import { ConvertMessageOfDatabaseToAiModel } from "@/util/convertMessageOfDbToAiModel";
+import { convertMessageOfDbToAiModel } from "@/util/convertMessageOfDbToAiModel";
 
 const log = debug("components:aside-menu:get-chat-messages");
 
@@ -27,7 +27,7 @@ export async function getChatMessages(chatId: string) {
   });
 
   const chat = userChats?.find((chat) => chat.id === chatId);
-  const convertedChatMessages = await ConvertMessageOfDatabaseToAiModel(
+  const convertedChatMessages = await convertMessageOfDbToAiModel(
     chat?.messages || []
   );
   return convertedChatMessages;

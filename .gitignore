@@ -21,6 +21,7 @@
 /out/
 
 # production
+/deploy
 deploy.zip
 /build
 

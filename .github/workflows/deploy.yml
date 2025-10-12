@@ -14,6 +14,7 @@ jobs:
       SQUARECLOUD_APP_ID: ${{ secrets.SQUARECLOUD_APP_ID }}
       SQUARECLOUD_TOKEN: ${{ secrets.SQUARECLOUD_TOKEN }}
       CLIENT_P12_B64: ${{ secrets.CLIENT_P12_B64 }}
+      ENV_PRODUCTION_CONTENT: ${{ secrets.ENV_PRODUCTION_CONTENT }}
 
     steps:
       # 1️⃣ Checkout do código
@@ -26,7 +27,7 @@ jobs:
         with:
           node-version: 24
 
-      # 3️⃣ Instalar PNPM 10 (sem rodar recursive install)
+      # 3️⃣ Instalar PNPM 10 (sem run_install)
       - name: 📦 Instalar PNPM
         uses: pnpm/action-setup@v4
         with:
@@ -45,14 +46,21 @@ jobs:
       - name: 🔐 Login na Square Cloud
         run: squarecloud auth login --token "$env:SQUARECLOUD_TOKEN"
 
-      # 7️⃣ Restaurar certificado .p12 no runner
+      # 7️⃣ Criar .env.production a partir do secret
+      - name: 🔒 Criar .env.production
+        shell: pwsh
+        run: |
+          $envContent = "$env:ENV_PRODUCTION_CONTENT"
+          $envContent | Out-File -Encoding UTF8 .env.production
+
+      # 8️⃣ Restaurar certificado .p12 no runner
       - name: 🔑 Restaurar certificado .p12
         shell: pwsh
         run: |
           mkdir -Force .certs
           [System.IO.File]::WriteAllBytes(".certs\client-identity.p12", [Convert]::FromBase64String("$env:CLIENT_P12_B64"))
 
-      # 8️⃣ Executar script de build e deploy
+      # 9️⃣ Executar script de build e deploy
       - name: 🏗️ Build e Deploy
         shell: pwsh
         run: .\.scripts\deploy.ps1

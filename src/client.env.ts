@@ -5,12 +5,17 @@ const clientEnvSchema = z.object({
     .string()
     .min(1, "NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY deve existir!"),
   NEXT_PUBLIC_APP_URL: z
-    .string()
-    .min(1, "NEXT_PUBLIC_APP_URL deve ser uma string!")
-    .url("NEXT_PUBLIC_APP_URL deve ser uma URL válida"),
+    .url("NEXT_PUBLIC_APP_URL deve ser uma URL válida")
+    .min(1, "NEXT_PUBLIC_APP_URL deve ser uma string!"),
 });
 
 const parsed = clientEnvSchema.safeParse({
+  NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY:
+    process.env.NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+});
+
+console.debug("[src/client.env.ts] Client env:", {
   NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY:
     process.env.NEXT_PUBLIC_GOOGLE_RECAPTCHA_KEY,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,

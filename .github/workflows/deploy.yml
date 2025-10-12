@@ -1,40 +1,54 @@
-name: CD - Deploy to Square Cloud
+name: CD - Deploy Square Cloud
 
 on:
   push:
     branches:
-      - main # ou "production"
+      - main
 
 jobs:
   deploy:
-    runs-on: windows-latest # necessário para o PowerShell e Compress-Archive
+    runs-on: windows-latest
+
+    env:
+      NODE_ENV: production
+      SQUARECLOUD_APP_ID: ${{ secrets.SQUARECLOUD_APP_ID }}
+      SQUARECLOUD_TOKEN: ${{ secrets.SQUARECLOUD_TOKEN }}
+      CLIENT_P12_B64: ${{ secrets.CLIENT_P12_B64 }}
 
     steps:
+      # 1️⃣ Checkout do código
       - name: 🔁 Checkout repositório
         uses: actions/checkout@v4
 
+      # 2️⃣ Configurar Node.js
       - name: 🧰 Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # 3️⃣ Instalar PNPM e dependências
       - name: 📦 Instalar PNPM
         uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: true
 
+      # 4️⃣ Instalar Square Cloud CLI
       - name: 🧰 Instalar Square Cloud CLI
         run: pnpm add -g @squarecloud/cli
 
+      # 5️⃣ Login Square Cloud
       - name: 🔐 Login na Square Cloud
-        env:
-          SQUARECLOUD_TOKEN: ${{ secrets.SQUARECLOUD_TOKEN }}
         run: squarecloud auth login --token "$env:SQUARECLOUD_TOKEN"
 
-      - name: 🏗️ Build e criar deploy.zip
+      # 6️⃣ Restaurar certificado .p12 no runner
+      - name: 🔑 Restaurar certificado .p12
+        shell: pwsh
+        run: |
+          mkdir -Force .certs
+          [System.IO.File]::WriteAllBytes(".certs\client-identity.p12", [Convert]::FromBase64String("$env:CLIENT_P12_B64"))
+
+      # 7️⃣ Executar script de build e deploy
+      - name: 🏗️ Build e Deploy
         shell: pwsh
         run: .\.scripts\deploy.ps1
-
-      - name: 🚀 Fazer deploy (commit) na Square Cloud
-        run: squarecloud app commit --path "deploy.zip"

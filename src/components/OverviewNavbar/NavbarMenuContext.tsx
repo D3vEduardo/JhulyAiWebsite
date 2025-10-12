@@ -14,7 +14,7 @@ export const useNavbarMenuContext = () => {
   const context = useContext(NavbarMenuContext);
   if (context === undefined) {
     throw new Error(
-      "useNavbarMenuContext must be used within a NavbarMenuProvider",
+      "useNavbarMenuContext must be used within a NavbarMenuProvider"
     );
   }
   return context;

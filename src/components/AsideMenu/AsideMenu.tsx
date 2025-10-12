@@ -15,7 +15,10 @@ type MotionDivAnimationType =
   | undefined;
 
 export default function AsideMenu() {
-  console.log("Renderizei AsideMenu");
+  console.debug(
+    "[src/components/AsideMenu/AsideMenu.tsx:AsideMenu]",
+    "Renderizei AsideMenu"
+  );
   const { asideIsOpen, toggleAside } = useAside();
   const innerWidth = useWindowSize();
 
@@ -24,13 +27,14 @@ export default function AsideMenu() {
       x: asideIsOpen ? 0 : "-100%",
       opacity: asideIsOpen ? 1 : 0,
     }),
-    [asideIsOpen],
+    [asideIsOpen]
   );
 
   const router = useRouter();
 
   return (
     <motion.div
+      initial={false}
       animate={containerStyles}
       transition={{
         duration: 0.5,

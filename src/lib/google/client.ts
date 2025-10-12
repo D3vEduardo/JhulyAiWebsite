@@ -1,4 +1,4 @@
-import { env } from "@env";
+import { serverEnv as env } from "@server.env";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 export const google = createGoogleGenerativeAI({

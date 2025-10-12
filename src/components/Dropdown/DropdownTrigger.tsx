@@ -24,7 +24,7 @@ export function DropdownTrigger({
       hover:bg-watermelon/80 transition-colors duration-200
       outline-none rounded-2xl px-4 py-2 shadow-sm text-cocoa
    focus:ring-papaya/30 cursor-pointer`,
-        className,
+        className
       )}
       aria-haspopup="listbox"
       aria-expanded={dropdown?.isOpen}

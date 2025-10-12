@@ -29,7 +29,7 @@ export default function Button({
   variant,
   ...props
 }: PropsType) {
-  console.log("Renderizei Button");
+  console.debug("[src/components/Button.tsx:Button]", "Renderizei Button");
 
   const button = tv({
     base: `font-medium flex items-center overflow-hidden
@@ -37,8 +37,8 @@ export default function Button({
     variants: {
       size: {
         sm: "p-2 text-xl",
-        md: "px-2 py-4 text-2xl",
-        lg: "py-4 px-6 text-3xl",
+        md: "p-4 text-2xl",
+        lg: "p-6 text-3xl",
       },
       color: {
         danger: "bg-red-400 text-vanilla",

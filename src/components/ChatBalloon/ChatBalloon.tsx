@@ -18,7 +18,11 @@ type PropsType = ComponentProps<"figure"> & {
 };
 
 export default function ChatBalloon({ message, error }: PropsType) {
-  console.log("Renderizei ChatBalloon da mensagem", message.id);
+  console.debug(
+    "[src/components/ChatBalloon/ChatBalloon.tsx:ChatBalloon]",
+    "Renderizei ChatBalloon da mensagem",
+    message.id
+  );
   const variants = tv({
     base: "text-cocoa",
     variants: {

@@ -6,7 +6,10 @@ interface iProps {
 }
 
 function PromptInput({ formRef, inputRef }: iProps) {
-  console.log("Renderizei PromptInput");
+  console.debug(
+    "[src/components/PromptForm/PromptInput.tsx:PromptInput]",
+    "Renderizei PromptInput"
+  );
 
   return (
     <textarea

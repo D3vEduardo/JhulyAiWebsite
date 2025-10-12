@@ -21,7 +21,7 @@ function HomeNavbarContent() {
 
   const isMobile = useMemo(
     () => isClient && innerWidth < 769,
-    [innerWidth, isClient],
+    [innerWidth, isClient]
   );
 
   const navFlexDirection = menuIsOpen && isMobile ? "column" : "row";

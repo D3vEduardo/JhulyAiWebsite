@@ -12,7 +12,6 @@ model User {
   name          String?
   email         String?   @unique
   emailVerified Boolean   @default(false)
-  role          UserRole  @default(USER)
   apiKey        ApiKey?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -22,26 +21,30 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
+
+  role UserRole?
+
   @@index([createdAt])
   @@map("user")
 }
 
 model Message {
-  id        String      @id @default(uuid())
-  sender    User?       @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  senderId  String?
-  role      MessageRole
-  reasoning String?
-  content   String      @db.Text
-  chat      Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  chatId    String
+  id       String      @id @default(uuid())
+  sender   User?       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  senderId String?
+  role     MessageRole
+  parts    Json
+  chat     Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId   String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([chatId, createdAt]) // ótimo para ORDER BY + paginação
-  @@index([senderId]) // útil se busca mensagens por usuário
-  // @@index([role])           // só adicione se realmente busca muito por role
+  @@index([chatId, createdAt])
+  @@index([senderId])
   @@map("message")
 }
 
@@ -55,8 +58,8 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([ownerId, createdAt]) // manter se usa em listagens
-  @@index([ownerId, updatedAt]) // idem, revise se dá pra consolidar
+  @@index([ownerId, createdAt])
+  @@index([ownerId, updatedAt])
   @@map("chat")
 }
 
@@ -71,8 +74,10 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  impersonatedBy String?
+
   @@index([userId])
-  @@index([expiresAt]) // bom para expiração/cleanup
+  @@index([expiresAt])
   @@map("session")
 }
 
@@ -93,7 +98,7 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@index([userId])
-  @@index([providerId, accountId]) // login rápido
+  @@index([providerId, accountId])
   @@map("account")
 }
 
@@ -106,7 +111,7 @@ model Verification {
   updatedAt  DateTime? @updatedAt
 
   @@index([identifier])
-  @@index([expiresAt]) // cleanup de tokens
+  @@index([expiresAt])
   @@map("verification")
 }
 
@@ -120,8 +125,8 @@ model ApiKey {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  @@index([key]) // lookup por chave
-  @@index([userId, isActive]) // manter se busca chave ativa do user
+  @@index([key])
+  @@index([userId, isActive])
   @@map("api_key")
 }
 

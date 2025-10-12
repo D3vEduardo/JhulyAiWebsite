@@ -5,17 +5,17 @@ import Input from "@components/Input";
 import { useForm } from "react-hook-form";
 import Label from "@components/Label";
 import { ReactNode } from "react";
-import * as React from "react";
+import { useEffect } from "react";
 import Button from "@components/Button";
 import { Icon } from "@iconify-icon/react/dist/iconify.mjs";
-import { getUserData, OboardingAction } from "./actions";
 import { onboardingFormSchema } from "@lib/zod/onboardingFormSchema";
 import { ApiKey, User } from "@prisma/client";
-import { FieldsType, RegisterType } from "./types";
+import { RegisterType } from "./types";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import LoadingScreen from "@components/Loading/LoadingScreen";
 import { CustomTooltip } from "@components/CustomTooltip";
+import { honoRPC } from "@/lib/hono/rpc";
 
 export type PageProps = {
   user: User & {
@@ -24,67 +24,94 @@ export type PageProps = {
 };
 
 export default function Onboarding() {
-  const { data: user, isLoading: queryIsLoading } = useQuery({
-    queryKey: ["onboarding_user_data"],
-    queryFn: getUserData,
-  });
-  const router = useRouter();
-
   const {
     register,
     handleSubmit,
     setError,
-    reset,
     formState: {
       errors,
       isSubmitSuccessful: formIsSubmitSuccessful,
       isSubmitting: formActionIsSubmitting,
     },
+    setValue,
   } = useForm({
     resolver: zodResolver(onboardingFormSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      apiKey: "",
-    },
   });
 
-  const requiredFields: FieldsType = ["name", "email", "apiKey"];
+  const { data: uncompletedFields, isLoading: queryIsLoading } = useQuery({
+    queryKey: ["onboarding", "uncompletedFields"],
+    queryFn: async () => {
+      const apiResponse = await honoRPC.api.users.me.onboarding.$get();
+      let apiResponseBody;
+      if (!apiResponse.ok) {
+        apiResponseBody = await apiResponse.json();
+        console.error(
+          "[src/app/(private)/onboarding/page.tsx:Onboarding]",
+          "Erro ao buscar dados do onboarding:",
+          apiResponseBody
+        );
+        throw new Error(
+          apiResponseBody?.message || "Erro ao buscar dados do onboarding"
+        );
+      }
 
-  const fieldsNotFilled = user
-    ? requiredFields.filter((field) => {
-        if (field === "apiKey") {
-          return !user.apiKey?.key;
-        }
-        return !(user as Record<string, unknown>)[field];
-      })
-    : requiredFields;
+      apiResponseBody = await apiResponse.json();
+      console.debug(
+        "[src/app/(private)/onboarding/page.tsx:Onboarding]",
+        "Dados do onboarding recebidos:",
+        apiResponseBody
+      );
 
-  React.useEffect(() => {
-    if (user) {
-      console.log("Resetando formulário com dados do usuário:", {
-        name: user.name || "",
-        email: user.email || "",
-        apiKey: user.apiKey?.key || "",
-      });
-      reset({
-        name: user.name || "",
-        email: user.email || "",
-        apiKey: user.apiKey?.key || "",
-      });
-    }
-  }, [user, reset]);
+      const data = apiResponseBody.data;
+      if (data.hasCompletedOnboarding) return [];
 
-  React.useEffect(() => {
-    console.log("Campos não preenchidos:", fieldsNotFilled);
-    console.log("Dados do usuário:", user);
-  }, [fieldsNotFilled, user]);
+      // Some API responses include `defaultValues` when onboarding is not
+      // completed. Use the `in` operator so TypeScript can narrow the union
+      // and allow safe access to `defaultValues`.
+      if ("defaultValues" in data && data.defaultValues) {
+        // Hono/RPC typing may be too loose here. Narrow the defaults shape
+        // so TypeScript understands the expected properties exist.
+        const defaults = data.defaultValues as {
+          name?: string;
+          email?: string;
+          apiKey?: string;
+        };
+
+        // Provide safe fallbacks to keep setValue happy (expecting strings).
+        setValue("name", defaults.name ?? "");
+        setValue("email", defaults.email ?? "");
+        setValue("apiKey", defaults.apiKey ?? "");
+      }
+
+      // Narrow the union before accessing `uncompletedFields` so TS knows it exists
+      if (
+        "uncompletedFields" in data &&
+        Array.isArray(data.uncompletedFields)
+      ) {
+        return data.uncompletedFields || [];
+      }
+
+      return [];
+    },
+  });
+  const router = useRouter();
+
+  useEffect(() => {
+    console.debug(
+      "[src/app/(private)/onboarding/page.tsx:Onboarding]",
+      "Campos não preenchidos:",
+      uncompletedFields
+    );
+  }, [uncompletedFields]);
 
   if (queryIsLoading) {
     return <LoadingScreen />;
   }
 
-  if (user && fieldsNotFilled.length === 0) {
+  if (
+    !uncompletedFields ||
+    (uncompletedFields && uncompletedFields.length === 0)
+  ) {
     router.push("/overview");
     return null;
   }
@@ -130,36 +157,49 @@ export default function Onboarding() {
         onSubmit={handleSubmit(
           async (data) => {
             try {
-              console.log("Onboarding data:", data);
+              console.debug(
+                "[src/app/(private)/onboarding/page.tsx:Onboarding]",
+                "Onboarding data:",
+                data
+              );
 
-              const result = await OboardingAction(data);
+              const apiResponse = await honoRPC.api.users.me.onboarding.$post({
+                json: data,
+              });
 
-              if (result.success) {
+              if (!apiResponse.ok) {
+                setError("root", { message: "" });
+
+                const apiResponseBody = await apiResponse.json();
+
+                if (apiResponseBody.message) {
+                  Object.entries(apiResponseBody.message).forEach(
+                    ([fieldName, message]) => {
+                      setError(fieldName as keyof typeof data, {
+                        type: "server",
+                        message: message,
+                      });
+                    }
+                  );
+                }
+
+                if (apiResponseBody.message) {
+                  setError("root", {
+                    type: "server",
+                    message: apiResponseBody.message,
+                  });
+                }
+              }
+              if (apiResponse.ok) {
                 router.push("/chat/new");
                 return;
               }
-
-              setError("root", { message: "" });
-
-              if (result.fieldErrors) {
-                Object.entries(result.fieldErrors).forEach(
-                  ([fieldName, message]) => {
-                    setError(fieldName as keyof typeof data, {
-                      type: "server",
-                      message: message,
-                    });
-                  },
-                );
-              }
-
-              if (result.error) {
-                setError("root", {
-                  type: "server",
-                  message: result.error,
-                });
-              }
             } catch (error) {
-              console.error("Erro inesperado no cliente:", error);
+              console.debug(
+                "[src/app/(private)/onboarding/page.tsx:Onboarding]",
+                "Erro inesperado no cliente:",
+                error
+              );
               setError("root", {
                 type: "server",
                 message: "Erro inesperado. Tente novamente.",
@@ -167,9 +207,10 @@ export default function Onboarding() {
             }
           },
           (validationErrors) => {
-            console.error(
+            console.debug(
+              "[src/app/(private)/onboarding/page.tsx:Onboarding]",
               "Erros de validação detalhados:",
-              JSON.stringify(validationErrors, null, 2),
+              JSON.stringify(validationErrors, null, 2)
             );
 
             if (Object.keys(validationErrors).length > 0) {
@@ -178,7 +219,7 @@ export default function Onboarding() {
                 message: "Por favor, corrija os erros nos campos acima.",
               });
             }
-          },
+          }
         )}
         className="flex flex-col items-center justify-center w-full mt-5 gap-y-2"
       >
@@ -191,8 +232,10 @@ export default function Onboarding() {
           </div>
         )}
 
-        {fieldsNotFilled.length > 0 &&
-          fieldsNotFilled.map((field) => fieldsComponents[field])}
+        {uncompletedFields.length > 0 &&
+          uncompletedFields.map(
+            (field) => fieldsComponents[field as "name" | "email" | "apiKey"]
+          )}
 
         <Button
           variant={{

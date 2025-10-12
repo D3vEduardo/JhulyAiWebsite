@@ -1,7 +1,7 @@
 import { auth } from "@/lib/betterAuth/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { env } from "@env";
+import { clientEnv as env } from "@client.env";
 
 export const authRoute = new Hono()
   .use(
@@ -13,7 +13,7 @@ export const authRoute = new Hono()
       exposeHeaders: ["Content-Length"],
       maxAge: 600,
       credentials: true,
-    }),
+    })
   )
   .on(["POST", "GET"], "/*", async (c) => {
     return auth.handler(c.req.raw);

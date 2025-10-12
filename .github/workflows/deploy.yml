@@ -1,0 +1,40 @@
+name: CD - Deploy to Square Cloud
+
+on:
+  push:
+    branches:
+      - main # ou "production"
+
+jobs:
+  deploy:
+    runs-on: windows-latest # necessário para o PowerShell e Compress-Archive
+
+    steps:
+      - name: 🔁 Checkout repositório
+        uses: actions/checkout@v4
+
+      - name: 🧰 Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Instalar PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: true
+
+      - name: 🧰 Instalar Square Cloud CLI
+        run: pnpm add -g @squarecloud/cli
+
+      - name: 🔐 Login na Square Cloud
+        env:
+          SQUARECLOUD_TOKEN: ${{ secrets.SQUARECLOUD_TOKEN }}
+        run: squarecloud auth login --token "$env:SQUARECLOUD_TOKEN"
+
+      - name: 🏗️ Build e criar deploy.zip
+        shell: pwsh
+        run: .\.scripts\deploy.ps1
+
+      - name: 🚀 Fazer deploy (commit) na Square Cloud
+        run: squarecloud app commit --path "deploy.zip"

@@ -12,7 +12,10 @@ export default function ZoopText({
   speed = 2000,
   className,
 }: PropsType) {
-  console.log("Renderizei ZoopText");
+  console.debug(
+    "[src/components/ZoopText.tsx:ZoopText]",
+    "Renderizei ZoopText"
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -26,7 +29,7 @@ export default function ZoopText({
     <motion.span
       className={twMerge(
         "inline-grid place-items-center text-center overflow-hidden h-[1em]",
-        className,
+        className
       )}
       style={{
         gridTemplateAreas: "1 / 1",

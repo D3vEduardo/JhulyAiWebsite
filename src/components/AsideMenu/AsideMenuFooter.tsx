@@ -3,7 +3,10 @@ import Button from "../Button";
 import { useAside } from "@store/asideMenu";
 
 export default function AsideMenuFooter() {
-  console.log("Renderizei AsideMenuFooter");
+  console.debug(
+    "[src/components/AsideMenu/AsideMenuFooter.tsx:AsideMenuFooter]",
+    "Renderizei AsideMenuFooter"
+  );
   const { toggleAside } = useAside();
   return (
     <div className="flex flex-col gap-2 overflow-hidden min-h-[90px]">

@@ -24,31 +24,35 @@ jobs:
       - name: 🧰 Configurar Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
-      # 3️⃣ Instalar PNPM e dependências
+      # 3️⃣ Instalar PNPM 10 (sem rodar recursive install)
       - name: 📦 Instalar PNPM
         uses: pnpm/action-setup@v4
         with:
-          version: 9
-          run_install: true
+          version: 10
+          run_install: false
 
-      # 4️⃣ Instalar Square Cloud CLI
+      # 4️⃣ Instalar dependências do projeto
+      - name: 🧪 Instalar dependências
+        run: pnpm install --frozen-lockfile
+
+      # 5️⃣ Instalar Square Cloud CLI
       - name: 🧰 Instalar Square Cloud CLI
         run: pnpm add -g @squarecloud/cli
 
-      # 5️⃣ Login Square Cloud
+      # 6️⃣ Login Square Cloud CLI
       - name: 🔐 Login na Square Cloud
         run: squarecloud auth login --token "$env:SQUARECLOUD_TOKEN"
 
-      # 6️⃣ Restaurar certificado .p12 no runner
+      # 7️⃣ Restaurar certificado .p12 no runner
       - name: 🔑 Restaurar certificado .p12
         shell: pwsh
         run: |
           mkdir -Force .certs
           [System.IO.File]::WriteAllBytes(".certs\client-identity.p12", [Convert]::FromBase64String("$env:CLIENT_P12_B64"))
 
-      # 7️⃣ Executar script de build e deploy
+      # 8️⃣ Executar script de build e deploy
       - name: 🏗️ Build e Deploy
         shell: pwsh
         run: .\.scripts\deploy.ps1

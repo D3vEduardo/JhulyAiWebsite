@@ -36,7 +36,7 @@ model Message {
   sender   User?       @relation(fields: [senderId], references: [id], onDelete: Cascade)
   senderId String?
   role     MessageRole
-  parts    Json
+  parts    Json        @default("[]") @db.JsonB
   chat     Chat        @relation(fields: [chatId], references: [id], onDelete: Cascade)
   chatId   String
 

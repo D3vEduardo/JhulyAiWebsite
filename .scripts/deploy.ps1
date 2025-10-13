@@ -1,5 +1,8 @@
-# Evita que o script pare no primeiro erro
 $ErrorActionPreference = "Stop"
+trap {
+  Write-Host "❌ Ocorreu um erro no deploy: $($_.Exception.Message)"
+  exit 1
+}
 
 # Vai para a raiz do projeto
 $root = Split-Path -Parent $MyInvocation.MyCommand.Definition

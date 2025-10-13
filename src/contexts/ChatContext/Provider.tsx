@@ -30,6 +30,7 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
               return [...prev, message];
             }
           );
+          queryClient.invalidateQueries({ queryKey: ["chats"] });
           window.dispatchEvent(
             new CustomEvent("chat-created", {
               detail: { chatId: finalChatId },

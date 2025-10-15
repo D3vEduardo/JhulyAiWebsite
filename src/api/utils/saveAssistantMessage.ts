@@ -30,11 +30,15 @@ export async function saveAssistantMessage({
       parts.push({ type: "text", text: event.text, state: "done" });
     }
 
+    log("Reasoning parts:", JSON.stringify(event.reasoning));
+
+    if (event.reasoning) parts.push(...event.reasoning);
+
     if (event.steps?.some((step) => step.toolCalls)) {
       event.steps.forEach((step) => {
         if (step.toolCalls) {
           step.toolCalls.forEach((toolCall) => {
-            log("Estrutura de toolCall:", JSON.stringify(toolCall, null, 2));
+            // log("Estrutura de toolCall:", JSON.stringify(toolCall, null, 2));
 
             // Transformar o toolCall para o formato esperado por UIMessagePart
             const transformedToolCall = {

@@ -18,6 +18,7 @@ function PromptInput({ formRef, inputRef }: iProps) {
         document.addEventListener("keypress", (e) => {
           if (e.key === "Enter" && !e.shiftKey && formRef.current) {
             formRef.current.requestSubmit();
+            if (inputRef.current?.value) inputRef.current.value = "";
             return;
           }
         });

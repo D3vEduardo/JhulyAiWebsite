@@ -5,6 +5,8 @@ import { UIMessage, DefaultChatTransport } from "ai";
 import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { ChatContext } from "./Context";
 import { ChatContextType } from "./types";
+import { Chat } from "@prisma/client";
+import { useRouter } from "next/navigation";
 
 interface ChatProviderProps {
   chatId: string | null;
@@ -15,6 +17,8 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
   const queryClient = useQueryClient();
   const isNewChat = chatId === "new" || !chatId;
   const newChatIdRef = useRef<string | null>(null);
+
+  const router = useRouter();
 
   const chatMessagesQuery = useChatMessages();
 
@@ -93,6 +97,31 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
       body: { chatId },
     }),
   });
+
+  useEffect(() => {
+    const handleChatsLoaded = (e: Event) => {
+      const customEvent = e as CustomEvent<{ chats: Chat[] }>;
+      const { chats: queryChats } = customEvent.detail;
+
+      const actualyChatExists = queryChats.some(
+        (chat) => chat.id === chatId?.toString()
+      );
+
+      if (!actualyChatExists) {
+        queryClient.setQueryData(
+          ["chat", `chat_${chatId?.toString()}`],
+          () => []
+        );
+        router.replace(`/chat/new`, { scroll: false });
+      }
+    };
+
+    window.addEventListener("chats-query-loaded", handleChatsLoaded);
+
+    return () => {
+      window.removeEventListener("chats-query-loaded", handleChatsLoaded);
+    };
+  }, [chatId, router, queryClient]);
 
   useEffect(() => {
     const chatContainer = document.getElementById("chatMessages");

@@ -22,8 +22,6 @@ export function useChatMessages({
     queryClient.invalidateQueries({ queryKey: ["chat", `chat_${chatId}`] });
   }, [chatId, queryClient]);
 
-  // This hook fetches all messages at once for backward compatibility
-  // Use useInfiniteChatMessages for pagination/infinite scroll
   return useQuery({
     queryKey: ["chat", `chat_${chatId}`],
     queryFn: async () => {
@@ -37,20 +35,15 @@ export function useChatMessages({
         },
       });
 
+      const body = await apiResponse.json();
+
       if (!apiResponse.ok) {
-        // Try to read body for better diagnostics
-        let bodyText = "";
-        try {
-          bodyText = await apiResponse.text();
-        } catch (e) {
-          bodyText = `<unable to read body: ${String(e)}>`;
-        }
         console.debug(
           "[src/hooks/useChatMessages.ts:useChatMessages]",
           `Error fetching chat ${chatId} messages:`,
           apiResponse.status,
           apiResponse.statusText,
-          bodyText
+          body.message
         );
         return [];
       }

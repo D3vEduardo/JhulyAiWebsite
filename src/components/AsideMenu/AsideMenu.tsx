@@ -34,6 +34,7 @@ export default function AsideMenu() {
 
   return (
     <motion.div
+      suppressHydrationWarning
       initial={false}
       animate={containerStyles}
       transition={{

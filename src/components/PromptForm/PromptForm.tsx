@@ -59,9 +59,7 @@ export default function PromptForm() {
         if (isLoading || !prompt || !inputRef.current) return;
 
         sendMessage(
-          {
-            text: prompt,
-          },
+          { role: "user", parts: [{ text: prompt, type: "text" }] },
           {
             body: {
               prompt,

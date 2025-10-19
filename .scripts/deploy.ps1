@@ -52,6 +52,10 @@ pnpm build:prepare
 # Build Next.js (ele vai automaticamente usar .env.production se NODE_ENV=production)
 Write-Host "🏗️ Executando build do Next.js..."
 pnpm build
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ ERRO: O build do Next.js falhou. Abortando o deploy."
+    exit 1
+}
 
 # Cria pasta de deploy
 New-Item -ItemType Directory -Path $deployDir | Out-Null

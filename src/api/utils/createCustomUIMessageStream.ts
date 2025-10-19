@@ -7,9 +7,9 @@ import {
 } from "ai";
 import "server-only";
 import { saveAssistantMessage } from "@api/utils/saveAssistantMessage";
-import { debug } from "debug";
+// import { debug } from "debug";
 import { getSystemPrompt } from "@api/utils/system-prompt";
-const log = debug("app:api:chat:createCustomUIMessageStream");
+// const log = debug("app:api:chat:createCustomUIMessageStream");
 
 type ParamsType = {
   chatId: string;

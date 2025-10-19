@@ -45,6 +45,10 @@ if (-not $appId) {
     exit 1
 }
 
+# Prepare
+Write-Host " 📝 Formatando arquivos e executando o linter..."
+pnpm build:prepare
+
 # Build Next.js (ele vai automaticamente usar .env.production se NODE_ENV=production)
 Write-Host "🏗️ Executando build do Next.js..."
 pnpm build

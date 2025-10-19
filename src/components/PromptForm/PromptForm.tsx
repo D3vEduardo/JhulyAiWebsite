@@ -1,7 +1,7 @@
 "use client";
 
 import PromptInput from "./PromptInput";
-import { motion, useAnimate } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
@@ -23,7 +23,7 @@ export default function PromptForm() {
         const { prompt } = e.detail;
 
         // Prevent multiple submissions if one is already in progress
-        if (inputRef.current.value.trim() === '') {
+        if (inputRef.current.value.trim() === "") {
           inputRef.current.value = prompt;
           formRef.current.requestSubmit();
         }

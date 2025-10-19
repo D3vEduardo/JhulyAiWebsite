@@ -24,7 +24,7 @@ export default function ChatBalloon({ message, error }: PropsType) {
     message.id
   );
   const variants = tv({
-    base: "text-cocoa",
+    base: "text-cocoa min-h-[60px]",
     variants: {
       color: {
         user: "bg-apricot px-4 py-6 rounded-2xl",

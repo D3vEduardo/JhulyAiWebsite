@@ -1,8 +1,8 @@
 "use client";
 
 import PromptInput from "./PromptInput";
-import { motion } from "motion/react";
-import { useRef, useState } from "react";
+import { motion, useAnimate } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import PromptSubmitButton from "./PromptSubmitButton";
 import ReasoningButton from "./ReasoningButton";
 import { useChatContext } from "@/contexts/ChatContext/Hooks";
@@ -15,6 +15,34 @@ export default function PromptForm() {
   const [reasoning, setReasoning] = useState<boolean>(false);
   const dropdown = useDropdown((state) => state.dropdowns["modelDropdown"]);
   const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const handlePromptSuggestionSelected = (
+      e: CustomEvent<{ prompt: string }>
+    ) => {
+      if (formRef.current && inputRef.current && !isLoading) {
+        const { prompt } = e.detail;
+
+        // Prevent multiple submissions if one is already in progress
+        if (inputRef.current.value.trim() === '') {
+          inputRef.current.value = prompt;
+          formRef.current.requestSubmit();
+        }
+      }
+    };
+
+    window.addEventListener(
+      "prompt-suggestion-selected",
+      handlePromptSuggestionSelected as EventListener
+    );
+
+    // Proper cleanup function to remove event listener
+    return () => {
+      window.removeEventListener(
+        "prompt-suggestion-selected",
+        handlePromptSuggestionSelected as EventListener
+      );
+    };
+  }, [formRef, inputRef, isLoading]);
 
   return (
     <motion.form

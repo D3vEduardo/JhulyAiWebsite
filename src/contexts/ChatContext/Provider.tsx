@@ -20,7 +20,7 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
 
   const router = useRouter();
 
-  const chatMessagesQuery = useChatMessages();
+  const chatMessagesQuery = useChatMessages({ externalChatId: chatId });
 
   const onFinish = useCallback(
     ({ message }: { message: UIMessage }) => {
@@ -173,13 +173,37 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
       }
     }
   }, [
-    chat,
+    chat.messages,
+    chat.setMessages,
     chatMessagesQuery.data,
     chatMessagesQuery.isLoading,
     chatId,
     isNewChat,
     chat.status,
   ]);
+
+  // useEffect(() => {
+  //   if (
+  //     !isNewChat &&
+  //     chat.messages.length > 0 &&
+  //     (chatMessagesQuery.data?.length || 0) > 0 &&
+  //     chat.status === "ready" &&
+  //     !chatMessagesQuery.isLoading
+  //   ) {
+  //     console.debug(
+  //       `[src/contexts/ChatContext/Provider.tsx:ChatProvider] Sincronizando mensagens do chat ${chatId} com cache`
+  //     );
+
+  //     chat.setMessages(chatMessagesQuery.data as UIMessage[]);
+  //   }
+  // }, [
+  //   chat,
+  //   chatMessagesQuery.data,
+  //   chatMessagesQuery.isLoading,
+  //   chatId,
+  //   isNewChat,
+  //   chat.status,
+  // ]);
 
   const contextValue: ChatContextType = {
     messages: chat.messages,

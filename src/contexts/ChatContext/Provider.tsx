@@ -173,7 +173,8 @@ export function ChatProvider({ chatId, children }: ChatProviderProps) {
       }
     }
   }, [
-    chat.messages,
+    // chat.messages,
+    chat,
     chat.setMessages,
     chatMessagesQuery.data,
     chatMessagesQuery.isLoading,

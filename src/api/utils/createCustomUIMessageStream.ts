@@ -36,7 +36,7 @@ export function createCustomUIMessageStream({
         messages: convertToModelMessages(messages),
         system: getSystemPrompt("pt-BR"),
         async onFinish(event) {
-          log("AI response received:", event.text);
+          // log("AI response received:", event.text);
           setImmediate(() => {
             saveAssistantMessage({
               chatId,

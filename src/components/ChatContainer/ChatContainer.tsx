@@ -130,7 +130,7 @@ export default function ChatContainer() {
             ? { duration: 0 }
             : { type: "spring", stiffness: 80 }
         }
-        className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative flex items-center justify-center"
+        className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative flex flex-col items-center justify-center"
       >
         <div>Selecione um chat ou crie um novo</div>
       </motion.div>
@@ -148,7 +148,7 @@ export default function ChatContainer() {
             ? { duration: 0 }
             : { type: "spring", stiffness: 80 }
         }
-        className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative"
+        className="w-screen h-svh !overflow-hidden px-[2%] pt-2 relative flex flex-col"
       >
         <ChatNavBar />
         <ChatMessages />

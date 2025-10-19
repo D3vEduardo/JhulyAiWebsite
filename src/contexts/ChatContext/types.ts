@@ -8,31 +8,13 @@ import {
 } from "ai";
 
 type SendMessageType = (
-  message?:
-    | (Omit<UIMessage<unknown, UIDataTypes, UITools>, "id" | "role"> & {
-        id?: string | undefined;
-        role?: "system" | "user" | "assistant" | undefined;
-      } & {
-        text?: never;
-        files?: never;
-        messageId?: string;
-      })
-    | {
-        text: string;
-        files?: FileList | FileUIPart[];
-        metadata?: unknown;
-        parts?: never;
-        messageId?: string;
-      }
-    | {
-        files: FileList | FileUIPart[];
-        metadata?: unknown;
-        parts?: never;
-        messageId?: string;
-      }
-    | undefined,
+  message:
+    | string
+    | (Omit<UIMessage, "id" | "role"> & {
+        role?: "user" | "assistant" | "system" | "function" | "data" | "tool";
+      }),
   options?: ChatRequestOptions
-) => Promise<void>;
+) => Promise<string | void>;
 
 export interface ChatContextType {
   // Estado

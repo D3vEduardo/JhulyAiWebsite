@@ -53,6 +53,15 @@ export default function AsideMenuChats() {
         "[src/components/AsideMenu/AsideMenuChats.tsx:AsideMenuChats]",
         "Get user chats is completed!"
       );
+
+      window.dispatchEvent(
+        new CustomEvent("chats-query-loaded", {
+          detail: {
+            chats: userChats,
+          },
+        })
+      );
+
       return userChats || [];
     },
     staleTime: 60 * 1000,
@@ -64,7 +73,6 @@ export default function AsideMenuChats() {
     queryClient.prefetchQuery({
       queryKey: ["chat", `chat_${chatId}`],
       queryFn: async () => {
-        // Avoid prefetching for sentinel values
         if (
           !chatId ||
           chatId === "new" ||

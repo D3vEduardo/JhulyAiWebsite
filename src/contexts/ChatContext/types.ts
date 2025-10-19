@@ -1,20 +1,15 @@
+import { UseChatHelpers } from "@ai-sdk/react";
 import {
   ChatRequestOptions,
   ChatStatus,
-  FileUIPart,
   UIDataTypes,
   UIMessage,
   UITools,
 } from "ai";
 
-type SendMessageType = (
-  message:
-    | string
-    | (Omit<UIMessage, "id" | "role"> & {
-        role?: "user" | "assistant" | "system" | "function" | "data" | "tool";
-      }),
-  options?: ChatRequestOptions
-) => Promise<string | void>;
+type ChatType = UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>;
+
+type SendMessageType = ChatType["sendMessage"];
 
 export interface ChatContextType {
   // Estado
